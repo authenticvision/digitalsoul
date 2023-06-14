@@ -3,7 +3,7 @@ A framework to work with Authentic Vision Meta Anchor (tm) Technology
 
 # SETUP
 1. Download the complete directory as zip and unpack it on your webserver (or git clone)
-  1. `wget https://github.com/tbergmueller/metaanchor-framework/archive/refs/heads/master.zip && unzip master.zip`
+  1. `wget https://github.com/authenticvision/metaanchor/archive/refs/heads/master.zip && unzip master.zip`
   1. Rename directory if needed  
 1. Replace the `backend/conf/metaanchor.json` with the `metaanchor.json` you received from us. __Make sure to never check this to public repositories or repositories at all, as it contains secret keys and API-keys that would compromise your complete collection__
 1. Optional configurations
