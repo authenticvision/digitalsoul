@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    container_name: metaanchor_backend
+    ports:
+      - "5020:8080"
+    depends_on:
+      - db
+    volumes:
+      - ./backend/assets:/usr/local/share/metaanchor-backend/assets
+      - ./backend/conf:/usr/local/share/metaanchor-backend/conf
+    networks:
+      my-network:
+        aliases:
+          - metaanchor.internal
+  db:
+    image: postgres
+    container_name: metaanchor_database
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      my-network:
+        aliases:
+          - metaanchor.internal
+  frontend:
+    container_name: metaanchor_frontend
+    build: ./frontend
+    ports:
+      - "5071:8080"
+    depends_on:
+      - backend
+    networks:
+      my-network:
+        aliases:
+          - metaanchor.internal
+    environment:
+      BACKEND_URL: "http://backend.metaanchor.internal:8080"
+
+volumes:
+  db-data:
+  
+networks:
+  my-network:
+    driver: bridge
+

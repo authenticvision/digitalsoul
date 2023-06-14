@@ -1,0 +1,10 @@
+flask==2.2.3
+json_log_formatter==0.5.1
+pytz==2022.7.1
+python-dateutil==2.8.2
+flask_sqlalchemy==3.0.3
+flask_cors==3.0.10
+psycopg2-binary==2.9.5
+requests==2.28.2
+waitress==2.1.2
+opencv-python
