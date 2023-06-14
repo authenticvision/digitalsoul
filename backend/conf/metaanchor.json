@@ -1,0 +1,14 @@
+{
+  "polygon-mumbai": {
+    "csn": "",
+    "address": "",
+    "contract_name": "",
+    "contact_details": "",
+    "api_key": "",
+    "base_uri": "",
+    "anchor_encryption": {
+      "iv": "",
+      "key": ""
+    }
+  }
+}
