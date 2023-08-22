@@ -1,0 +1,25 @@
+// schema.prisma
+
+generator client {
+	provider = "prisma-client-js"
+	previewFeature = ["jsonProtocol"]
+}
+
+datasource db {
+	provider = "postgresql"
+	url = env("POSTGRESQL_PRISMA_URL")
+}
+
+model Config {
+	id			String		@default(cuid()) @id
+	apiKey		String
+}
+
+model User {
+	id			String		@default(cuid()) @id
+	email		String		@unique
+	createdAt	DateTime	@default(now()) @map(name: "created_at")
+	updatedAt	DateTime	@default(now()) @map(name: "updated_at")
+
+	@@map(name: "users")
+}
