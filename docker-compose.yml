@@ -8,6 +8,8 @@ services:
     stdin_open: true
     tty: true
     command: 'yarn dev'
+    environment:
+      POSTGRESQL_PRISMA_URL: postgresql://metaanchor:metaanchor@db/metaanchor_dev?sslmode=disable
     ports:
       - "3000:3000"
     depends_on:
@@ -17,9 +19,10 @@ services:
       - /home/app/node_modules
 
   db:
-    image: postgres
+    image: postgres:15-alpine
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_USER: metaanchor
+      POSTGRES_PASSWORD: metaanchor
     volumes:
       - db-data:/var/lib/postgresql/data
 
