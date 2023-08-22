@@ -1,22 +1,32 @@
 # metaanchor-framework
+
 A framework to work with Authentic Vision Meta Anchor (tm) Technology
 
-# SETUP
-1. Download the complete directory as zip and unpack it on your webserver (or git clone)
-  1. `wget https://github.com/authenticvision/metaanchor/archive/refs/heads/master.zip && unzip master.zip`
-  1. Rename directory if needed  
-1. Replace the `backend/conf/metaanchor.json` with the `metaanchor.json` you received from us. __Make sure to never check this to public repositories or repositories at all, as it contains secret keys and API-keys that would compromise your complete collection__
-1. Optional configurations
-   1. Adapt public-exposed ports (5020 for backend and 5071 for frontend per default) in `docker-compose.yml` 
-1. Adapt `VUE_APP_BASE_URL` in `frontend/.env` to reflect your webservers public address and the backend-port (default: 5020) you configured in the step before.
-  1. When you provided us with `http://my-webserver.com:5020/collection`, then set `VUE_APP_BASE_URL=http://my-webserver.com:5020`
-1. Run `sudo docker-compose build && sudo docker-compose up -d`. This takes a few minutes and builds everything as well as starts it in the background
-  1. In case you need to debug, use `sudo docker logs --follow metaanchor_backend` and `sudo docker logs --follow metaanchor_frontend` respectively
+## Development
 
+We use [Prisma][prisma] to manage our DB. Currently, we're tied to PostgreSQL
+due to it's wide support to JSON, Binary Data and being battle-tested. SQLite
+can be offered in the future, but it's not on the roadmap at the moment.
 
-## Making NFTs
-1. For demo only, there is a temporary database in `backend/conf/tmpdb.json` ... Fill it.
-  1. TODO instructions on what a SLID is etc.
-  1. In case a SLID is not mentioned there, the NFT will get the DigitalSoul-Standard design with the SLID printed on the image
-1. Copy images into the `backend/assets` folder (image paths are relative from there, so if an image `blub.jpg` is directly in the `frontend/assets` folder, the image shall be listed as `blub.jpg` in `backend/conf/tmpdb.json`)
-1. Thats it ;) 
+As so, after building the containers and getting things up, we'll have to
+push the DB to it's initial state, you can do so by firing up a shell inside the
+metaanchor container, like so:
+
+```
+docker-compose exec metaanchor sh
+```
+
+This will dump you into a ash shell (which is the default shell for Alpine
+Linux). Run the following prisma command:
+
+```
+npx prisma db push
+```
+
+Ideally, after we have reached a stable version of our schema, we'll switch to
+migration whenever needing to do any changes to the DB. This will suffice for
+now.
+
+## License
+
+Under the terms of the MIT License, check the LICENSE file for more information.
