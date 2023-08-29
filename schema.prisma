@@ -17,21 +17,23 @@ model Config {
   @@map(name: "configs")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @default(now()) @map(name: "updated_at")
+model Wallet {
+  id        String     @id @default(cuid())
+  address   String     @unique
+  email     String?    @unique
+  createdAt DateTime   @default(now()) @map(name: "created_at")
+  updatedAt DateTime   @default(now()) @map(name: "updated_at")
+  contracts Contract[]
 
-  @@map(name: "users")
+  @@map(name: "wallets")
 }
 
 model Contract {
   id      String @id @default(cuid())
   csn     String
-  owner   String
+  owner   Wallet @relation(fields: [ownerId], references: [id])
+  ownerId String @map(name: "owner_id")
   network String
-  // TODO: wallet?
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
@@ -49,7 +51,7 @@ model NFT {
 
   createdAt  DateTime @default(now()) @map(name: "created_at")
   updatedAt  DateTime @default(now()) @map(name: "updated_at")
-  contractId String
+  contractId String   @map(name: "contract_id")
 
   @@map(name: "nfts")
 }
