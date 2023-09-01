@@ -1,0 +1,57 @@
+// schema.prisma
+
+generator client {
+  provider       = "prisma-client-js"
+  previewFeature = ["jsonProtocol"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_PRISMA_URL")
+}
+
+model Config {
+  id     String @id @default(cuid())
+  apiKey String
+
+  @@map(name: "configs")
+}
+
+model Wallet {
+  id        String     @id @default(cuid())
+  address   String     @unique
+  email     String?    @unique
+  createdAt DateTime   @default(now()) @map(name: "created_at")
+  updatedAt DateTime   @default(now()) @map(name: "updated_at")
+  contracts Contract[]
+
+  @@map(name: "wallets")
+}
+
+model Contract {
+  id      String @id @default(cuid())
+  csn     String
+  owner   Wallet @relation(fields: [ownerId], references: [id])
+  ownerId String @map(name: "owner_id")
+  network String
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  nfts      NFT[]
+
+  @@map(name: "contracts")
+}
+
+model NFT {
+  id       String   @id @default(cuid())
+  contract Contract @relation(fields: [contractId], references: [id])
+  anchor   String
+  slid     String
+  metadata Json
+
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+  contractId String   @map(name: "contract_id")
+
+  @@map(name: "nfts")
+}
