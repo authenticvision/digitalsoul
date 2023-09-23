@@ -1,42 +1,88 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Router from "next/router"
+import Button from "@/components/Button"
+import { useSignMessage, useAccount } from 'wagmi'
+import { recoverMessageAddress } from 'viem'
 
-const Setup = (props) =>  {
-	const [apiKey, setApiKey] = useState("")
+const Setup = ({ signMessageText, onDone, ...props }) =>  {
+	const [error, setError] = useState()
+	const { address } = useAccount()
+	const { data: signMessageData, error: signError, isLoading, signMessage, variables } =
+		useSignMessage()
 
-	const submitData = async(e) => {
-		e.preventDefault()
-
+	const completeSetup = async({ signMessageData, recoveredAddress }) => {
 		try {
-			const body = { apiKey }
-			await fetch('/api/setup', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body),
-			})
+			const response = await fetch('/api/setup', {
+				method: "POST", // or 'PUT'
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					signedMessage: signMessageData,
+					address
+				}),
+			});
 
-			console.log("Done!");
-			await Router.push('/auth')
+			if (response.status == 201) {
+				Router.push('/')
+			} else {
+				const responseData = await response.json()
+				console.log("response data: ", responseData)
+				setError(responseData.error)
+			}
+
 		} catch (error) {
-			console.error(error)
+			setError("There was an error while trying to communicate with the API")
+			console.error("Error:", error);
 		}
 	}
 
-	return (
-		<div className="flex p-3 align-center justify-center">
-			<form onSubmit={submitData}>
-				<input className="w-full p-2 rounded my-2 text-black"
-						autoFocus
-						onChange={(e) => setApiKey(e.target.value)}
-						placeholder="API Key from AuthenticVision"
-						type="text"
-						value={apiKey} />
+	useEffect(() => {
+		;(async () => {
+			if (variables?.message && signMessageData) {
+				const recoveredAddress = await recoverMessageAddress({
+					message: variables?.message,
+					signature: signMessageData,
+				})
 
-				<input type="submit"
-					className="py-4 px-8 bg-slate-900 cursor-pointer w-full"
-					disabled={!apiKey}
-					value="Register" />
-			</form>
+				// TODO: Check with Thomas if we should post the address or the
+				// signMessageData. Most likely the former
+				const response = await completeSetup({
+					signMessageData,
+					recoveredAddress
+				})
+
+				console.log(response)
+			}
+		})()
+	}, [signMessageData, variables?.message])
+
+	// Use the useState and useEffect hooks to track whether the component has mounted or not
+	const [hasMounted, setHasMounted] = useState(false);
+	useEffect(() => {
+		setHasMounted(true);
+	}, []);
+
+	// If the component has not mounted yet, return null
+	if (!hasMounted) {
+		return null;
+	}
+
+	return (
+		<div className="flex flex-col p-3 align-center justify-center">
+			<p>
+				In order to establish communication with MetaAnchor servers
+				and validate your DevKit we'll require you to sign this Message
+			</p>
+
+
+			<p className="block">
+				{error}
+			</p>
+
+			<Button disabled={isLoading}
+					onClick={() => signMessage({ message: signMessageText })}
+					text={isLoading ? 'Loading...' : 'Sign Message'} />
 		</div>
 	)
 }

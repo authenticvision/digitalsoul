@@ -1,9 +1,60 @@
 import React, { useState } from 'react'
+import Router from 'next/router'
+import { useConnect, useAccount, useSignMessage } from 'wagmi'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
 import Logo from '@/components/Logo'
+import Button from '@/components/Button'
+import Setup from '@/components/Setup'
+
+export const getServerSideProps = async ({ req }) => {
+	const isConfigured = await prisma.config.count()
+	const signMessageText = process.env.SIGN_MESSAGE_TEXT
+
+	return {
+		props: { isConfigured, signMessageText }
+	}
+}
 
 const Auth = (props) => {
+	const [showLoading, setShowLoading] = useState(false)
+	const { connect, connectors, error, isLoading, pendingConnector } =
+		useConnect()
+
+	const { address, connector, isConnected } = useAccount()
+
+	const registerWallet = async() => {
+		try {
+			const body = {
+				wallet: { address }
+			}
+
+			await fetch('/api/wallets', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(body),
+			})
+
+			await Router.push('/')
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
+	const onConnect = ({ connector }) => {
+		if (props.isConfigured) {
+			registerWallet()
+
+			Router.push('/')
+		}
+
+		connect({ connector })
+	}
+
+	const onDoneSign = (data) => {
+		console.log(data)
+	}
+
 	return (
 		<Layout>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
@@ -12,10 +63,25 @@ const Auth = (props) => {
 						<Logo />
 					</div>
 					<div className="text-center">
-						<h1 className="text-2xl font-bold">Auth!</h1>
+						<h1 className="text-2xl font-bold">
+							Auth!
+						</h1>
 					</div>
 
 					<div className="">
+						{isConnected ? (
+							<Setup signMessageText={props.signMessageText} onDone={onDoneSign} />
+						) : (
+							<div>
+								{connectors.map((connector) => (
+									<Button text={`Connect with ${connector.name}`}
+											onClick={() => onConnect({ connector })}
+											key={connector.id} />
+								))}
+
+								{error && <div>{error.message}</div>}
+							</div>
+						)}
 					</div>
 				</main>
 			</div>
