@@ -6,6 +6,7 @@ import Layout from '@/components/Layout'
 import Logo from '@/components/Logo'
 import Button from '@/components/Button'
 import Setup from '@/components/Setup'
+import NextHead from 'next/head.js'
 
 export const getServerSideProps = async ({ req }) => {
 	const isConfigured = await prisma.config.count()
@@ -57,6 +58,9 @@ const Auth = (props) => {
 
 	return (
 		<Layout>
+			<NextHead>
+				<title>MetaAnchor - Login with Wallet</title>
+			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col justify-center align-center">
 					<div className="flex justify-center py-2">
@@ -64,15 +68,15 @@ const Auth = (props) => {
 					</div>
 					<div className="text-center">
 						<h1 className="text-2xl font-bold">
-							Auth!
+							Choose a Wallet Provider below
 						</h1>
 					</div>
 
-					<div className="">
+					<div className="flex flex-col w-full">
 						{isConnected ? (
 							<Setup signMessageText={props.signMessageText} onDone={onDoneSign} />
 						) : (
-							<div>
+							<div className="w-full items-center justify-center text-center mt-5">
 								{connectors.map((connector) => (
 									<Button text={`Connect with ${connector.name}`}
 											onClick={() => onConnect({ connector })}

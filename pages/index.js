@@ -7,6 +7,7 @@ import { useAccount, useDisconnect } from 'wagmi'
 import Layout from "../components/Layout"
 import Logo from "../components/Logo"
 import Button from "../components/Button"
+import NextHead from 'next/head.js'
 
 const Landing = (props) => {
 	const { address, connector, isConnected } = useAccount()
@@ -32,6 +33,9 @@ const Landing = (props) => {
 
 	return (
 		<Layout>
+			<NextHead>
+				<title>Welcome to MetaAnchor</title>
+			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
 					<div className="flex justify-center py-2">
@@ -55,7 +59,7 @@ const Landing = (props) => {
 					<div className="text-center mt-5">
 						{isConnected ? (
 							<div className="">
-								<h2>{address}</h2>
+								<h2 className="text-lg my-5">Connected with {address}</h2>
 
 								<Button text="Disconnect" onClick={onDisconnect} />
 							</div>

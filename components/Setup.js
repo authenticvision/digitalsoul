@@ -76,13 +76,15 @@ const Setup = ({ signMessageText, onDone, ...props }) =>  {
 			</p>
 
 
-			<p className="block">
+			<p className="block mt-5">
 				{error}
 			</p>
 
-			<Button disabled={isLoading}
-					onClick={() => signMessage({ message: signMessageText })}
-					text={isLoading ? 'Loading...' : 'Sign Message'} />
+			<div className="flex flex-col text-center">
+				<Button disabled={isLoading}
+						onClick={() => signMessage({ message: signMessageText })}
+						text={isLoading ? 'Loading...' : 'Sign Message'} />
+			</div>
 		</div>
 	)
 }
