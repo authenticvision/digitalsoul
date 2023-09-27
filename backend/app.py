@@ -19,7 +19,6 @@ class ConfigClass(object):
     SQLALCHEMY_DATABASE_URI = os.getenv('POSTGRES_DSN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False    # Avoids SQLAlchemy warning
     CORS_HEADERS = ['Content-Type', 'application/json']
-    METAANCHOR_API_URL = os.getenv('METAANCHOR_API_URL', 'http://api.metaanchor.io.at/api/v1') # fixme encode production
 
     default_api_key = ''
     # Try to read from config file
