@@ -11,8 +11,11 @@ datasource db {
 }
 
 model Config {
-  id     String @id @default(cuid())
-  apiKey String
+  id             String  @id @default(cuid())
+  instanceApiKey String  @map(name: "instance_api_key")
+  apiKey         String? @map(name: "api_key")
+  signedMessage  String  @map(name: "signed_message")
+  address        String
 
   @@map(name: "configs")
 }
