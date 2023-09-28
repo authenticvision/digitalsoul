@@ -13,10 +13,14 @@ export default async function handle(req, res) {
 	let walletResult
 
 	try {
-		walletResult = await prisma.wallet.create({
-			data: {
+		walletResult = await prisma.wallet.upsert({
+			where: {
 				address
-			}
+			},
+			create: {
+				address
+			},
+			update: {},
 		})
 	} catch (e) {
 		if (e instanceof Prisma.PrismaClientKnownRequestError) {

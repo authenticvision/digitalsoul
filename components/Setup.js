@@ -27,7 +27,6 @@ const Setup = ({ signMessageText, onDone, ...props }) =>  {
 				Router.push('/')
 			} else {
 				const responseData = await response.json()
-				console.log("response data: ", responseData)
 				setError(responseData.error)
 			}
 
@@ -45,19 +44,16 @@ const Setup = ({ signMessageText, onDone, ...props }) =>  {
 					signature: signMessageData,
 				})
 
-				// TODO: Check with Thomas if we should post the address or the
-				// signMessageData. Most likely the former
 				const response = await completeSetup({
 					signMessageData,
 					recoveredAddress
 				})
-
-				console.log(response)
 			}
 		})()
 	}, [signMessageData, variables?.message])
 
-	// Use the useState and useEffect hooks to track whether the component has mounted or not
+	// Use the useState and useEffect hooks to track whether the component has
+	// mounted or not
 	const [hasMounted, setHasMounted] = useState(false);
 	useEffect(() => {
 		setHasMounted(true);
@@ -72,7 +68,7 @@ const Setup = ({ signMessageText, onDone, ...props }) =>  {
 		<div className="flex flex-col p-3 align-center justify-center">
 			<p>
 				In order to establish communication with MetaAnchor servers
-				and validate your DevKit we'll require you to sign this Message
+				and validate your DevKit we'll require you to Sign this Message
 			</p>
 
 

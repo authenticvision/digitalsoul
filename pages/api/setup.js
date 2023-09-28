@@ -32,63 +32,69 @@ const registerInstance = async({ wallet, config }) => {
 	}
 }
 
-// TODO: Add data validation via Zod, validate incoming body object while we're
-// at it
+const createWalletAndConfig = async({ address, instanceApiKey, signedMessage }) => {
+	try {
+		return await prisma.$transaction(async(tx) => {
+			let wallet = await prisma.wallet.upsert({
+				where: {
+					address
+				},
+				update: {},
+				create: {
+					address
+				}
+			})
+
+			let config = await prisma.config.create({
+				data: {
+					instanceApiKey,
+					signedMessage,
+					address
+				}
+			})
+
+			return { wallet, config }
+		})
+	} catch (e) {
+		// TODO: Add this to a unified error service
+		console.error(e)
+		errorMsg = "There was an error when trying to record the data"
+
+		return { error: errorMsg }
+	}
+}
+
 export default async function handle(req, res) {
+	// TODO: Move this somewhere else, probably as a utility function
 	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
 	const { signedMessage, address } = req.body
-	const instanceApiKey = crypto.randomBytes(32).toString("hex")
-	let errorMsg
-	let walletResult
+	const instanceApiKey = crypto.randomBytes(32).toString('hex')
 
-	try {
-		walletResult = await prisma.wallet.create({
-			data: {
-				address
-			}
-		})
-	} catch (e) {
-		if (e instanceof Prisma.PrismaClientKnownRequestError) {
-			// This is the code for a unique constraint violation
-			if (e.code === 'P2002') {
-				errorMsg = 'There is a uncomplete instance setup going on. This wallet already exists!'
+	const { wallet, config, error } = await createWalletAndConfig({
+		instanceApiKey,
+		signedMessage,
+		address
+	})
 
-				console.log(
-					errorMsg
-				)
-			}
-		}
-
+	if (error) {
 		res.status(500).json({ error: errorMsg })
 	}
 
-	// XXX: Bit redundant info here, might be better to associate to the wallet
-	// entity? For simplicity we can assume that's the first wallet as well
-	const configResult = await prisma.config.create({
-		data: {
-			instanceApiKey,
-			signedMessage,
-			address
-		}
-	})
-
 	try {
-		//const apiData = await registerInstance({
-		//	wallet: walletResult,
-		//	config: configResult
-		//})
-
-		// TODO: Replace with actual data from API. Most likely from a fake one
+		// TODO: Replace this with a call to metaanchor API register endpoint
 		const updatedConfig = await prisma.config.update({
-			where: { id: configResult.id },
-			data: { apiKey: "abcdef12345" },
+			where: { id: config.id },
+			data: { apiKey: process.env.METAANCHOR_API_TOKEN },
 		})
-	} catch (apiError) {
-		res.status(500).json({ error: "Something went wrong on storing API key" })
+	} catch (e) {
+		// TODO: Add this to a unified error service
+		console.error(e)
+		let errorMsg = "There was an error when trying to record the data"
+		res.status(500).json({ error: errorMsg })
 	}
 
-	res.status(201).json({ wallet: walletResult, config: configResult })
+	res.status(201).json({ wallet: wallet, config: config })
 }

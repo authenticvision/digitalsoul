@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Router from 'next/router'
 import { useConnect, useAccount, useSignMessage } from 'wagmi'
+import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
 import Logo from '@/components/Logo'
@@ -9,7 +10,8 @@ import Setup from '@/components/Setup'
 import NextHead from 'next/head.js'
 
 export const getServerSideProps = async ({ req }) => {
-	const isConfigured = await prisma.config.count()
+	const configCount = await prisma.config.count()
+	const isConfigured = configCount > 0;
 	const signMessageText = process.env.SIGN_MESSAGE_TEXT
 
 	return {
@@ -19,37 +21,32 @@ export const getServerSideProps = async ({ req }) => {
 
 const Auth = (props) => {
 	const [showLoading, setShowLoading] = useState(false)
-	const { connect, connectors, error, isLoading, pendingConnector } =
+	const { connect, connectAsync, connectors, error, isLoading, pendingConnector } =
 		useConnect()
 
 	const { address, connector, isConnected } = useAccount()
 
-	const registerWallet = async() => {
-		try {
-			const body = {
-				wallet: { address }
-			}
+	const onConnect = async({ connector }) => {
+		let callbackUrl = '/'
 
-			await fetch('/api/wallets', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body),
-			})
-
-			await Router.push('/')
-		} catch (error) {
-			console.error(error)
-		}
-	}
-
-	const onConnect = ({ connector }) => {
-		if (props.isConfigured) {
-			registerWallet()
-
-			Router.push('/')
+		if (!props.isConfigured) {
+			callbackUrl = '/setup'
 		}
 
-		connect({ connector })
+		if (address) {
+			signIn('credentials', { address: address, callbackUrl })
+
+			return
+		}
+
+		const { account, error } = await connectAsync({ connector })
+
+		if (error) {
+			// TODO: Display error
+			throw error
+		}
+
+		signIn('credentials', { address: account, callbackUrl })
 	}
 
 	const onDoneSign = (data) => {
@@ -73,19 +70,15 @@ const Auth = (props) => {
 					</div>
 
 					<div className="flex flex-col w-full">
-						{isConnected ? (
-							<Setup signMessageText={props.signMessageText} onDone={onDoneSign} />
-						) : (
-							<div className="w-full items-center justify-center text-center mt-5">
-								{connectors.map((connector) => (
-									<Button text={`Connect with ${connector.name}`}
-											onClick={() => onConnect({ connector })}
-											key={connector.id} />
-								))}
+						<div className="w-full items-center justify-center text-center mt-5">
+							{connectors.map((connector) => (
+								<Button text={`Connect with ${connector.name}`}
+										onClick={() => onConnect({ connector })}
+										key={connector.id} />
+							))}
 
-								{error && <div>{error.message}</div>}
-							</div>
-						)}
+							{error && <div>{error.message}</div>}
+						</div>
 					</div>
 				</main>
 			</div>
