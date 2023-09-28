@@ -3,6 +3,7 @@ import Router from 'next/router'
 import Image from 'next/image'
 import prisma from "@/lib/prisma"
 import { GetStaticProps } from "next"
+import { useSession, signOut } from 'next-auth/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import Layout from "../components/Layout"
 import Logo from "../components/Logo"
@@ -10,10 +11,11 @@ import Button from "../components/Button"
 import NextHead from 'next/head.js'
 
 const Landing = (props) => {
-	const { address, connector, isConnected } = useAccount()
-	const { disconnect } = useDisconnect()
+	const { data: session, status } = useSession()
+	const { disconnectAsync } = useDisconnect()
 
-	// Use the useState and useEffect hooks to track whether the component has mounted or not
+	// Use the useState and useEffect hooks to track whether the component
+	// has mounted or not
 	const [hasMounted, setHasMounted] = useState(false)
 	useEffect(() => {
 		setHasMounted(true)
@@ -24,12 +26,10 @@ const Landing = (props) => {
 		return null
 	}
 
-	const onDisconnect = () => {
-		console.log("User Disconnected")
-
-		disconnect()
+	const onDisconnect = async() => {
+		await disconnectAsync()
+		signOut()
 	}
-
 
 	return (
 		<Layout>
@@ -57,9 +57,11 @@ const Landing = (props) => {
 					</div>
 
 					<div className="text-center mt-5">
-						{isConnected ? (
+						{status == "authenticated" ? (
 							<div className="">
-								<h2 className="text-lg my-5">Connected with {address}</h2>
+								<h2 className="text-lg my-5">
+									Connected with {session.address}
+								</h2>
 
 								<Button text="Disconnect" onClick={onDisconnect} />
 							</div>
