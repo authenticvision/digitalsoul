@@ -49,10 +49,6 @@ const Auth = (props) => {
 		signIn('credentials', { address: account, callbackUrl })
 	}
 
-	const onDoneSign = (data) => {
-		console.log(data)
-	}
-
 	return (
 		<Layout>
 			<NextHead>

@@ -63,7 +63,15 @@ const Landing = (props) => {
 									Connected with {session.address}
 								</h2>
 
-								<Button text="Disconnect" onClick={onDisconnect} />
+								<div className="flex flex-col">
+									<div className="flex flex-col my-2">
+										<a className="text-success cursor-pointer" href="/contracts">Contracts →</a>
+									</div>
+
+									<Button text="Disconnect"
+											onClick={onDisconnect} />
+
+								</div>
 							</div>
 						) : (
 							<Button href="/auth" text="Connect" />
