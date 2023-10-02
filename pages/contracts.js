@@ -121,7 +121,7 @@ const Contracts = (props) => {
 	const onSelectContracts = async(selectedContracts) => {
 		const signedContracts = await signContracts(selectedContracts)
 
-		const response = await fetch('/api/contracts', {
+		const response = await fetch('/api/internal/contracts', {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

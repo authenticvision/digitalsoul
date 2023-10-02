@@ -12,7 +12,7 @@ const Setup = ({ signMessageText, onDone, ...props }) =>  {
 
 	const completeSetup = async({ signMessageData, recoveredAddress }) => {
 		try {
-			const response = await fetch('/api/setup', {
+			const response = await fetch('/api/internal/setup', {
 				method: "POST", // or 'PUT'
 				headers: {
 					"Content-Type": "application/json",

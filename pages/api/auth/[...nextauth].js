@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import { utils } from 'ethers'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-const walletURL = `${process.env.HOST_URL}/api/wallets`
+const walletURL = `${process.env.HOST_URL}/api/internal/wallets`
 
 export const authOptions = {
 	providers: [
