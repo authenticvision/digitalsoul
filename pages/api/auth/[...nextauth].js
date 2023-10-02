@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 const walletURL = `${process.env.HOST_URL}/api/wallets`
 
-export default NextAuth({
+export const authOptions = {
 	providers: [
 		CredentialsProvider({
 			name: 'Credentials',
@@ -65,4 +65,6 @@ export default NextAuth({
 		error: '/',
 		newUser: '/',
 	},
-})
+}
+
+export default NextAuth(authOptions)

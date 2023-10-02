@@ -33,6 +33,8 @@ model Wallet {
 
 model Contract {
   id      String @id @default(cuid())
+  name    String
+  address String @unique
   csn     String
   owner   Wallet @relation(fields: [ownerId], references: [id])
   ownerId String @map(name: "owner_id")
