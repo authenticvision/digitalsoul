@@ -1,3 +1,6 @@
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
+
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import MetaAnchor from '@/lib/api.metaanchor.io'
@@ -8,12 +11,33 @@ const claimContract = async(api, csn, signedMessage) => {
 	return await api.claimContract(csn, signedMessage)
 }
 
+const fetchAnchors = async(api, csn) => {
+	return await api.getAnchors(csn)
+}
+
+const storeNFTS = async(anchors, contract) => {
+	return await Promise.all(anchors.map(async(anchor) => {
+		return await prisma.NFT.create({
+			data: {
+				slid: anchor.slid,
+				anchor: anchor.anchor,
+				metadata: {},
+				contract: {
+					connect: {
+						id: contract.id
+					}
+				}
+			}
+		})
+	}))
+}
+
 const storeContracts = async(signedContracts, wallet) => {
 	return await Promise.all(signedContracts.map(async(contract) => {
 		return await prisma.contract.create({
 			data: {
 				csn: contract.csn,
-				name: contract.contract_name,
+				name: contract.contract_name || contract.name,
 				network: contract.network,
 				address: contract.address,
 				owner: {
@@ -27,6 +51,11 @@ const storeContracts = async(signedContracts, wallet) => {
 }
 
 export default async function handle(req, res) {
+	const session = await getServerSession(req, res, authOptions)
+	if (!session) {
+		return res.status(401).json({ message: 'Unauthorized' })
+	}
+
 	let errorMsg
 
 	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
@@ -42,11 +71,19 @@ export default async function handle(req, res) {
 
 	const { signedContracts, wallet: address } = req.body
 
+	if (!address || !signedContracts) {
+		return res.status(400).json({ message: 'Missing required parameters' })
+	}
+
 	const wallet = await prisma.wallet.findUnique({
 		where: {
 			address
 		}
 	})
+
+	if (!wallet) {
+		return res.status(404).json({ message: 'Wallet does not exists' })
+	}
 
 	// TODO: Deal with existing contracts that should be removed (most likely
 	// they should be 'unclaimed' as well on MetaAnchor API?
@@ -63,13 +100,19 @@ export default async function handle(req, res) {
 		const contracts = await storeContracts(signedContracts, wallet)
 
 		// TODO: Move this to a background job instead of doing it here!
-		//fetchNFTS()
+		for (const contract of contracts) {
+			const { data: anchors } = await fetchAnchors(api, contract.csn)
 
-		res.status(201).json({
+			if (anchors.length) {
+				const nfts = await storeNFTS(anchors, contract)
+			}
+		}
+
+		return res.status(201).json({
 			contracts, unclaimedContracts
 		})
 	} catch (e) {
 		console.error(e)
-		res.status(500).json({ error: "Can't connect to MetaAnchor API" })
+		return res.status(500).json({ error: "Can't connect to MetaAnchor API" })
 	}
 }
