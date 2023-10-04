@@ -1,3 +1,6 @@
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
+
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import MetaAnchor from '@/lib/api.metaanchor.io'
@@ -48,6 +51,11 @@ const storeContracts = async(signedContracts, wallet) => {
 }
 
 export default async function handle(req, res) {
+	const session = await getServerSession(req, res, authOptions)
+	if (!session) {
+		return res.status(401).json({ message: 'Unauthorized' })
+	}
+
 	let errorMsg
 
 	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
@@ -63,11 +71,19 @@ export default async function handle(req, res) {
 
 	const { signedContracts, wallet: address } = req.body
 
+	if (!address || !signedContracts) {
+		return res.status(400).json({ message: 'Missing required parameters' })
+	}
+
 	const wallet = await prisma.wallet.findUnique({
 		where: {
 			address
 		}
 	})
+
+	if (!wallet) {
+		return res.status(404).json({ message: 'Wallet does not exists' })
+	}
 
 	// TODO: Deal with existing contracts that should be removed (most likely
 	// they should be 'unclaimed' as well on MetaAnchor API?
@@ -92,11 +108,11 @@ export default async function handle(req, res) {
 			}
 		}
 
-		res.status(201).json({
+		return res.status(201).json({
 			contracts, unclaimedContracts
 		})
 	} catch (e) {
 		console.error(e)
-		res.status(500).json({ error: "Can't connect to MetaAnchor API" })
+		return res.status(500).json({ error: "Can't connect to MetaAnchor API" })
 	}
 }

@@ -1,3 +1,6 @@
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
+
 import crypto from 'crypto'
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
@@ -65,6 +68,11 @@ const createWalletAndConfig = async({ address, instanceApiKey, signedMessage }) 
 }
 
 export default async function handle(req, res) {
+	const session = await getServerSession(req, res, authOptions)
+	if (!session) {
+		return res.status(401).json({ message: 'Unauthorized' })
+	}
+
 	// TODO: Move this somewhere else, probably as a utility function
 	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
 		return res.status(405).json({ message: 'Method not allowed.' })
@@ -80,7 +88,7 @@ export default async function handle(req, res) {
 	})
 
 	if (error) {
-		res.status(500).json({ error: errorMsg })
+		return res.status(500).json({ error: errorMsg })
 	}
 
 	try {
@@ -93,8 +101,8 @@ export default async function handle(req, res) {
 		// TODO: Add this to a unified error service
 		console.error(e)
 		let errorMsg = "There was an error when trying to record the data"
-		res.status(500).json({ error: errorMsg })
+		return res.status(500).json({ error: errorMsg })
 	}
 
-	res.status(201).json({ wallet: wallet, config: config })
+	return res.status(201).json({ wallet: wallet, config: config })
 }
