@@ -8,12 +8,33 @@ const claimContract = async(api, csn, signedMessage) => {
 	return await api.claimContract(csn, signedMessage)
 }
 
+const fetchAnchors = async(api, csn) => {
+	return await api.getAnchors(csn)
+}
+
+const storeNFTS = async(anchors, contract) => {
+	return await Promise.all(anchors.map(async(anchor) => {
+		return await prisma.NFT.create({
+			data: {
+				slid: anchor.slid,
+				anchor: anchor.anchor,
+				metadata: {},
+				contract: {
+					connect: {
+						id: contract.id
+					}
+				}
+			}
+		})
+	}))
+}
+
 const storeContracts = async(signedContracts, wallet) => {
 	return await Promise.all(signedContracts.map(async(contract) => {
 		return await prisma.contract.create({
 			data: {
 				csn: contract.csn,
-				name: contract.contract_name,
+				name: contract.contract_name || contract.name,
 				network: contract.network,
 				address: contract.address,
 				owner: {
@@ -63,7 +84,13 @@ export default async function handle(req, res) {
 		const contracts = await storeContracts(signedContracts, wallet)
 
 		// TODO: Move this to a background job instead of doing it here!
-		//fetchNFTS()
+		for (const contract of contracts) {
+			const { data: anchors } = await fetchAnchors(api, contract.csn)
+
+			if (anchors.length) {
+				const nfts = await storeNFTS(anchors, contract)
+			}
+		}
 
 		res.status(201).json({
 			contracts, unclaimedContracts
