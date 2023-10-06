@@ -1,22 +1,90 @@
-# metaanchor-framework
-A framework to work with Authentic Vision Meta Anchor (tm) Technology
+# metaanchor
 
-# SETUP
-1. Download the complete directory as zip and unpack it on your webserver (or git clone)
-  1. `wget https://github.com/authenticvision/metaanchor/archive/refs/heads/master.zip && unzip master.zip`
-  1. Rename directory if needed  
-1. Replace the `backend/conf/metaanchor.json` with the `metaanchor.json` you received from us. __Make sure to never check this to public repositories or repositories at all, as it contains secret keys and API-keys that would compromise your complete collection__
-1. Optional configurations
-   1. Adapt public-exposed ports (5020 for backend and 5071 for frontend per default) in `docker-compose.yml` 
-1. Adapt `VUE_APP_BASE_URL` in `frontend/.env` to reflect your webservers public address and the backend-port (default: 5020) you configured in the step before.
-  1. When you provided us with `http://my-webserver.com:5020/collection`, then set `VUE_APP_BASE_URL=http://my-webserver.com:5020`
-1. Run `sudo docker-compose build && sudo docker-compose up -d`. This takes a few minutes and builds everything as well as starts it in the background
-  1. In case you need to debug, use `sudo docker logs --follow metaanchor_backend` and `sudo docker logs --follow metaanchor_frontend` respectively
+A frontend to work with Authentic Vision Meta Anchor (tm) Technology
 
+## Codebase
 
-## Making NFTs
-1. For demo only, there is a temporary database in `backend/conf/tmpdb.json` ... Fill it.
-  1. TODO instructions on what a SLID is etc.
-  1. In case a SLID is not mentioned there, the NFT will get the DigitalSoul-Standard design with the SLID printed on the image
-1. Copy images into the `backend/assets` folder (image paths are relative from there, so if an image `blub.jpg` is directly in the `frontend/assets` folder, the image shall be listed as `blub.jpg` in `backend/conf/tmpdb.json`)
-1. Thats it ;) 
+### Technologies
+
+The project is **full-stack Javascript**: meaning that the whole frontend is
+powered by React, via Next.js, and all APIs are also built with it as well.
+Here's a list of all technologies we use:
+
+- **PostgreSQL**: Data storage
+- **NextAuth**: For session & authentication
+- **Prisma**: Persistence layer
+- **React**: Frontend
+
+## Hacking
+
+The first step to run MetaAnchor locally is to grab a copy of the repository via
+Git:
+
+`git clone https://github.com/authenticvision/metaanchor`
+
+*Tip: it is preferable to use SSH to connect, since it'll give you the option to
+push in case you're a maintainer.*
+
+### Preparing the environment
+
+There are a couple of major steps to get your instance running:
+
+1. **Install Docker & docker-compose**: See the [Docker documentation][docker]
+   for instructions on installing it with your OS.
+2. **Install the MetaMask Browser Extension**: For signin, at the moment, we
+   only provide support for authentication with MetaMask. [See the instructions
+   for your browser here][metamask]
+3. **Apply for a DevKit**: You'll require having a MetaAnchor API Key for
+   communicating with the MetaAnchor API. [Apply for one here][devkit]
+
+[docker]: https://docs.docker.com/get-docker
+[metamask]: https://metamask.io/download
+[devkit]: https://www.authenticvision.com/mac
+
+After completing these steps, you'll be ready to move on 💯
+
+### Getting the instance up
+
+#### **⚠️ Warning**
+
+At the moment, the project is under heavy development. Stuff might break and the
+database schema is not fully completed and can go through changes. YMMV.
+
+#### Fill the environment variables
+
+First of all, we'll have to place our MetaAnchor key as environment variables.
+There's a couple of ways to do that, we'll use the `.env` approach. So let's
+copy the `.env.sample` file into a local, git-ignored file, on your nearest
+terminal tab, inside the project folder:
+
+`cp .env.sample .env.local`
+
+Open this configuration file on your favorite editor and fill it in.
+
+#### Build the containers
+
+Now we need to get the containers ready to go, using docker:
+
+`docker-compose build`
+
+This might take a while, it'll grab the PostgreSQL image and build another image
+for our application to live. After that's done, we can spin up our instance:
+
+`docker-compose up`
+
+*Tip: use the -d flag to run the detached mode, you can follow the logs later by
+using `docker-compose logs -f`*
+
+Great, now the metaanchor instance is running under `http://localhost:3000`.
+
+*Tip: If you ever need to change the DB, you can (1) spin up a shell inside the
+metaanchor container: `docker-compose exec metaanchor sh` (2) do a Prisma's push
+command, optionally forcing a reset of the data: `yarn run db:push` or `yarn run
+db:reset`*
+
+## License
+
+Licensed under the terms of the [MIT License][mit]. Check the `LICENSE` file
+inside this repository for more details.
+
+[mit]: https://opensource.org/license/MIT
