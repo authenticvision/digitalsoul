@@ -1,8 +1,7 @@
 import NextAuth from 'next-auth'
-import { utils } from 'ethers'
+import { ethers } from 'ethers'
 import CredentialsProvider from 'next-auth/providers/credentials'
-
-const walletURL = `${process.env.HOST_URL}/api/internal/wallets`
+import prisma from '@/lib/prisma'
 
 export const authOptions = {
 	providers: [
@@ -16,32 +15,24 @@ export const authOptions = {
 				},
 			},
 			async authorize(credentials) {
-				//if (!Boolean(utils.getAddress(credentials?.address))) {
-				//	return null
-				//}
-
-				try {
-					const body = {
-						address: credentials.address
-					}
-
-					const res = await fetch(walletURL, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(body),
-					})
-
-					const { wallet } = await res.json()
-
-					if (res.ok) {
-						return { id: wallet.address }
-					}
-				} catch (error) {
-					// TODO: Add to some error collecting service
-					console.error(error)
-
+				if (!Boolean(ethers.getAddress(credentials?.address))) {
 					return null
 				}
+
+				// TODO: We need to figure it out a nice mechanism to check if
+				// someone is allowed to authenticate. I suppose its planned to
+				// allow the owner of the instance to disable registration
+				const wallet = await prisma.wallet.upsert({
+					where: {
+						address: credentials.address
+					},
+					create: {
+						address: credentials.address
+					},
+					update: {},
+				})
+
+				return { id: wallet.address }
 			},
 		}),
 	],
