@@ -81,6 +81,20 @@ export default async function handle(req, res) {
 	const { signedMessage, address } = req.body
 	const instanceApiKey = crypto.randomBytes(32).toString('hex')
 
+	let configCount = await prisma.config.count()
+
+	if (configCount > 1) {
+		console.error('A config already exists!')
+
+		return res.status(422).json({
+			error: 'A configuration for this instance already exists'
+		})
+	}
+
+	if (!process.env.METAANCHOR_API_TOKEN) {
+		return res.status(400).json({ error: 'METAANCHOR_API_TOKEN not set' })
+	}
+
 	const { wallet, config, error } = await createWalletAndConfig({
 		instanceApiKey,
 		signedMessage,
