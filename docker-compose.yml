@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     stdin_open: true
     tty: true
-    command: 'yarn dev'
+    command: 'yarn dev:migrate'
     environment:
       POSTGRESQL_PRISMA_URL: postgresql://metaanchor:metaanchor@db/metaanchor_dev?sslmode=disable
     ports:

@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "npx prisma db push",
-    "db:reset": "npx prisma db push --force-reset"
+    "db:push": "prisma db push",
+    "db:reset": "prisma db push --force-reset",
+    "dev:migrate": "prisma db push && npm run dev",
+    "start:migrate:prod": "prisma db migrate deploy && npm run start"
   },
   "dependencies": {
     "@prisma/client": "^5.2.0",
