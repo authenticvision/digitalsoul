@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import Router from 'next/router'
 import Image from 'next/image'
+import Link from 'next/link'
 import prisma from "@/lib/prisma"
 import { GetStaticProps } from "next"
 import { useSession, signOut } from 'next-auth/react'
@@ -65,7 +66,7 @@ const Landing = (props) => {
 
 								<div className="flex flex-col">
 									<div className="flex flex-col my-2">
-										<a className="text-success cursor-pointer" href="/contracts">Contracts →</a>
+										<Link className="text-success cursor-pointer" href="/contracts">Contracts →</Link>
 									</div>
 
 									<Button text="Disconnect"
