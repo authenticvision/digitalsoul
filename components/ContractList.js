@@ -48,7 +48,7 @@ const ContractList = ({ availableContracts = [], claimedContracts = [], onSave, 
 						))}
 
 						<div className="mt-5">
-							<Button type="submit" text="Save" />
+							<Button btnType="submit" text="Save" />
 						</div>
 					</form>
 				</div>
