@@ -22,8 +22,15 @@ export async function getServerSideProps(context) {
 	const config = await prisma.config.findFirst()
 	const metaAnchorApiURL = process.env.METAANCHOR_API_URL
 	const session = await auth(context.req, context.res)
+
+	const api = new MetaAnchor({
+		baseUrl: metaAnchorApiURL,
+		apiKey: config.apiKey
+	})
+
 	let wallet = null
 	let claimedContracts = []
+	let availableContracts = []
 
 	if (session) {
 		wallet = await prisma.wallet.findUnique({
@@ -44,6 +51,11 @@ export async function getServerSideProps(context) {
 				network: true
 			}
 		})
+
+		const { data: contractsData, status } = await api
+			.getContracts(session.address)
+
+		availableContracts = contractsData
 	} else {
 		return {
 			redirect: {
@@ -55,8 +67,7 @@ export async function getServerSideProps(context) {
 
 	return {
 		props: {
-			apiKey: config.apiKey,
-			metaAnchorApiURL,
+			availableContracts,
 			claimedContracts,
 			session: JSON.parse(JSON.stringify(session)) // XXX: NextJS is dumb
 		}
@@ -71,29 +82,10 @@ const Contracts = (props) => {
 		},
 	})
 
-	const [availableContracts, setAvailableContracts] = useState([])
+	const [availableContracts, setAvailableContracts] = useState(
+		props.availableContracts
+	)
 	const [error, setError] = useState()
-
-	const fetchContracts = useCallback(async() => {
-		const api = new MetaAnchor({
-			baseUrl: props.metaAnchorApiURL,
-			apiKey: props.apiKey
-		})
-		try {
-			const { data: contracts, status } = await api.getContracts(session.address)
-			setAvailableContracts(contracts)
-		} catch (e) {
-			setError(e.message)
-			console.error(e)
-		}
-	}, [session])
-
-	useEffect(() => {
-		if (session) {
-			fetchContracts()
-		}
-	}, [fetchContracts, session])
-
 
 	// Use the useState and useEffect hooks to track whether the component has
 	// mounted or not
