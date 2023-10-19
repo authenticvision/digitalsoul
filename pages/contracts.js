@@ -13,10 +13,7 @@ import MetaAnchor from '@/lib/api.metaanchor.io'
 import { auth } from "auth"
 
 import ContractList from '@/components/ContractList'
-import Layout from "@/components/Layout"
-import Logo from "@/components/Logo"
-import Button from "@/components/Button"
-import Alert from "@/components/Alert"
+import { Layout, Logo, Button, Alert } from '@/components/ui'
 
 export async function getServerSideProps(context) {
 	const config = await prisma.config.findFirst()

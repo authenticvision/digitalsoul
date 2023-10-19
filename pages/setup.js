@@ -8,11 +8,8 @@ import { useSession } from 'next-auth/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { auth } from "auth"
 
-import Layout from "../components/Layout"
-import Logo from "../components/Logo"
-import Button from "../components/Button"
-import SetupComponent from "../components/Setup"
-
+import { Layout, Logo, Button } from '@/components/ui'
+import SetupComponent from "@/components/Setup"
 
 export async function getServerSideProps(context) {
 	const configCount = await prisma.config.count()
