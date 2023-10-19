@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react"
 import Router from "next/router"
-import Button from "@/components/Button"
-import Alert from "@/components/Alert"
 import { useSignMessage, useAccount, useDisconnect } from 'wagmi'
 import { recoverMessageAddress } from 'viem'
+
+import { Button, Alert } from "@/components/ui"
 
 const Setup = ({ signMessageText, onDone, ...props }) =>  {
 	const [error, setError] = useState()
