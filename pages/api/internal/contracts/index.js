@@ -25,7 +25,7 @@ const storeNFTS = async(anchors, contract) => {
 					description: "This is a MetaAnchor DigitalSoul NFT",
 					external_url: "",
 					background_color: "",
-					attributes: []
+					attributes: {}
 				},
 				contract: {
 					connect: {
