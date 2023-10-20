@@ -13,7 +13,7 @@ import MetaAnchor from '@/lib/api.metaanchor.io'
 import { auth } from "auth"
 
 import ContractList from '@/components/ContractList'
-import { Layout, Logo, Button, Alert } from '@/components/ui'
+import { Layout, Button, Alert } from '@/components/ui'
 
 export async function getServerSideProps(context) {
 	const config = await prisma.config.findFirst()
@@ -136,10 +136,6 @@ const Contracts = (props) => {
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
-					<div className="flex justify-center py-2">
-						<Logo />
-					</div>
-
 					{error && (
 						<Alert type='error' text={error} />
 					)}

@@ -2,11 +2,15 @@ import Link from 'next/link'
 import { Logo, Button } from '@/components/ui'
 
 import { useSession, signOut } from 'next-auth/react'
+import { useDisconnect } from 'wagmi'
 
 const NavBar = ({...props }) => {
+	const { disconnectAsync } = useDisconnect()
 	const { data: session, status } = useSession()
 
-	const onDisconnect = async() => {
+	const onDisconnect = async(e) => {
+		e.preventDefault()
+
 		await disconnectAsync()
 		signOut()
 	}
@@ -23,23 +27,18 @@ const NavBar = ({...props }) => {
 				<ul className="menu menu-horizontal px-1">
 					<li>
 						{session ? (
-							<Button text="Disconnect"
-								onClick={onDisconnect} />
+							<Link href="#" onClick={onDisconnect}>
+								Disconnect
+							</Link>
 						) : (
 							<Link href="/auth">Connect</Link>
-						)}</a>
+						)}
 					</li>
+					{session && (
 					<li>
-						<details>
-							<summary>
-								Parent
-							</summary>
-							<ul className="p-2 bg-base-100">
-								<li><a>Link 1</a></li>
-								<li><a>Link 2</a></li>
-							</ul>
-						</details>
+						<Link href="#">Config</Link>
 					</li>
+					)}
 				</ul>
 			</div>
 		</div>

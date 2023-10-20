@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { auth } from "auth"
 
-import { Layout, Logo, Button } from '@/components/ui'
+import { Layout, Button } from '@/components/ui'
 import SetupComponent from "@/components/Setup"
 
 export async function getServerSideProps(context) {
@@ -66,9 +66,6 @@ const Setup = (props) => {
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
-					<div className="flex justify-center py-2">
-						<Logo />
-					</div>
 					<div className="text-center">
 						<SetupComponent signMessageText={props.signMessageText}
 										onDone={onDoneSign} />

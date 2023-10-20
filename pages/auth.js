@@ -54,9 +54,6 @@ const Auth = (props) => {
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col justify-center align-center">
-					<div className="flex justify-center py-2">
-						<Logo />
-					</div>
 					<div className="text-center">
 						<h1 className="text-2xl font-bold">
 							Choose a Wallet Provider below
