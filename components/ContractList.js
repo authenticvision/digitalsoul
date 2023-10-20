@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, Suspense } from 'react'
 import MetaAnchor from '@/lib/api.metaanchor.io'
-import Button from '@/components/Button'
+
+import { Button } from '@/components/ui'
 
 const ContractList = ({ availableContracts = [], claimedContracts = [], onSave, ...props }) =>  {
 	const [selectedContracts, setSelectedContracts] = useState([...claimedContracts]);

@@ -6,10 +6,9 @@ import prisma from "@/lib/prisma"
 import { GetStaticProps } from "next"
 import { useSession, signOut } from 'next-auth/react'
 import { useAccount, useDisconnect } from 'wagmi'
-import Layout from "../components/Layout"
-import Logo from "../components/Logo"
-import Button from "../components/Button"
 import NextHead from 'next/head.js'
+
+import { Layout, Logo, Button } from "@/components/ui"
 
 const Landing = (props) => {
 	const { data: session, status } = useSession()
@@ -40,7 +39,6 @@ const Landing = (props) => {
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
 					<div className="flex justify-center py-2">
-						<Logo />
 					</div>
 					<div className="text-center">
 						<h1 className="text-2xl font-bold">Welcome!</h1>

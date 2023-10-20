@@ -16,6 +16,7 @@
     "@prisma/client": "^5.2.0",
     "autoprefixer": "10.4.15",
     "axios": "^1.5.1",
+    "clsx": "^2.0.0",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.18",
     "ethers": "^6.7.1",
@@ -30,6 +31,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "daisyui": "^3.9.3",
     "prisma": "^5.1.1"
   }
 }
