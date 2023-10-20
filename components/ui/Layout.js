@@ -2,7 +2,7 @@ import React, { ReactNode } from "react"
 import { NavBar } from '@/components/ui'
 
 const Layout = (props) => (
-	<div className="mx-auto h-screen flex flex-col bg-shark-950 text-white">
+	<div className="mx-auto min-h-screen flex flex-col bg-shark-950 text-white">
 		<NavBar />
 
 		<div className="w-full max-w-3xl mx-auto py-16">
