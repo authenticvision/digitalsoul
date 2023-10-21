@@ -5,7 +5,8 @@ import clsx from 'clsx'
 
 const Logo = ({ size = 'navbar', ...props }) => {
 	const sizes = {
-		'navbar': 'h-[60px] w-[60px]'
+		'navbar': 'h-[60px] w-[60px]',
+		'landing': 'h-[200px] w-[200px]'
 	}
 
 	const logoContainerClasses = clsx('relative', sizes[size])
