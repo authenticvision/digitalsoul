@@ -36,44 +36,69 @@ export async function getServerSideProps(context) {
 	const { av_sip, av_beneficiary } = context.query
 
 	if (av_sip && av_beneficiary) {
+		// Check the SIP-Token has been signed by a trusted source
+		try {
+			const { data: assetResponse, status } = await api.getAssetBySip(av_sip)
+			assetData = assetResponse
+		} catch (error) {
+			errorMsg = 'Error while trying to fetch API, maybe invalid av_sip?'
+		}
 
-		wallet = await prisma.wallet.findUnique({
-			where: {
-				address: av_beneficiary
-			},
-			select: {
-				address: true,
-			}
-		})
+		if (assetData) {
+			// Only bother with wallet-logic, if the SIP token is valid. This is already some way
+			// of authorization preventing DoS or spamming the wallet-table
+			// Find wallet, in case it does not exist, persist it (which allows us to later join easily on it
+			wallet = await prisma.wallet.findUnique({
+				where: {
+					address: av_beneficiary
+				},
+				select: {
+					address: true,
+				}
+			})
 
-		if (!wallet) {
-			errorMsg = 'This wallet does not exist on our records!'
-		} else {
-			try {
-				const { data: assetResponse, status } = await api.getAssetBySip(av_sip)
+			if (!wallet) {	
+				// TODO only create wallets with a valid SIP-token and also create one wallet per SIP token
+				// this ensures that at max. 1 wallet / scan is created, which prevents DoS / spamming of wallet table
 
-				assetData = assetResponse
-			} catch (error) {
-				console.error(error)
-				errorMsg = 'Error while trying to fetch API'
-			}
+				// FIXME this is duplicate code from wallets/index.js 
+				const address = av_beneficiary
+				let walletResult = await prisma.wallet.upsert({
+					where: {
+						address
+					},
+					create: {
+						address
+					},
+					update: {},
+				})
 
-			// TODO: Sanitize and validate the assetData.anchor is a valid
-			// anchor, raw queries are sanitized by default
-			const nftResults = await prisma.$queryRaw`
-				SELECT slid, metadata, anchor, contracts.address AS contract_address,
-				contracts.name AS contract_name, contracts.csn AS contract_csn
-				FROM nfts
-				INNER JOIN contracts ON contracts.id = nfts.contract_id
-				INNER JOIN wallets ON wallets.id = contracts.owner_id
-				WHERE wallets.address = ${wallet.address}
-				AND nfts.anchor = ${assetData.anchor} LIMIT 1
-			`;
-
-			if (nftResults.length == 1) {
-				nft = nftResults[0]
+				if(!walletResult) {
+					errorMsg = "Could not create wallet"
+				}
 			} else {
-				errorMsg = 'There are two NFTs locally, database is broken'
+				try {
+					const { data: assetResponse, status } = await api.getAssetBySip(av_sip)
+					assetData = assetResponse
+				} catch (error) {
+					errorMsg = 'Error while trying to fetch API'
+				}
+
+				// TODO: Sanitize and validate the assetData.anchor is a valid
+				// anchor, raw queries are sanitized by default
+				const nftResults = await prisma.$queryRaw`
+					SELECT slid, metadata, anchor, contracts.address AS contract_address,
+					contracts.name AS contract_name, contracts.csn AS contract_csn
+					FROM nfts
+					INNER JOIN contracts ON contracts.id = nfts.contract_id
+					WHERE nfts.anchor = ${assetData.anchor} LIMIT 1
+				`;
+
+				if (nftResults.length == 1) {
+					nft = nftResults[0]
+				} else {
+					errorMsg = 'There are two NFTs locally, database is broken'
+				}
 			}
 		}
 	} else {
@@ -99,7 +124,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	const [ownershipStatus, setOwnershipStatus] = useState(
 		assetData.owner == wallet.address ? OWNER_STATUS : RECEIVING_STATUS
 	)
-
+	
 	const CurrentCard = useCallback(() => {
 		switch(ownershipStatus) {
 			case OWNER_STATUS:
