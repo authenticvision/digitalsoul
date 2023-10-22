@@ -14,11 +14,11 @@ const ReceivingCardView = ({ nft, wallet, assetData, ...props}) => {
 			</div>
 
 			<div className="flex mt-5">
-				<WalletAddress address={wallet.address} />
+				<WalletAddress address={assetData.owner} />
 			</div>
 
 			<div className="text-slate-700 text-center justify-center">
-				owning wallet
+				receiving from
 			</div>
 		</div>
 	)
