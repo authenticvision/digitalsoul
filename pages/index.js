@@ -65,7 +65,6 @@ const Landing = (props) => {
 								<div className="flex flex-col">
 									<div className="flex flex-col my-2">
 										<Link className="text-success cursor-pointer" href="/contracts">Contracts →</Link>
-										<Link className="text-success cursor-pointer" href="/landing">Landing →</Link>
 									</div>
 
 									<Button text="Disconnect"
