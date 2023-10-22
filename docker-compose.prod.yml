@@ -4,25 +4,17 @@ services:
   metaanchor:
     build:
       context: .
-      target: builder
+      target: runner
       dockerfile: Dockerfile
       args:
-        NODE_ENV: development
-    stdin_open: true
-    tty: true
-    command: 'yarn dev:migrate'
+        NODE_ENV: production
+    command: 'yarn prod:migrate:start'
     env_file:
       - .env.local
     ports:
       - "3000:3000"
     depends_on:
       - db
-    tmpfs:
-      - /tmp
-    volumes:
-      - .:/srv/app
-      - /srv/app/.next
-      - /srv/app/node_modules
 
   db:
     image: postgres:15-alpine

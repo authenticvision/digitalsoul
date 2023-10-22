@@ -9,12 +9,13 @@ const allowedMethods = ['POST']
 
 const registerInstance = async({ wallet, config }) => {
 	const registrationURL = `${process.env.METAANCHOR_API_URL}/register`
+	const hostURL = `${process.env.PROTOCOL}${process.env.HOST}:${process.env.PORT}`
 
 	const data = {
 		registrar: wallet.address,
 		instance_api_data: config.instanceApiKey,
 		authorization: config.signedMessage,
-		uri: process.env.HOST_URL,
+		uri: hostURL,
 		version: 'v0.0.0' // TODO: Grab this from env?
 	}
 

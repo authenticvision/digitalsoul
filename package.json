@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
+    "db:baseline": "npx prisma migrate resolve --applied prisma/migrations/0_init/migration.sql",
     "db:reset": "prisma db push --force-reset",
+	"prod:db": "npx prisma generate && npx prisma migrate deploy",
     "dev:migrate": "prisma db push && npm run dev",
-    "start:migrate:prod": "prisma db migrate deploy && npm run start"
+    "prod:migrate:start": "npm run prod:db && npm run start"
   },
   "dependencies": {
     "@prisma/client": "^5.2.0",

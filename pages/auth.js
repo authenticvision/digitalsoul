@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Layout, Logo, Button } from '@/components/ui'
 import Setup from '@/components/Setup'
 import NextHead from 'next/head.js'
+import prisma from '@/lib/prisma'
 
 export const getServerSideProps = async ({ req }) => {
 	const configCount = await prisma.config.count()
