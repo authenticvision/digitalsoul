@@ -59,18 +59,33 @@ terminal tab, inside the project folder:
 
 `cp .env.sample .env.local`
 
-Open this configuration file on your favorite editor and fill it in.
+You should also copy the PostgreSQL database config file as well:
+
+`cp .db.env.sample .db.env`
+
+Open both configuration files on your favorite editor and fill them in.
 
 #### Build the containers
 
-Now we need to get the containers ready to go, using docker:
+Now we need to get the containers ready to go, using docker. For production:
+
+`docker-compose -f docker-compose.prod.yml build`
+
+For development:
 
 `docker-compose build`
 
 This might take a while, it'll grab the PostgreSQL image and build another image
 for our application to live. After that's done, we can spin up our instance:
 
+`docker-compose -f docker-compose.prod.yml up`
+
+For development:
+
 `docker-compose up`
+
+Getting our instance up, will generate our Prisma client, run the pending
+migrations and get our server up.
 
 *Tip: use the -d flag to run the detached mode, you can follow the logs later by
 using `docker-compose logs -f`*

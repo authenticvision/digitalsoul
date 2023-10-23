@@ -1,27 +1,37 @@
 FROM node:18-alpine AS dependencies
 
-ARG NODE_ENV=development
-ENV NODE_ENV=${NODE_ENV}
-
-RUN apk --no-cache -U add git curl
-RUN mkdir -p /home/app/ && chown -R node:node /home/app
-WORKDIR /home/app
+WORKDIR /srv/app
 COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 USER node
 
-RUN yarn install --frozen-lockfile
+FROM node:18-alpine AS builder
 
-FROM node:18-alpine AS build
+ARG NODE_ENV
+ENV NODE_ENV ${NODE_ENV}
+WORKDIR /srv/app
 
-WORKDIR /home/app
-COPY --from=dependencies /home/app/node_modules ./node_modules
-COPY --chown=node:node . .
+COPY . .
+COPY --from=dependencies /srv/app/node_modules ./node_modules
 
 RUN npx prisma generate
 RUN yarn build
 
-# Write down production-ready commands here
+FROM node:18-alpine AS runner
+
+WORKDIR /srv/app
+ENV NODE_ENV production
+
+COPY --from=dependencies /srv/app/node_modules ./node_modules
+COPY --from=builder /srv/app/package.json ./
+COPY --from=builder /srv/app/next.config.js ./
+COPY --from=builder /srv/app/prisma ./
+COPY --from=builder /srv/app/schema.prisma ./
+
+COPY --from=builder /srv/app/public ./public
+COPY --from=builder /srv/app/.next ./.next
 
 EXPOSE 3000
+
 CMD [ "yarn", "start" ]
