@@ -15,13 +15,16 @@ services:
       - "3000:3000"
     depends_on:
       - db
+    volumes:
+      - ds-data:/srv/app/nftdata
+
 
   db:
     image: postgres:15-alpine
     env_file:
       - .db.env
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - ./db-data:/var/lib/postgresql/data
 
 volumes:
   db-data:
