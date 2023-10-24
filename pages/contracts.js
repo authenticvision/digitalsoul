@@ -140,11 +140,23 @@ const Contracts = (props) => {
 						<Alert type='error' text={error} />
 					)}
 
-					<div className="text-center">
-						<ContractList availableContracts={availableContracts}
-									  claimedContracts={props.claimedContracts}
-									  onSave={onSelectContracts} />
-					</div>
+					{availableContracts.length > 0 && (
+						<div className="text-center">
+							<ContractList availableContracts={availableContracts}
+										  claimedContracts={props.claimedContracts}
+										  onSave={onSelectContracts} />
+						</div>
+					)}
+
+					{availableContracts.length == 0 && (
+						<div className="flex flex-col text-center font-bold text-lg">
+							<p className="mb-2">
+								There are no contracts available for your wallet
+							</p>
+
+							<Button href="/" text="Go back" />
+						</div>
+					)}
 				</main>
 			</div>
 		</Layout>

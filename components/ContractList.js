@@ -37,7 +37,7 @@ const ContractList = ({ availableContracts = [], claimedContracts = [], onSave, 
 			<Suspense fallback={<p>Loading contracts...</p>}>
 				<h1 className="text-xl">Contracts available for your wallet</h1>
 				<div className="flex flex-col">
-					<form onSubmit={claimContracts}>
+					<div>
 						{availableContracts.map((contract) => (
 							<div key={contract.csn} className="flex w-full px-3 py-2 cursor-pointer
 											text-white bg-slate-500 rounded mt-2">
@@ -49,9 +49,9 @@ const ContractList = ({ availableContracts = [], claimedContracts = [], onSave, 
 						))}
 
 						<div className="mt-5">
-							<Button btnType="submit" text="Save" />
+							<Button btnType="button" onClick={claimContracts} text="Save" />
 						</div>
-					</form>
+					</div>
 				</div>
 			</Suspense>
 		</section>
