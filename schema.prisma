@@ -43,6 +43,7 @@ model Contract {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
   nfts      NFT[]
+  assets    Asset[]
 
   @@map(name: "contracts")
 }
@@ -58,5 +59,26 @@ model NFT {
   updatedAt  DateTime @default(now()) @map(name: "updated_at")
   contractId String   @map(name: "contract_id")
 
+  assets Asset[]
+
   @@map(name: "nfts")
+}
+
+model Asset {
+  id                String   @id @default(cuid())
+  contract          Contract @relation(fields: [contractId], references: [id])
+
+  assetHash         String @map(name: "asset_hash")
+  originalFileName  String @map(name: "original_file_name")
+  fileName          String @map(name: "file_name")
+
+  assetType         String @map(name: "asset_type")
+
+  nfts NFT[]
+
+  createdAt DateTime   @default(now()) @map(name: "created_at")
+  updatedAt DateTime   @default(now()) @map(name: "updated_at")
+  contractId String   @map(name: "contract_id")
+
+  @@map(name: "asset")
 }
