@@ -97,6 +97,12 @@ digitalsoul container: `docker-compose exec digitalsoul sh` (2) do a Prisma's pu
 command, optionally forcing a reset of the data: `yarn run db:push` or `yarn run
 db:reset`*
 
+## Considerations for production deployment
+For production use, you obviously need persistent (and backup-able) data storage.
+`docker-compose-prod.yml` therefore mounts `./ds-data` and `./db-data`, which should
+be local filesystems, which are backed up regularily. These are snapshots of your DB
+NFT binary data (such as images, videos and other media files)
+
 ## License
 
 Licensed under the terms of the [MIT License][mit]. Check the `LICENSE` file
