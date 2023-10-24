@@ -211,7 +211,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	return (
 		<Layout>
 			<NextHead>
-				<title>Welcome to MetaAnchor - Landing</title>
+				<title>DigitalSoul - Landing</title>
 			</NextHead>
 
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">

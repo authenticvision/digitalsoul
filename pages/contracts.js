@@ -132,7 +132,7 @@ const Contracts = (props) => {
 	return (
 		<Layout>
 			<NextHead>
-				<title>Welcome to MetaAnchor - Contracts</title>
+				<title>Welcome to DigitalSoul - Contracts</title>
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">

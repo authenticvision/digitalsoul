@@ -34,14 +34,14 @@ const Landing = (props) => {
 	return (
 		<Layout>
 			<NextHead>
-				<title>Welcome to MetaAnchor</title>
+				<title>Welcome to DigitalSoul-Studio</title>
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
 					<div className="flex justify-center py-2">
 					</div>
 					<div className="text-center">
-						<h1 className="text-2xl font-bold">Welcome!</h1>
+						<h1 className="text-2xl font-bold">Welcome to DigitalSoul-Studio!</h1>
 						<p className="text-center">
 							Lorem ipsum dolor sit amet, consectetur adipiscing
 							elit, sed do eiusmod tempor incididunt ut labore et

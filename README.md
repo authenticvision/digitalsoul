@@ -17,10 +17,10 @@ Here's a list of all technologies we use:
 
 ## Hacking
 
-The first step to run MetaAnchor locally is to grab a copy of the repository via
+The first step to run DigitalSoul Studio locally is to grab a copy of the repository via
 Git:
 
-`git clone https://github.com/authenticvision/metaanchor`
+`git clone https://github.com/authenticvision/digitalsoul`
 
 *Tip: it is preferable to use SSH to connect, since it'll give you the option to
 push in case you're a maintainer.*
@@ -90,10 +90,10 @@ migrations and get our server up.
 *Tip: use the -d flag to run the detached mode, you can follow the logs later by
 using `docker-compose logs -f`*
 
-Great, now the metaanchor instance is running under `http://localhost:3000`.
+Great, now the digitalsoul instance is running under `http://localhost:3000`.
 
 *Tip: If you ever need to change the DB, you can (1) spin up a shell inside the
-metaanchor container: `docker-compose exec metaanchor sh` (2) do a Prisma's push
+digitalsoul container: `docker-compose exec digitalsoul sh` (2) do a Prisma's push
 command, optionally forcing a reset of the data: `yarn run db:push` or `yarn run
 db:reset`*
 

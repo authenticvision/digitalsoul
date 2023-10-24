@@ -62,7 +62,7 @@ const Setup = (props) => {
 	return (
 		<Layout>
 			<NextHead>
-				<title>Welcome to MetaAnchor</title>
+				<title>Welcome to DigitalSoul-Studio</title>
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
