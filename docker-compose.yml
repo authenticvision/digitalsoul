@@ -23,6 +23,7 @@ services:
       - .:/srv/app
       - /srv/app/.next
       - /srv/app/node_modules
+      - ./ds-data:/srv/app/nftdata
 
   db:
     image: postgres:15-alpine
