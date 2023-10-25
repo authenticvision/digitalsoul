@@ -5,6 +5,8 @@ import walletIcon from '@/public/icons/wallet.svg'
 import { useSession, signOut } from 'next-auth/react'
 import { useDisconnect } from 'wagmi'
 
+import { formatAddress } from '@/lib/utils'
+
 const NavBarMenu = () => {
 	const { disconnectAsync } = useDisconnect()
 	const { data: session, status } = useSession()
@@ -24,7 +26,7 @@ const NavBarMenu = () => {
 				</div>
 			</label>
 
-			<ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+			<ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-64">
 				{session && (
 					<li>
 						<Link href="#" className="justify-between">
@@ -40,6 +42,12 @@ const NavBarMenu = () => {
 						</Link>
 					</li>
 				)}
+
+				<li className="btn-disabled text-gray-500 mt-2">
+					<span>
+						Connected with {formatAddress(session.address)}
+					</span>
+				</li>
 			</ul>
 		</div>
 	)
