@@ -10,7 +10,7 @@ const NavBar = ({...props }) => {
 	const { data: session, status } = useSession()
 
 	return (
-		<div className="navbar bg-base-100">
+		<div className="navbar bg-[#171b25] shadow-lg">
 			<div className="flex-1">
 				<Link href="/" className="pl-5 normal-case text-xl flex">
 					<Logo size="navbar" />
