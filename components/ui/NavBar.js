@@ -1,19 +1,13 @@
 import Link from 'next/link'
-import { Logo, Button } from '@/components/ui'
+import Image from 'next/image'
+import { Logo, Button, NavBarMenu } from '@/components/ui'
+import walletIcon from '@/public/icons/wallet.svg'
 
 import { useSession, signOut } from 'next-auth/react'
 import { useDisconnect } from 'wagmi'
 
 const NavBar = ({...props }) => {
-	const { disconnectAsync } = useDisconnect()
 	const { data: session, status } = useSession()
-
-	const onDisconnect = async(e) => {
-		e.preventDefault()
-
-		await disconnectAsync()
-		signOut()
-	}
 
 	return (
 		<div className="navbar bg-base-100">
@@ -24,22 +18,13 @@ const NavBar = ({...props }) => {
 			</div>
 
 			<div className="flex-none">
-				<ul className="menu menu-horizontal px-1">
-					<li>
-						{session ? (
-							<Link href="#" onClick={onDisconnect}>
-								Disconnect
-							</Link>
-						) : (
-							<Link href="/auth">Connect</Link>
-						)}
-					</li>
-					{session && (
-					<li>
-						<Link href="#">Config</Link>
-					</li>
-					)}
-				</ul>
+				{session ? (
+					<NavBarMenu />
+				) : (
+					<Link href="/auth" className="btn btn-ghost">
+						<Image src={walletIcon} priority height={40} width={40} />
+					</Link>
+				)}
 			</div>
 		</div>
 	)
