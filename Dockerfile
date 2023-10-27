@@ -23,6 +23,7 @@ RUN yarn build
 ################################################################
 FROM node:18-alpine AS runner
 
+USER 1000
 WORKDIR /srv/app
 ENV NODE_ENV production
 
