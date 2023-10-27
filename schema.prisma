@@ -45,6 +45,10 @@ model Contract {
   nfts      NFT[]
   assets    Asset[]
 
+   // The new fields:
+  defaultNft  NFT?     @relation("DefaultNFT", fields: [defaultNftId], references: [id])
+  defaultNftId String? @map(name: "default_nft_id") @unique
+
   @@map(name: "contracts")
 }
 
@@ -60,6 +64,9 @@ model NFT {
   contractId String   @map(name: "contract_id")
 
   assets Asset[]
+
+  // New back-reference field:
+  defaultForContract Contract? @relation("DefaultNFT")
 
   @@map(name: "nfts")
 }
