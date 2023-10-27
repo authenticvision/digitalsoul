@@ -6,6 +6,7 @@ RUN yarn install --frozen-lockfile
 
 USER node
 
+########################################################
 FROM node:18-alpine AS builder
 
 ARG NODE_ENV
@@ -18,12 +19,15 @@ COPY --from=dependencies /srv/app/node_modules ./node_modules
 RUN npx prisma generate
 RUN yarn build
 
+
+################################################################
 FROM node:18-alpine AS runner
 
+USER 1000
 WORKDIR /srv/app
 ENV NODE_ENV production
 
-COPY --from=dependencies /srv/app/node_modules ./node_modules
+COPY --from=builder /srv/app/node_modules ./node_modules
 COPY --from=builder /srv/app/package.json ./
 COPY --from=builder /srv/app/next.config.js ./
 COPY --from=builder /srv/app/prisma ./
@@ -34,4 +38,7 @@ COPY --from=builder /srv/app/.next ./.next
 
 EXPOSE 3000
 
-CMD [ "yarn", "start" ]
+# Start directly via next, since yarn requires
+# Filesystem write access to run a command. In production
+# environments this may be problematic
+CMD [ "node_modules/.bin/next", "start", "-H", "0.0.0.0" ]
