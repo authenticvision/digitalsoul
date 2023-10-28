@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react"
+import NextHead from 'next/head.js'
+
 import { AppLayout, Loading } from '@/components/ui'
 
 import { NFTList } from '@/components/nfts'
@@ -50,6 +52,7 @@ export async function getServerSideProps(context) {
 }
 
 const Studio = ({ contracts, ...props }) => {
+	const [contractId, setContractId] = useState(contracts[0].id)
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -57,16 +60,24 @@ const Studio = ({ contracts, ...props }) => {
 		}
 	})
 
-	const [contractId, setContractId] = useState()
+	const onChangeContract = ({ contractId }) => {
+		console.log(contractId)
+		setContractId(contractId)
+	}
 
 	return (
-		<AppLayout contracts={contracts}>
-			<div className="page container w-full ">
-				<main className="flex flex-col">
-					<NFTList contractId={contractId} />
-				</main>
-			</div>
-		</AppLayout>
+		<>
+			<NextHead>
+				<title>DigitalSoul - Studio</title>
+			</NextHead>
+			<AppLayout contracts={contracts} contractId={contractId} onChange={onChangeContract}>
+				<div className="page container w-full ">
+					<main className="flex flex-col">
+						<NFTList contractId={contractId} />
+					</main>
+				</div>
+			</AppLayout>
+		</>
 	)
 }
 
