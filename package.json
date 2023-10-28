@@ -10,7 +10,7 @@
     "db:push": "prisma db push",
     "db:baseline": "npx prisma migrate resolve --applied prisma/migrations/0_init/migration.sql",
     "db:reset": "prisma db push --force-reset",
-	"prod:db": "npx prisma generate && npx prisma migrate deploy",
+    "prod:db": "npx prisma generate && npx prisma migrate deploy",
     "dev:migrate": "prisma db push && npm run dev",
     "prod:migrate:start": "npm run prod:db && npm run start"
   },
@@ -19,16 +19,17 @@
     "autoprefixer": "10.4.15",
     "axios": "^1.5.1",
     "clsx": "^2.0.0",
-	"daisyui": "^3.9.3",
+    "daisyui": "^3.9.3",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.18",
     "ethers": "^6.7.1",
+    "file-type": "^18.5.0",
     "lottie-react": "^2.4.0",
     "next": "13.4.18",
     "next-auth": "^4.23.1",
     "paseto": "^3.1.4",
     "postcss": "8.4.28",
-	"prisma": "^5.1.1",
+    "prisma": "^5.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.3",
@@ -36,6 +37,5 @@
     "wagmi": "^1.4.2",
     "zod": "^3.22.2"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

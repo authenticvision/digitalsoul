@@ -23,11 +23,12 @@ export default async function handle(req, res) {
 		})
 
 		if (!contract) {
-			res.status(404).json({ message: 'CSN does not exists on our records' })
+			return res.status(404).json({ message: 'CSN does not exists on our records' })
+			
 		}
 	} catch (e) {
 		console.error(e.message)
-		res.status(500).json({ message: 'An internal error happened' })
+		return res.status(500).json({ message: 'An internal error happened' })		
 	}
 
 	try {
@@ -39,18 +40,63 @@ export default async function handle(req, res) {
 						id: contract.id
 					}
 				}
+			},
+			include: {
+				assets: {
+					include: {}
+				},
+				contract: {
+					include: {
+						defaultNft: {
+							include: {
+								assets: {}
+							}
+						}
+					}
+				}
 			}
 		})
 
 		if (!nft) {
-			res.status(404).json({ message: 'NFT does not exists on our records' })
+			return res.status(404).json({ message: 'NFT does not exists on our records' })
 		}
+
+		if (nft.slid == "0") {
+			return res.status(404).json({message: 'NFT does not exist on our records'})
+		}
+
+		let nftToReturn = undefined
+
+		if (nft.metadata || nft.assets.length>0) {
+			nftToReturn = nft
+		} else {
+			if (nft.contract?.defaultNft.metadata || nft.contract?.defaultNft.assets.length>0) {
+				nftToReturn = nft.contract.defaultNft
+			}
+		}
+
+		if (!nftToReturn) {
+			return res.status(404).json({"message": "No metadata found"})
+		}
+
+		let metadata = nftToReturn.metadata
+		if (!metadata) {
+			// then there were assets, so create an empty object
+			metadata = {}
+		}
+
+		// Filling the assets
+		// Note this overwrites any pre-existing keys
+		nftToReturn.assets.map((a, index) => (
+			metadata[a.assetType] =  new URL("/api/v1/assets/" + a.assetHash, process.env.NEXTAUTH_URL).toString()
+		))
+		
+		return res.json(metadata)
+
+
 	} catch (e) {
 		console.error(e.message)
 		res.status(500).json({ message: 'An internal error happened' })
+		return
 	}
-
-	// TODO: Generate external URL for the metadata using the
-	// process.env.HOST_URL
-	res.json(nft.metadata)
 }
