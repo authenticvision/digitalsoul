@@ -7,12 +7,29 @@ import { GetStaticProps } from "next"
 import { useSession, signOut } from 'next-auth/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import NextHead from 'next/head.js'
+import { auth } from "auth"
 
 import { Layout, Logo, Button } from "@/components/ui"
 
+export async function getServerSideProps(context) {
+	const session = await auth(context.req, context.res)
+
+	if (session) {
+		return {
+			redirect: {
+				destination: '/studio',
+				permanent: false,
+			}
+		}
+	} else {
+		return {
+			props: {}
+		}
+	}
+}
+
 const Landing = (props) => {
 	const { data: session, status } = useSession()
-	const { disconnectAsync } = useDisconnect()
 
 	// Use the useState and useEffect hooks to track whether the component
 	// has mounted or not
@@ -24,11 +41,6 @@ const Landing = (props) => {
 	// If the component has not mounted yet, return null
 	if (!hasMounted) {
 		return null
-	}
-
-	const onDisconnect = async() => {
-		await disconnectAsync()
-		signOut()
 	}
 
 	return (
