@@ -21,12 +21,7 @@ const storeNFTS = async(anchors, contract) => {
 			data: {
 				slid: anchor.slid,
 				anchor: anchor.anchor,
-				metadata: {
-					description: "This is a MetaAnchor DigitalSoul NFT",
-					external_url: "",
-					background_color: "",
-					attributes: []
-				},
+				metadata: undefined, // per default, do not set any metadata. Crucial for contract.default_nft logic to work
 				contract: {
 					connect: {
 						id: contract.id
@@ -39,7 +34,8 @@ const storeNFTS = async(anchors, contract) => {
 
 const storeContracts = async(signedContracts, wallet) => {
 	return await Promise.all(signedContracts.map(async(contract) => {
-		return await prisma.contract.create({
+
+		const created_contract= await prisma.contract.create({
 			data: {
 				csn: contract.csn,
 				name: contract.contract_name || contract.name,
@@ -52,6 +48,27 @@ const storeContracts = async(signedContracts, wallet) => {
 				}
 			}
 		})
+
+		// create a default nft and assign to contract
+		const default_nft = await prisma.NFT.create({
+			data: {
+				slid: "0",
+				anchor: "default", // signal that this is no valid anchor
+				metadata: undefined, // per default, do not set any metadata. Crucial for contract.default_nft logic to work
+				defaultForContract: {
+					connect: {
+						id: created_contract.id
+					}
+				},
+				contract: {
+					connect: {
+						id: created_contract.id
+					}
+				}
+			}
+		})
+
+		return created_contract
 	}))
 }
 

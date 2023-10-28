@@ -57,7 +57,7 @@ model NFT {
   contract Contract @relation(fields: [contractId], references: [id])
   anchor   String
   slid     String
-  metadata Json
+  metadata Json?
 
   createdAt  DateTime @default(now()) @map(name: "created_at")
   updatedAt  DateTime @default(now()) @map(name: "updated_at")
