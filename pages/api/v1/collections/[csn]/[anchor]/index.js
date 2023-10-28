@@ -42,9 +42,16 @@ export default async function handle(req, res) {
 				}
 			},
 			include: {
+				assets: {
+					include: {}
+				},
 				contract: {
 					include: {
-						defaultNft: true
+						defaultNft: {
+							include: {
+								assets: {}
+							}
+						}
 					}
 				}
 			}
@@ -58,18 +65,34 @@ export default async function handle(req, res) {
 			return res.status(404).json({message: 'NFT does not exist on our records'})
 		}
 
-		let toReturn = nft.metadata
+		let nftToReturn = undefined
 
-		// Default-NFT logic
-		if ( !toReturn) {
-			// If metadata is not set on a NFT base, check whether there is a default NFT
-			toReturn = nft.contract?.defaultNft.metadata
-
-			if (!toReturn) {
-				return res.status(404).json({"message": "No metadata found"})
+		if (nft.metadata || nft.assets.length>0) {
+			nftToReturn = nft
+		} else {
+			if (nft.contract?.defaultNft.metadata || nft.contract?.defaultNft.assets.length>0) {
+				nftToReturn = nft.contract.defaultNft
 			}
-			return res.json(toReturn)
 		}
+
+		if (!nftToReturn) {
+			return res.status(404).json({"message": "No metadata found"})
+		}
+
+		let metadata = nftToReturn.metadata
+		if (!metadata) {
+			// then there were assets, so create an empty object
+			metadata = {}
+		}
+
+		// Filling the assets
+		// Note this overwrites any pre-existing keys
+		nftToReturn.assets.map((a, index) => (
+			metadata[a.assetType] =  new URL("/api/v1/assets/" + a.assetHash, process.env.NEXTAUTH_URL).toString()
+		))
+		
+		return res.json(metadata)
+
 
 	} catch (e) {
 		console.error(e.message)
