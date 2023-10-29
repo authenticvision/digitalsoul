@@ -4,13 +4,16 @@ import React, { useState, useEffect } from 'react'
 import { Loading } from '@/components/ui'
 import { useRouter } from 'next/router'
 
-const NFTList = ({ contractId, ...props }) => {
+import { Header, NFTTable, NFTCards } from '@/components/studio'
+
+const NFTList = ({ contractId, contractName, ...props }) => {
 	const router = useRouter()
 	const { csn } = router.query
 
 	const [nfts, setNFTs] = useState([])
 	const [isLoading, setIsLoading] = useState(contractId != undefined)
 	const [error, setError] = useState()
+	const [mode, setMode] = useState('card')
 
 	useEffect(() => {
 		async function fetchNFTs() {
@@ -31,6 +34,10 @@ const NFTList = ({ contractId, ...props }) => {
 		}
 	}, [contractId])
 
+	const onChangeMode = (mode) => {
+		setMode(mode)
+	}
+
 	return (
 		<div className="flex">
 			{contractId == undefined && (
@@ -46,9 +53,21 @@ const NFTList = ({ contractId, ...props }) => {
 			)}
 
 			{(!isLoading && nfts.length > 0) && (
-				<span className="text-center w-full text-xl font-bold mt-5">
-					NFTs count: {nfts.length}
-				</span>
+				<div className="flex flex-col text-center w-full text-xl font-bold mt-5">
+					<div className="flex border-b border-raven-700">
+						<Header contractName={contractName}
+								mode={mode}
+								onChangeMode={onChangeMode} />
+					</div>
+
+					<div className="flex w-full ml-8 mt-8">
+						{mode == 'card' ? (
+							<NFTCards nfts={nfts}  contractName={contractName} />
+						) : (
+							<NFTTable nfts={nfts} contractName={contractName} />
+						)}
+					</div>
+				</div>
 			)}
 
 			{(!isLoading && nfts.length == 0) && (
