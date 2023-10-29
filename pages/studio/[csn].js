@@ -76,9 +76,9 @@ const Studio = ({ wallet, contract, ...props }) => {
 				<title>DigitalSoul - Studio</title>
 			</NextHead>
 			<AppLayout wallet={wallet} contractId={contract.id}>
-				<div className="page container w-full ">
+				<div className="page w-full ">
 					<main className="flex flex-col">
-						<NFTList contractId={contract.id} />
+						<NFTList contractId={contract.id} contractName={contract.name} />
 					</main>
 				</div>
 			</AppLayout>
