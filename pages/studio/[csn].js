@@ -24,15 +24,25 @@ export async function getServerSideProps(context) {
 		}
 	}
 
+	const { csn } = context.query
+
 	const wallet = await prisma.wallet.findUnique({
 		where: {
 			address: session.address
+		},
+		select: {
+			id: true,
+			address: true
 		}
 	})
 
-	const contracts = await prisma.contract.findMany({
+	const contract = await prisma.contract.findFirst({
 		where: {
-			ownerId: wallet.id
+			ownerId: wallet.id,
+			csn: {
+				equals: csn,
+				mode: 'insensitive'
+			}
 		},
 		select: {
 			id: true,
@@ -45,14 +55,14 @@ export async function getServerSideProps(context) {
 
 	return {
 		props: {
-			contracts,
+			wallet,
+			contract,
 			session: JSON.parse(JSON.stringify(session)) // XXX: NextJS is dumb
 		}
 	}
 }
 
-const Studio = ({ contracts, ...props }) => {
-	const [contractId, setContractId] = useState(contracts[0].id)
+const Studio = ({ wallet, contract, ...props }) => {
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -60,20 +70,15 @@ const Studio = ({ contracts, ...props }) => {
 		}
 	})
 
-	const onChangeContract = ({ contractId }) => {
-		console.log(contractId)
-		setContractId(contractId)
-	}
-
 	return (
 		<>
 			<NextHead>
 				<title>DigitalSoul - Studio</title>
 			</NextHead>
-			<AppLayout contracts={contracts} contractId={contractId} onChange={onChangeContract}>
+			<AppLayout wallet={wallet} contractId={contract.id}>
 				<div className="page container w-full ">
 					<main className="flex flex-col">
-						<NFTList contractId={contractId} />
+						<NFTList contractId={contract.id} />
 					</main>
 				</div>
 			</AppLayout>
