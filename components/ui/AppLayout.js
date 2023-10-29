@@ -11,7 +11,7 @@ const AppLayout = (props) => {
 				<NavBar />
 			</div>
 
-			<div className="grid grid-cols-[auto_1fr] justify-center w-full gap-4">
+			<div className="grid grid-cols-[auto_1fr] justify-center w-full">
 				<Sidebar address={props.wallet.address} contractId={props.contractId}
 						 onChange={onSelectContract} />
 
