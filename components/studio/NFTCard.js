@@ -1,8 +1,16 @@
-import { truncate, formatAddress } from '@/lib/utils'
+import { truncate, formatAddress, cn } from '@/lib/utils'
+import Link from 'next/link'
 
 const NFTCard = ({ nft, contractName, ...props }) => {
+	const cardRootClassName = cn(`
+		card card-compact rounded-lg w-64 bg-base-100 shadow-xl border
+		border-raven-700 hover:border-white
+		`
+	)
+
 	return (
-		<div className="card card-compact rounded-lg w-64 bg-base-100 shadow-xl border border-white">
+		<Link href={`/studio/${nft.contract.csn.toLowerCase()}/${nft.anchor}`}
+			  className={cardRootClassName}>
 			<figure>
 				<img src="/nft-fallback-cover.webp" alt={nft.metadata.description} />
 			</figure>
@@ -24,7 +32,7 @@ const NFTCard = ({ nft, contractName, ...props }) => {
 					</div>
 				</div>
 			</div>
-		</div>
+		</Link>
 	)
 }
 
