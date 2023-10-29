@@ -12,9 +12,8 @@ const AppLayout = (props) => {
 			</div>
 
 			<div className="grid grid-cols-[auto_1fr] justify-center w-full gap-4">
-				<Sidebar contractId={props.contractId}
-						 onChange={onSelectContract}
-						 contracts={props.contracts} />
+				<Sidebar address={props.wallet.address} contractId={props.contractId}
+						 onChange={onSelectContract} />
 
 				<div className="flex pt-6">
 					{props.children}
