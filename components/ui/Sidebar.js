@@ -24,7 +24,7 @@ const Sidebar = ({ address, ...props }) => {
 	)
 
 	return (
-		<aside className="flex flex-col h-[calc(100vh_-_2rem)] w-56 border-r border-raven-700 pt-6">
+		<aside className="flex flex-col min-h-[calc(100vh_-_2rem)] h-full w-56 border-r border-raven-700 pt-6">
 			<div className="flex flex-col justify-between w-full min-h-full">
 				{isLoading && (
 					<div className="w-full text-center">
