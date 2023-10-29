@@ -19,16 +19,22 @@ export default async function handle(req, res) {
 
 	const { contractId } = req.query
 
-	console.log(req.query)
-
 	if (!contractId) {
 		return res.status(400).json({ message: 'Missing required parameters' })
 	}
 
 	// TODO: Deal with unexisting contracts
+	// TODO: Add pagination
 	const nfts = await prisma.NFT.findMany({
 		where: {
 			contractId
+		},
+		include: {
+			contract: {
+				include: {
+					owner: true
+				}
+			}
 		}
 	})
 
