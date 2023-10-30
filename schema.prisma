@@ -87,5 +87,5 @@ model Asset {
   updatedAt DateTime   @default(now()) @map(name: "updated_at")
   contractId String   @map(name: "contract_id")
 
-  @@map(name: "asset")
+  @@map(name: "assets")
 }
