@@ -7,6 +7,7 @@ import NavBar from './NavBar'
 import NavBarMenu from './NavBarMenu'
 import AppLayout from './AppLayout'
 import Sidebar from './Sidebar'
+import ErrorPage from './ErrorPage'
 
 export {
 	Logo,
@@ -17,5 +18,6 @@ export {
 	Layout,
 	AppLayout,
 	Sidebar,
+	ErrorPage,
 	NavBarMenu,
 }
