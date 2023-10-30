@@ -14,7 +14,7 @@ import { Layout, Logo, Button } from "@/components/ui"
 export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
 
-	if (session) {
+	if (session && session.wallet) {
 		const contract = await prisma.contract.findFirst({
 			where: {
 				ownerId: session.wallet.id
