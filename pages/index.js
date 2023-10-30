@@ -15,9 +15,28 @@ export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
 
 	if (session) {
+		const contract = await prisma.contract.findFirst({
+			where: {
+				ownerId: session.wallet.id
+			},
+			select: {
+				id: true,
+				name: true,
+				csn: true
+			}
+		})
+
+		let destinationURL
+
+		if (!contract) {
+			destinationURL = '/contracts'
+		} else {
+			destinationURL = `/studio/${contract.csn.toLowerCase()}`
+		}
+
 		return {
 			redirect: {
-				destination: '/studio',
+				destination: destinationURL,
 				permanent: false,
 			}
 		}
