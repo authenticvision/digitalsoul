@@ -1,6 +1,46 @@
-# metaanchor
+# DigitalSoul
 
-A frontend to work with Authentic Vision Meta Anchor (tm) Technology
+A Service to design and serve Digital Assets for [Asset-Bound NFTs (ERC-6956)](https://ercs.ethereum.org/ERCS/erc-6956). 
+
+Designed to work with [Meta Anchor Technology](https://metaanchor.io).
+
+This service provides:
+- The **Landing page** for the MetaAnchor-App, which allows to display and transfer DigitalSoul-NFTs
+- The **DigitalSoul-Studio**, which allows you to manage your Smart Contract and create and manage your DigitalSoul-NFTs. 
+
+
+## Support
+
+Find us on [Discord](https://discord.com/invite/ddsCeG8Z5d)
+
+## Choosing hosted vs self-hosted
+With your DigitalSoul-NFTs, you can chose whether you want to use the 
+
+### Hosted
+The latest released version of DigitalSoul Studio is available as a hosted instance at https://digitalsoul.metaanchor.io 
+
+**Benefits**:
+- Maintained and updated on a regular basis
+- No webserver needed
+- Automated backups and monitoring
+
+**Getting started**: 
+- Head over to https://digitalsoul.metaanchor.io and log in with the wallet owning your Smart-Contract. 
+- Don't have a DigitalSoul Smart Contract yet? Apply for DevKit or Startup Kit on https://metaanchor.io
+
+### Self-hosted
+You can self-host DigitalSoul-Studio from this repository on your own web-server.
+
+**Benefits**:
+- Enables you to implement your own features and landing-page designs
+- Full control over your data
+
+**Getting started**: 
+- Some automatization features for self-hosted are still under development. If you want to self-host already, hit us up in our [Discord](https://discord.com/invite/ddsCeG8Z5d)
+
+
+# Development
+This section concerns people who want to implement their own features.
 
 ## Codebase
 
@@ -105,7 +145,6 @@ NFT binary data (such as images, videos and other media files)
 
 ## License
 
-Licensed under the terms of the [MIT License][mit]. Check the `LICENSE` file
-inside this repository for more details.
+Licensed under the terms of the [MIT License][mit]. Check the `LICENSE` file inside this repository for more details.
 
 [mit]: https://opensource.org/license/MIT
