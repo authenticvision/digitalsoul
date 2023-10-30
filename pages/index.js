@@ -7,12 +7,48 @@ import { GetStaticProps } from "next"
 import { useSession, signOut } from 'next-auth/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import NextHead from 'next/head.js'
+import { auth } from "auth"
 
 import { Layout, Logo, Button } from "@/components/ui"
 
+export async function getServerSideProps(context) {
+	const session = await auth(context.req, context.res)
+
+	if (session && session.wallet) {
+		const contract = await prisma.contract.findFirst({
+			where: {
+				ownerId: session.wallet.id
+			},
+			select: {
+				id: true,
+				name: true,
+				csn: true
+			}
+		})
+
+		let destinationURL
+
+		if (!contract) {
+			destinationURL = '/contracts'
+		} else {
+			destinationURL = `/studio/${contract.csn.toLowerCase()}`
+		}
+
+		return {
+			redirect: {
+				destination: destinationURL,
+				permanent: false,
+			}
+		}
+	} else {
+		return {
+			props: {}
+		}
+	}
+}
+
 const Landing = (props) => {
 	const { data: session, status } = useSession()
-	const { disconnectAsync } = useDisconnect()
 
 	// Use the useState and useEffect hooks to track whether the component
 	// has mounted or not
@@ -26,11 +62,6 @@ const Landing = (props) => {
 		return null
 	}
 
-	const onDisconnect = async() => {
-		await disconnectAsync()
-		signOut()
-	}
-
 	return (
 		<Layout>
 			<NextHead>
@@ -38,43 +69,26 @@ const Landing = (props) => {
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
-					<div className="flex justify-center py-2">
-					</div>
-					<div className="text-center">
-						<h1 className="text-2xl font-bold">Welcome to DigitalSoul-Studio!</h1>
-						<p className="text-center">
-							Lorem ipsum dolor sit amet, consectetur adipiscing
-							elit, sed do eiusmod tempor incididunt ut labore et
-							dolore magna aliqua. Ut enim ad minim veniam, quis
-							nostrud exercitation ullamco laboris nisi ut aliquip
-							ex ea commodo consequat. Duis aute irure dolor
-							in reprehenderit in voluptate velit esse cillum
-							dolore eu fugiat nulla pariatur. Excepteur sint
-							occaecat cupidatat non proident, sunt in culpa
-							qui officia deserunt mollit anim id est laborum.
-						</p>
-					</div>
+					<div className="hero min-h-screen">
+						<div className="hero-content text-center">
+							<div className="max-w-md">
+								<h1 className="text-5xl font-bold">
+									Welcome to DigitalSoul-Studio
+								</h1>
 
-					<div className="text-center mt-5">
-						{status == "authenticated" ? (
-							<div className="">
-								<h2 className="text-lg my-5">
-									Connected with {session.address}
-								</h2>
+								<p className="py-6">
 
-								<div className="flex flex-col">
-									<div className="flex flex-col my-2">
-										<Link className="text-success cursor-pointer" href="/contracts">Contracts →</Link>
-									</div>
+									DigitalSoul-Studio is the tool to interact
+									and customize your collection of assets
+									from MetaAnchor!
 
-									<Button text="Disconnect"
-											onClick={onDisconnect} />
+								</p>
 
-								</div>
+								{!session && (
+									<Button href="/auth" text="Connect" />
+								)}
 							</div>
-						) : (
-							<Button href="/auth" text="Connect" />
-						)}
+						</div>
 					</div>
 				</main>
 			</div>

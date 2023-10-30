@@ -1,5 +1,5 @@
 import React from 'react'
-import logoImg from '@/public/logo-grey.svg'
+import logoImg from '@/public/logo-white.svg'
 import Image from 'next/image'
 import clsx from 'clsx'
 
