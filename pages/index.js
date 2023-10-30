@@ -69,7 +69,7 @@ const Landing = (props) => {
 			</NextHead>
 			<div className="page container w-full py-5 px-2 my-0 mx-auto">
 				<main className="flex flex-col">
-					<div className="hero min-h-screen bg-base-200">
+					<div className="hero min-h-screen">
 						<div className="hero-content text-center">
 							<div className="max-w-md">
 								<h1 className="text-5xl font-bold">

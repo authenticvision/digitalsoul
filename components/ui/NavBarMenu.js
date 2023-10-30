@@ -26,7 +26,7 @@ const NavBarMenu = () => {
 				</div>
 			</label>
 
-			<ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-64">
+			<ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-shark-800 rounded-box w-64">
 				{session && (
 					<li>
 						<Link href="#" className="justify-between">
