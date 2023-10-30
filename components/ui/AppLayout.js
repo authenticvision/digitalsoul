@@ -1,10 +1,6 @@
 import { NavBar, Sidebar } from '@/components/ui'
 
 const AppLayout = (props) => {
-	const onSelectContract = (event) => {
-		props.onChange(event)
-	}
-
 	return (
 		<div className="mx-auto min-h-screen flex flex-col bg-shark-950 text-white">
 			<div>
@@ -12,8 +8,7 @@ const AppLayout = (props) => {
 			</div>
 
 			<div className="grid grid-cols-[auto_1fr] justify-center w-full">
-				<Sidebar address={props.wallet.address} contractId={props.contractId}
-						 onChange={onSelectContract} />
+				<Sidebar address={props.wallet.address} contractId={props.contractId} />
 
 				<div className="flex pt-6">
 					{props.children}

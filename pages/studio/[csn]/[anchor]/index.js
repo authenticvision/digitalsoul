@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import NextHead from 'next/head.js'
 
-import { AppLayout, Loading } from '@/components/ui'
+import { AppLayout, Loading, ErrorPage } from '@/components/ui'
 import { NFTView as NFTProfileView } from '@/components/studio'
 
 import { useSession } from 'next-auth/react'
@@ -25,24 +25,27 @@ export async function getServerSideProps(context) {
 
 	const { anchor } = context.query
 
-	const wallet = await prisma.wallet.findUnique({
-		where: {
-			address: session.address
-		},
-		select: {
-			id: true,
-			address: true
-		}
-	})
-
 	let nft = await prisma.NFT.findFirst({
 		where: {
-			anchor
+			anchor: anchor,
+			contract: {
+				ownerId: session.wallet.id
+			}
 		},
 		include: {
 			contract: true
 		}
 	})
+
+	if (!nft) {
+		return {
+			props: {
+				forbidden: true
+			}
+		}
+	}
+
+	const wallet = { id: session.wallet.id, address: session.wallet.address }
 
 	nft = JSON.parse(JSON.stringify(nft))
 
@@ -53,12 +56,18 @@ export async function getServerSideProps(context) {
 			anchor,
 			wallet,
 			contract,
-			nft
+			nft,
 		}
 	}
 }
 
 const NFTView = ({ nft, contract, wallet, anchor, ...props }) => {
+	if (props.forbidden) {
+		return (
+			<ErrorPage status={403} />
+		)
+	}
+
 	return (
 		<>
 			<NextHead>

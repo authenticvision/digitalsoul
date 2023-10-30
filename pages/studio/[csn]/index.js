@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import NextHead from 'next/head.js'
 
-import { AppLayout, Loading } from '@/components/ui'
+import { AppLayout, Loading, ErrorPage } from '@/components/ui'
 
 import { NFTList } from '@/components/nfts'
 
@@ -26,15 +26,7 @@ export async function getServerSideProps(context) {
 
 	const { csn } = context.query
 
-	const wallet = await prisma.wallet.findUnique({
-		where: {
-			address: session.address
-		},
-		select: {
-			id: true,
-			address: true
-		}
-	})
+	const wallet = { id: session.wallet.id, address: session.wallet.address }
 
 	const contract = await prisma.contract.findFirst({
 		where: {
@@ -53,6 +45,14 @@ export async function getServerSideProps(context) {
 		}
 	})
 
+	if (!contract) {
+		return {
+			props: {
+				forbidden: true
+			}
+		}
+	}
+
 	return {
 		props: {
 			wallet,
@@ -69,6 +69,12 @@ const Studio = ({ wallet, contract, ...props }) => {
 			Router.push('/')
 		}
 	})
+
+	if (props.forbidden) {
+		return (
+			<ErrorPage status={403} />
+		)
+	}
 
 	return (
 		<>

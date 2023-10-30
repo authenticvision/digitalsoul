@@ -43,13 +43,26 @@ export const authOptions = {
 		secret: process.env.JWT_SECRET,
 	},
 	callbacks: {
-		async session({ session, token }) {
+		async jwt({ token, account, profile }) {
+			if (account) {
+				token.wallet = await prisma.wallet.findFirst({
+					where: {
+						address: token.sub
+					}
+				})
+			}
+
+			return token
+		},
+		async session({ session, token, user }) {
 			session.address = token.sub
+			session.user.name = token.sub
+			session.wallet = token.wallet
 
 			return session
-		},
+		}
 	},
-	secret: process.env.NEXT_AUTH_SECRET,
+	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
 		signIn: '/',
 		signOut: '/',
