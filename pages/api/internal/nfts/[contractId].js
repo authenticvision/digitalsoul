@@ -25,9 +25,14 @@ export default async function handle(req, res) {
 
 	// TODO: Deal with unexisting contracts
 	// TODO: Add pagination
+	// FIXME: Better way to identify the default-NFT... SLID 0 is a nice definition
+	// but maybe using the relation is better?
 	const nfts = await prisma.NFT.findMany({
 		where: {
-			contractId
+			contractId,
+			slid: {
+				not: '0'
+			}
 		},
 		include: {
 			contract: {

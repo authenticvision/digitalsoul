@@ -1,5 +1,5 @@
 const TraitsBox = ({ nft, ...props }) => {
-	const traits = nft.metadata.attributes
+	const traits = nft.metadata?.attributes
 	const hasTraits = Array.isArray(traits) && traits.length > 0
 
 	return (

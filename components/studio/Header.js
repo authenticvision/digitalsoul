@@ -23,7 +23,7 @@ const Header = ({ mode, onChangeMode, contractName, ...props }) => {
 				</div>
 
 				<div className="font-bold text-4xl">
-					My NFTs
+					NFTs
 				</div>
 			</div>
 
@@ -42,7 +42,7 @@ const Header = ({ mode, onChangeMode, contractName, ...props }) => {
 			</div>
 
 			<div className="flex">
-				Third
+				&nbsp;
 			</div>
 		</div>
 	)
