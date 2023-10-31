@@ -3,7 +3,7 @@ import Lottie from "lottie-react";
 import { WalletAddress } from '@/components/landing'
 import receivingNFTAnimation from "@/lib/receivingNFT.json";
 
-const ReceivingCardView = ({ nft, wallet, assetData, ...props}) => {
+const ReceivingCardView = ({ wallet, assetData, ...props}) => {
 	return (
 		<div className="flex flex-col">
 			<div className="flex flex-col justify-center text-center mx-5">
