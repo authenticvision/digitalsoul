@@ -9,8 +9,8 @@ const NFTView = ({ nft, wallet, contract, ...props }) => {
 		document.getElementById('nft-modal-editing').showModal()
 	}
 
-	const onFinishUploading = () => {
-
+	const onFinishUploading = (e) => {
+		console.log(e)
 	}
 
 	return (
@@ -47,7 +47,7 @@ const NFTView = ({ nft, wallet, contract, ...props }) => {
 							</button>
 
 							<dialog id="nft-modal-editing" className="modal">
-								<NFTImageUploader onFinish={onFinishUploading} />
+								<NFTImageUploader anchor={nft.anchor} onFinish={onFinishUploading} />
 							</dialog>
 
 							<img src="/nft-fallback-cover.webp" className="max-w-sm rounded-lg shadow-2xl" />

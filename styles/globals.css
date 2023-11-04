@@ -38,3 +38,14 @@ li {
   list-style: none;
 }
 
+.filepond--drop-label {
+	@apply bg-base-100 dark:bg-base-100;
+}
+
+.filepond--drop-label label {
+	@apply text-white;
+}
+
+.filepond--panel-root {
+	@apply bg-base-100 !important;
+}

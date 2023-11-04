@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react"
 import NextHead from 'next/head.js'
 
+// Import React FilePond
+import { FilePond, registerPlugin } from 'react-filepond'
+
+// Import FilePond styles
+import 'filepond/dist/filepond.min.css'
+import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
+
 import { AppLayout, Loading, ErrorPage } from '@/components/ui'
 import { NFTView as NFTProfileView } from '@/components/studio'
 
@@ -9,6 +18,8 @@ import { getServerSession } from 'next-auth/next'
 import { auth } from 'auth'
 
 import prisma from '@/lib/prisma'
+
+registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview)
 
 export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
