@@ -33,7 +33,8 @@ export async function getServerSideProps(context) {
 			}
 		},
 		include: {
-			contract: true
+			contract: true,
+			assets: true
 		}
 	})
 
