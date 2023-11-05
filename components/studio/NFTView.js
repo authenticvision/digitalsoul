@@ -5,6 +5,7 @@ import { TraitsBox, NFTImageUploader } from '@/components/studio'
 import editImg from '@/public/icons/edit.svg'
 import Image from 'next/image'
 
+// TODO: Split this component into two, a standalone header & the body
 const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 	const editingModal = useRef(null)
 
