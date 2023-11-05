@@ -34,7 +34,11 @@ export default async function handle(req, res) {
 				not: '0'
 			}
 		},
+		orderBy: {
+			updatedAt: 'desc'
+		},
 		include: {
+			assets: true,
 			contract: {
 				include: {
 					owner: true

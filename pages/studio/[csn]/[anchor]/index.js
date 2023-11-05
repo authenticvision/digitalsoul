@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react"
-import NextHead from 'next/head.js'
+import React, { useState, useEffect } from 'react'
+import NextHead from 'next/head'
 
 import { AppLayout, Loading, ErrorPage } from '@/components/ui'
 import { NFTView as NFTProfileView } from '@/components/studio'
@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import { getServerSession } from 'next-auth/next'
 import { auth } from 'auth'
 
+import { useNFT } from '@/hooks'
 import prisma from '@/lib/prisma'
 
 export async function getServerSideProps(context) {
@@ -23,7 +24,7 @@ export async function getServerSideProps(context) {
 		}
 	}
 
-	const { anchor } = context.query
+	const { csn, anchor } = context.query
 
 	let nft = await prisma.NFT.findFirst({
 		where: {
@@ -33,7 +34,7 @@ export async function getServerSideProps(context) {
 			}
 		},
 		include: {
-			contract: true
+			contract: true,
 		}
 	})
 
@@ -47,37 +48,47 @@ export async function getServerSideProps(context) {
 
 	const wallet = { id: session.wallet.id, address: session.wallet.address }
 
-	nft = JSON.parse(JSON.stringify(nft))
-
 	const contract = JSON.parse(JSON.stringify(nft.contract))
 
 	return {
 		props: {
 			anchor,
 			wallet,
-			contract,
-			nft,
+			contract
 		}
 	}
 }
 
-const NFTView = ({ nft, contract, wallet, anchor, ...props }) => {
+const NFTView = ({ contract, wallet, anchor, ...props }) => {
 	if (props.forbidden) {
 		return (
 			<ErrorPage status={403} />
 		)
 	}
 
+	const { nft, isLoading, error, mutate } = useNFT(anchor)
+
+	const onFinishEditing = () => {
+		mutate()
+	}
+
 	return (
 		<>
 			<NextHead>
-				<title>DigitalSoul - Studio - {nft.slid}</title>
+				<title>DigitalSoul - Studio - {nft ? nft.slid : anchor}</title>
 			</NextHead>
 
 			<AppLayout wallet={wallet} contractId={contract.id}>
 				<div className="page w-full ">
 					<main className="flex flex-col">
-						<NFTProfileView wallet={wallet} contract={contract} nft={nft} />
+						{nft ? (
+							<NFTProfileView wallet={wallet} contract={contract}
+											nft={nft} onFinishEditing={onFinishEditing} />
+						) : (
+							<div className='text-center'>
+								<Loading size='lg' />
+							</div>
+						)}
 					</main>
 				</div>
 			</AppLayout>
