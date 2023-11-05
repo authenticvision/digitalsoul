@@ -133,3 +133,4 @@ node_modules
 .next
 .env.local
 .db.env
+ds-data
