@@ -26,6 +26,7 @@
     "ethers": "^6.7.1",
     "file-type": "^18.5.0",
     "filepond": "^4.30.4",
+    "filepond-plugin-file-validate-size": "^2.2.8",
     "filepond-plugin-image-exif-orientation": "^1.0.11",
     "filepond-plugin-image-preview": "^4.6.11",
     "formidable": "^3.5.1",
