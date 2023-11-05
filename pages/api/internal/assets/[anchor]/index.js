@@ -48,6 +48,49 @@ const dropAssetsFromNFT = async (nft) => {
 	})
 }
 
+const computeFileHash = (csn, file) => {
+	const hashedFile = keccak256(file)
+
+	return id(`${csn}:${hashedFile}`)
+}
+
+const connectWithExistingAsset = async (asset, nft) => {
+	await prisma.NFT.update({
+		where: {
+			id: nft.id
+		},
+		data: {
+			updatedAt: new Date(),
+			assets: {
+				connect: [{
+					id: asset.id
+				}]
+			}
+		}
+	})
+}
+
+const createAsset = async ({ nft, fileHash, originalFileName, contractId }) => {
+	await prisma.asset.create({
+		data: {
+			fileName: fileHash,
+			assetHash: fileHash,
+			assetType: 'image', // XXX: Should be dynamic
+			originalFileName,
+			contract: {
+				connect: {
+					id: contractId
+				}
+			},
+			nfts: {
+				connect: [{
+					id: nft.id
+				}]
+			}
+		}
+	})
+}
+
 export default async function handle(req, res) {
 	const session = await getServerSession(req, res, authOptions)
 	if (!session) {
@@ -71,6 +114,8 @@ export default async function handle(req, res) {
 		}
 	})
 
+	const contract = nft.contract
+
 	// TODO: What to do with assets that aren't attached to any other NFT?
 	// Should this clean up run on an async job?
 	await dropAssetsFromNFT(nft)
@@ -85,55 +130,29 @@ export default async function handle(req, res) {
 
 		const filePath = uploadedFile.path
 		const fileContent = readFileSync(filePath)
-
-		const hashedFile = keccak256(fileContent)
-		const finalHash = id(`${nft.contract.csn}:${hashedFile}`)
+		const fileHash = computeFileHash(nft.contract.csn, fileContent)
 
 		const existingAsset = await prisma.asset.findFirst({
 			where: {
-				assetHash: finalHash
+				assetHash: fileHash
 			}
 		})
 
 		if (existingAsset) {
-			await prisma.NFT.update({
-				where: {
-					id: nft.id
-				},
-				data: {
-					updatedAt: new Date(),
-					assets: {
-						connect: [{
-							id: existingAsset.id
-						}]
-					}
-				}
-			})
+			await connectWithExistingAsset(existingAsset, nft)
 
 			return res.json({
 				existingAsset
 			})
 		} else {
 			try {
-				writeFileSync(path.join(STORAGE_DIR, finalHash), fileContent)
+				writeFileSync(path.join(STORAGE_DIR, fileHash), fileContent)
 
-				const asset = await prisma.asset.create({
-					data: {
-						fileName: finalHash,
-						assetHash: finalHash,
-						assetType: 'image',
-						originalFileName: uploadedFile.name,
-						contract: {
-							connect: {
-								id: nft.contract.id
-							}
-						},
-						nfts: {
-							connect: [{
-								id: nft.id
-							}]
-						}
-					}
+				const asset = await createAsset({
+					nft,
+					fileHash,
+					contractId: nft.contract.id,
+					originalFileName: uploadedFile.name
 				})
 
 				return res.json({
