@@ -34,6 +34,9 @@ export default async function handle(req, res) {
 				not: '0'
 			}
 		},
+		orderBy: {
+			updatedAt: 'desc'
+		},
 		include: {
 			contract: {
 				include: {
