@@ -1,5 +1,6 @@
-import { truncate, formatAddress, cn } from '@/lib/utils'
+import { truncate, formatAddress, cn, generateAssetURL } from '@/lib/utils'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const NFTCard = ({ nft, contractName, ...props }) => {
 	const cardRootClassName = cn(`
@@ -8,11 +9,18 @@ const NFTCard = ({ nft, contractName, ...props }) => {
 		`
 	)
 
+	const hasAssets = nft.assets.length > 0
+	const assetURL  = hasAssets ? generateAssetURL(nft.assets[0].assetHash) : null
+
 	return (
 		<Link href={`/studio/${nft.contract.csn.toLowerCase()}/${nft.anchor}`}
 			  className={cardRootClassName}>
-			<figure>
-				<img src="/nft-fallback-cover.webp" alt={nft.metadata?.description} />
+			<figure className="w-[254px] h-[254px] object-cover relative">
+				{hasAssets? (
+					<Image src={assetURL} fill alt={nft.metadata?.description} />
+				) : (
+					<Image src="/nft-fallback-cover.webp" fill alt={nft.metadata?.description} />
+				)}
 			</figure>
 			<div className="card-body pb-[5px]">
 				<div className="flex flex-row items-end justify-between">
