@@ -24,11 +24,11 @@ export default async function handle(req, res) {
 
 		if (!contract) {
 			return res.status(404).json({ message: 'CSN does not exists on our records' })
-			
+
 		}
 	} catch (e) {
 		console.error(e.message)
-		return res.status(500).json({ message: 'An internal error happened' })		
+		return res.status(500).json({ message: 'An internal error happened' })
 	}
 
 	try {
@@ -90,12 +90,10 @@ export default async function handle(req, res) {
 		nftToReturn.assets.map((a, index) => (
 			metadata[a.assetType] =  new URL("/api/v1/assets/" + a.assetHash, process.env.NEXTAUTH_URL).toString()
 		))
-		
+
 		return res.json(metadata)
-
-
 	} catch (e) {
-		console.error(e.message)
+		console.error("Error: ", e)
 		res.status(500).json({ message: 'An internal error happened' })
 		return
 	}
