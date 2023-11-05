@@ -1,17 +1,25 @@
+import React, { useRef } from 'react'
 import Link from 'next/link'
-import { formatAddress } from '@/lib/utils'
+import { formatAddress, generateAssetURL } from '@/lib/utils'
 import { TraitsBox, NFTImageUploader } from '@/components/studio'
 import editImg from '@/public/icons/edit.svg'
 import Image from 'next/image'
 
-const NFTView = ({ nft, wallet, contract, ...props }) => {
+const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
+	const editingModal = useRef(null)
+
 	const onEdit = (event) => {
-		document.getElementById('nft-modal-editing').showModal()
+		editingModal.current.showModal()
 	}
 
 	const onFinishUploading = (e) => {
-		console.log(e)
+		editingModal.current.close()
+
+		onFinishEditing()
 	}
+
+	const hasAssets = nft.assets.length > 0
+	const assetURL  = hasAssets ? generateAssetURL(nft.assets[0].assetHash) : null
 
 	return (
 		<>
@@ -42,15 +50,22 @@ const NFTView = ({ nft, wallet, contract, ...props }) => {
 				<div className="grid">
 					<div className="flex items-center justify-center flex-col lg:flex-row">
 						<div className="relative group">
-							<button type="button" onClick={onEdit} className="absolute invisible group-hover:visible right-5 top-5 border cursor-pointer hover:shadow-white border-white rounded-full hover:shadow-sm">
+							<button type="button" onClick={onEdit} className="absolute z-10 invisible group-hover:visible right-5 top-5 border cursor-pointer hover:shadow-white border-white rounded-full hover:shadow-sm">
 								<Image src={editImg} height={35} width={35} />
 							</button>
 
-							<dialog id="nft-modal-editing" className="modal">
+							<dialog ref={editingModal} id="nft-modal-editing" className="modal">
 								<NFTImageUploader anchor={nft.anchor} onFinish={onFinishUploading} />
 							</dialog>
 
-							<img src="/nft-fallback-cover.webp" className="max-w-sm rounded-lg shadow-2xl" />
+							<div className="relative w-[350px] h-[350px]">
+								{hasAssets ? (
+									<Image src={assetURL} fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
+								) : (
+									<Image src="/nft-fallback-cover.webp" fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
+								)}
+							</div>
+
 						</div>
 
 						<div className="ml-8">
