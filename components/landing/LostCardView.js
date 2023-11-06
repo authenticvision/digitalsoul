@@ -5,7 +5,7 @@ import { WalletAddress } from '@/components/landing'
 // TODO: Replace with correct icon or animation
 import receivingNFTAnimation from "@/lib/receivingNFT.json";
 
-const LostCardView = ({ nft, wallet, newOwner, ...props}) => {
+const LostCardView = ({ wallet, newOwner, ...props}) => {
 	return (
 		<div className="flex flex-col">
 			<div className="flex flex-col justify-center text-center mx-5">

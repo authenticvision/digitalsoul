@@ -41,6 +41,7 @@ export async function getServerSideProps(context) {
 			const { data: assetResponse, status } = await api.getAssetBySip(av_sip)
 			assetData = assetResponse
 		} catch (error) {
+			console.error(error)
 			errorMsg = 'Error while trying to fetch API, maybe invalid av_sip?'
 		}
 
@@ -63,7 +64,7 @@ export async function getServerSideProps(context) {
 
 				// FIXME this is duplicate code from wallets/index.js 
 				const address = av_beneficiary
-				let walletResult = await prisma.wallet.upsert({
+				wallet = await prisma.wallet.upsert({
 					where: {
 						address
 					},
@@ -71,9 +72,12 @@ export async function getServerSideProps(context) {
 						address
 					},
 					update: {},
+					select: {
+						address: true,
+					}
 				})
 
-				if(!walletResult) {
+				if(!wallet) {
 					errorMsg = "Could not create wallet"
 				}
 			} else {
@@ -99,9 +103,14 @@ export async function getServerSideProps(context) {
 				} else {
 					errorMsg = 'There are two NFTs locally, database is broken'
 				}
+
+				// TODO ADD: Check for "Is NFT defined?"
+				// If not, go to the udnefined status, which may allow the user to upload an image
+				// And then claim (mint) the NFT.
 			}
 		}
 	} else {
+		errorMsg= "GET-Parameters av_sip or av_beneficiary missing!"
 		noData = true
 	}
 
@@ -112,29 +121,34 @@ export async function getServerSideProps(context) {
 			assetData,
 			noData,
 			errorMsg,
-			avSip: av_sip,
+			avSip: av_sip || null,
 			session: JSON.parse(JSON.stringify(session)) // XXX: NextJS is dumb
 		}
 	}
 }
 
 const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) => {
+	// Although nft is not used a.t.m, keep it, as we will use it later on
+	// e.g. to dynamically upload Images to that NFT BEFORE claiming it.
 	const [error, setError] = useState(errorMsg)
 	const [newOwner, setNewOwner] = useState()
 	const [ownershipStatus, setOwnershipStatus] = useState(
-		assetData.owner == wallet.address ? OWNER_STATUS : RECEIVING_STATUS
+		assetData?.owner == wallet?.address ? OWNER_STATUS : RECEIVING_STATUS
 	)
 	
 	const CurrentCard = useCallback(() => {
 		switch(ownershipStatus) {
+			// TODO add a status "Undefined NFT". In this case, there may be a view,
+			// where the user can upload an image, as soon as uploaded, forward to RECEIVING_STATUS
+			// and actually claim it
 			case OWNER_STATUS:
-				return (<OwnerCardView wallet={wallet} assetData={assetData} nft={nft} />)
+				return (<OwnerCardView wallet={wallet} assetData={assetData} />)
 			case RECEIVING_STATUS:
-				return (<ReceivingCardView wallet={wallet} assetData={assetData} nft={nft} />)
+				return (<ReceivingCardView wallet={wallet} assetData={assetData} />)
 			case LOST_STATUS:
-				return (<LostCardView wallet={wallet} newOwner={newOwner} nft={nft} />)
+				return (<LostCardView wallet={wallet} newOwner={newOwner} />)
 			default:
-				return (<ReceivingCardView wallet={wallet} assetData={assetData} nft={nft} />)
+				return (<ReceivingCardView wallet={wallet} assetData={assetData} />)
 		}
 	}, [ownershipStatus, nft, wallet, assetData, newOwner])
 
@@ -184,7 +198,6 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 
 		if (response.ok) {
 			await poll(verifySipToken, nftWasClaimed, 3000)
-
 			setOwnershipStatus(OWNER_STATUS)
 		} else {
 			setError('Something went wrong when trying to claim NFT')
@@ -193,7 +206,6 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 
 	const checkNFTOwnership = async () => {
 		const result = await poll(verifySipToken, nftWasTransfered, 3000)
-
 		setNewOwner(result.owner)
 		setOwnershipStatus(LOST_STATUS)
 	}
