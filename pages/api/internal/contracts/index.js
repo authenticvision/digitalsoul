@@ -45,7 +45,8 @@ const storeContracts = async(signedContracts, wallet) => {
 					connect: {
 						id: wallet.id
 					}
-				}
+				},
+				settings: {} // Create empty settings
 			}
 		})
 
