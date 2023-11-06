@@ -40,8 +40,9 @@ model Contract {
   ownerId String @map(name: "owner_id")
   network String
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  /// Contract-Settings and configurations defining the behavior of endpoints and pages
+  settings Json
+
   nfts      NFT[]
   assets    Asset[]
 
@@ -49,6 +50,9 @@ model Contract {
   defaultNft  NFT?     @relation("DefaultNFT", fields: [defaultNftId], references: [id])
   defaultNftId String? @map(name: "default_nft_id") @unique
 
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  
   @@map(name: "contracts")
 }
 
