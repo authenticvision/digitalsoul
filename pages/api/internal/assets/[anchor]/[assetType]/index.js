@@ -71,12 +71,12 @@ const connectWithExistingAsset = async (asset, nft) => {
 	})
 }
 
-const createAsset = async ({ nft, fileHash, storageFileName, originalFileName, contractId }) => {
+const createAsset = async ({ nft, fileHash, storageFileName, assetType, originalFileName, contractId }) => {
 	await prisma.asset.create({
 		data: {
 			fileName: storageFileName,
 			assetHash: fileHash,
-			assetType: 'image', // XXX: Should be dynamic
+			assetType: assetType,
 			originalFileName,
 			contract: {
 				connect: {
@@ -103,7 +103,12 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-	const { anchor } = req.query
+		// TODO: This should 
+
+
+	const { anchor, assetType } = req.query
+	console.log('UPLOAD ASSET TYPE ${assetType}')
+	console.log(assetType)
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
@@ -115,7 +120,6 @@ export default async function handle(req, res) {
 		}
 	})
 
-	const contract = nft.contract
 
 	// TODO: What to do with assets that aren't attached to any other NFT?
 	// Should this clean up run on an async job?
@@ -171,6 +175,7 @@ export default async function handle(req, res) {
 					nft,
 					fileHash,
 					storageFileName,
+					assetType,
 					contractId: nft.contract.id,
 					originalFileName: uploadedFile.name
 				})
