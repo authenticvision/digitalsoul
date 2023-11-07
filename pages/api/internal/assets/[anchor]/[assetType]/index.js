@@ -8,7 +8,7 @@ import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
 import formidable from 'formidable-serverless'
-import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
+import { readFileSync, renameSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { keccak256, id } from 'ethers'
 import { tmpdir } from "os"
 
@@ -131,7 +131,7 @@ export default async function handle(req, res) {
 		const uploadedFile = files.assets
 		
 		if (!allowedMimeTypes.includes(uploadedFile.type)) {
-			rmSync(uploadedFile.path) // FIXME code duplication
+			rmSync(uploadedFile.path)
 			return res.status(422).json({ message: 'File type ${uploadedFile.type} is not allowed' })
 		}
 
@@ -146,7 +146,7 @@ export default async function handle(req, res) {
 
 		if (existingAsset) {
 			await connectWithExistingAsset(existingAsset, nft)
-			rmSync(uploadedFile.path) // FIXME code duplication
+			rmSync(uploadedFile.path)
 			return res.json({
 				existingAsset
 			})
@@ -164,7 +164,7 @@ export default async function handle(req, res) {
 					mkdirSync(targetDir) 
 				}
 
-				writeFileSync(targetFile, fileContent)
+				renameSync(uploadedFile.path, targetFile)
 
 				const asset = await createAsset({
 					nft,
@@ -180,11 +180,10 @@ export default async function handle(req, res) {
 				})
 			} catch (error) {
 				console.error(error)
+				rmSync(uploadedFile.path)
 				return res.status(500).json({
 					error: 'There was an error when storing the asset'
 				})
-			} finally {
-				rmSync(uploadedFile.path) // FIXME code duplication
 			}
 		}
 	})
