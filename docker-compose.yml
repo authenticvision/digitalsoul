@@ -17,8 +17,6 @@ services:
       - "3000:3000"
     depends_on:
       - db
-    tmpfs:
-      - /tmp
     volumes:
       - .:/srv/app
       - /srv/app/.next

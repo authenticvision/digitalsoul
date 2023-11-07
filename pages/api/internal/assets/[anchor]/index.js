@@ -8,8 +8,9 @@ import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
 import formidable from 'formidable-serverless'
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { keccak256, id } from 'ethers'
+import { tmpdir } from "os"
 
 const allowedMethods = ['POST']
 
@@ -70,10 +71,10 @@ const connectWithExistingAsset = async (asset, nft) => {
 	})
 }
 
-const createAsset = async ({ nft, fileHash, originalFileName, contractId }) => {
+const createAsset = async ({ nft, fileHash, storageFileName, originalFileName, contractId }) => {
 	await prisma.asset.create({
 		data: {
-			fileName: fileHash,
+			fileName: storageFileName,
 			assetHash: fileHash,
 			assetType: 'image', // XXX: Should be dynamic
 			originalFileName,
@@ -121,15 +122,21 @@ export default async function handle(req, res) {
 	await dropAssetsFromNFT(nft)
 
 	const form = new formidable.IncomingForm()
+	// This is a temporary directory for uploads
+	// It allows us to cache files, but at the same time is isolated from the system's /tmp
+	// this should prevent Arbitrary Code Execution attacks via Image-Uploads.
+	const tmpDir = path.join(process.env.STORAGE_DIR, "upload") 
+	form.uploadDir = tmpDir
+
 	form.parse(req, async (err, fields, files) => {
 		const uploadedFile = files.assets
-
+		
 		if (!allowedMimeTypes.includes(uploadedFile.type)) {
-			return res.status(422).json({ message: 'File type is not allowed' })
+			rmSync(uploadedFile.path) // FIXME code duplication
+			return res.status(422).json({ message: 'File type ${uploadedFile.type} is not allowed' })
 		}
 
-		const filePath = uploadedFile.path
-		const fileContent = readFileSync(filePath)
+		const fileContent = readFileSync(uploadedFile.path)
 		const fileHash = computeFileHash(nft.contract.csn, fileContent)
 
 		const existingAsset = await prisma.asset.findFirst({
@@ -140,17 +147,30 @@ export default async function handle(req, res) {
 
 		if (existingAsset) {
 			await connectWithExistingAsset(existingAsset, nft)
-
+			rmSync(uploadedFile.path) // FIXME code duplication
 			return res.json({
 				existingAsset
 			})
 		} else {
 			try {
-				writeFileSync(path.join(STORAGE_DIR, fileHash), fileContent)
+				// Split files per Smart contract. 
+				// This is a logical separation and also reduces the risk of Filesystem-overload
+				// due to too many files in the same directory
+				const storageFileName = path.join(nft.contract.csn, fileHash)
+				const targetFile = path.join(STORAGE_DIR, storageFileName)
+				const targetDir =path.dirname(targetFile)
+
+				// Create contract-directory in case it does not exist
+				if(!existsSync(targetDir)) {
+					mkdirSync(targetDir) 
+				}
+
+				writeFileSync(targetFile, fileContent)
 
 				const asset = await createAsset({
 					nft,
 					fileHash,
+					storageFileName,
 					contractId: nft.contract.id,
 					originalFileName: uploadedFile.name
 				})
@@ -160,10 +180,11 @@ export default async function handle(req, res) {
 				})
 			} catch (error) {
 				console.error(error)
-
 				return res.status(500).json({
 					error: 'There was an error when storing the asset'
 				})
+			} finally {
+				rmSync(uploadedFile.path) // FIXME code duplication
 			}
 		}
 	})

@@ -19,6 +19,11 @@ COPY --from=dependencies /srv/app/node_modules ./node_modules
 RUN npx prisma generate
 RUN yarn build
 
+# Create a dirty-mounted tmp directory
+RUN rm -rf /tmp
+RUN ln -sfn /srv/app/nftdata/tmp /tmp
+
+
 
 ################################################################
 FROM node:18-alpine AS runner
@@ -35,6 +40,10 @@ COPY --from=builder /srv/app/schema.prisma ./
 
 COPY --from=builder /srv/app/public ./public
 COPY --from=builder /srv/app/.next ./.next
+
+# Create a dirty-mounted tmp directory
+RUN rm -rf /tmp
+RUN ln -sfn /srv/app/nftdata/tmp /tmp
 
 EXPOSE 3000
 
