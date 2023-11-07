@@ -103,12 +103,7 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-		// TODO: This should 
-
-
 	const { anchor, assetType } = req.query
-	console.log('UPLOAD ASSET TYPE ${assetType}')
-	console.log(assetType)
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
