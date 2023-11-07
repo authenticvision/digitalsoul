@@ -27,7 +27,7 @@ export default async function handle(req, res) {
 		}
 
 		const STORAGE_DIR = process.env.STORAGE_DIR
-		const filePath = path.join(STORAGE_DIR, asset.fileName)
+		const filePath = path.join(STORAGE_DIR, asset.filePath)
 
 		// Read the file content
 		const fileContent = fs.readFileSync(filePath);

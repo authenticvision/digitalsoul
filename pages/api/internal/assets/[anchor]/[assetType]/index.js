@@ -71,10 +71,10 @@ const connectWithExistingAsset = async (asset, nft) => {
 	})
 }
 
-const createAsset = async ({ nft, fileHash, storageFileName, assetType, originalFileName, contractId }) => {
+const createAsset = async ({ nft, fileHash, storageFilePath, assetType, originalFileName, contractId }) => {
 	await prisma.asset.create({
 		data: {
-			fileName: storageFileName,
+			filePath: storageFilePath,
 			assetHash: fileHash,
 			assetType: assetType,
 			originalFileName,
@@ -121,9 +121,6 @@ export default async function handle(req, res) {
 	await dropAssetsFromNFT(nft)
 
 	const form = new formidable.IncomingForm()
-	// This is a temporary directory for uploads
-	// It allows us to cache files, but at the same time is isolated from the system's /tmp
-	// this should prevent Arbitrary Code Execution attacks via Image-Uploads.
 	const tmpDir = path.join(process.env.STORAGE_DIR, "upload") 
 	form.uploadDir = tmpDir
 
@@ -155,21 +152,18 @@ export default async function handle(req, res) {
 				// Split files per Smart contract. 
 				// This is a logical separation and also reduces the risk of Filesystem-overload
 				// due to too many files in the same directory
-				const storageFileName = path.join(nft.contract.csn, fileHash)
-				const targetFile = path.join(STORAGE_DIR, storageFileName)
-				const targetDir =path.dirname(targetFile)
+				const targetDir = path.join(STORAGE_DIR, nft.contract.csn)
+				const storageFilePath = path.join(nft.contract.csn, fileHash)
+				const targetFile = path.join(targetDir, fileHash)
 
 				// Create contract-directory in case it does not exist
-				if(!existsSync(targetDir)) {
-					mkdirSync(targetDir) 
-				}
-
+				mkdirSync(targetDir, {recursive:true})
 				renameSync(uploadedFile.path, targetFile)
 
 				const asset = await createAsset({
 					nft,
 					fileHash,
-					storageFileName,
+					storageFilePath,
 					assetType,
 					contractId: nft.contract.id,
 					originalFileName: uploadedFile.name
