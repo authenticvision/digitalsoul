@@ -17,13 +17,11 @@ services:
       - "3000:3000"
     depends_on:
       - db
-    tmpfs:
-      - /tmp
     volumes:
       - .:/srv/app
       - /srv/app/.next
       - /srv/app/node_modules
-      - ./ds-data:/srv/app/nftdata
+      - ./ds-data:/srv/data
 
   db:
     image: postgres:15-alpine

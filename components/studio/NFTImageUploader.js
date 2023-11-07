@@ -38,7 +38,7 @@ const NFTImageUploader = ({ anchor, onFinish, ...props }) => {
 					maxFiles={3}
 					maxFileSize={'3MB'}
 					onprocessfiles={afterProcess}
-					server={`/api/internal/assets/${anchor}`}
+					server={`/api/internal/assets/${anchor}/image`}
 					name="assets"
 					labelIdle='Drag & Drop your NFT files or <span class="filepond--label-action">Browse</span>'
 				/>

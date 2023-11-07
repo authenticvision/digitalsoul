@@ -81,7 +81,7 @@ model Asset {
 
   assetHash         String @map(name: "asset_hash")
   originalFileName  String @map(name: "original_file_name")
-  fileName          String @map(name: "file_name")
+  filePath          String @map(name: "file_path")
 
   assetType         String @map(name: "asset_type")
 

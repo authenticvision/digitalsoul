@@ -26,7 +26,8 @@ export default async function handle(req, res) {
 			return res.status(404).json({ message: 'Asset does not exist on our records' })
 		}
 
-		const filePath = path.join(process.cwd(), "nftdata", asset.fileName)
+		const STORAGE_DIR = process.env.STORAGE_DIR
+		const filePath = path.join(STORAGE_DIR, asset.filePath)
 
 		// Read the file content
 		const fileContent = fs.readFileSync(filePath);

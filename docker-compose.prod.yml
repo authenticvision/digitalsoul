@@ -16,8 +16,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./ds-data:/srv/app/nftdata
-
+      - ./ds-data:/srv/data
 
   db:
     image: postgres:15-alpine

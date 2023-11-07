@@ -19,6 +19,15 @@ COPY --from=dependencies /srv/app/node_modules ./node_modules
 RUN npx prisma generate
 RUN yarn build
 
+# NextJS seems to have no intentions on supporting a 
+# different cache dir. They do seem to approve symlinking though
+# https://github.com/vercel/next.js/discussions/35656
+# https://github.com/vercel/next.js/issues/10111
+# Note this is kind of dangerous, as it relies on /srv/data being the 
+# mount point of the volume!!
+RUN rm -rf ./.next/cache
+RUN ln -s /srv/data/next-cache ./.next/cache 
+
 
 ################################################################
 FROM node:18-alpine AS runner
@@ -35,6 +44,7 @@ COPY --from=builder /srv/app/schema.prisma ./
 
 COPY --from=builder /srv/app/public ./public
 COPY --from=builder /srv/app/.next ./.next
+
 
 EXPOSE 3000
 

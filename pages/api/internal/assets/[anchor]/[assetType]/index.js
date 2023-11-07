@@ -8,8 +8,9 @@ import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
 import formidable from 'formidable-serverless'
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, renameSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { keccak256, id } from 'ethers'
+import { tmpdir } from "os"
 
 const allowedMethods = ['POST']
 
@@ -70,12 +71,12 @@ const connectWithExistingAsset = async (asset, nft) => {
 	})
 }
 
-const createAsset = async ({ nft, fileHash, originalFileName, contractId }) => {
+const createAsset = async ({ nft, fileHash, storageFilePath, assetType, originalFileName, contractId }) => {
 	await prisma.asset.create({
 		data: {
-			fileName: fileHash,
+			filePath: storageFilePath,
 			assetHash: fileHash,
-			assetType: 'image', // XXX: Should be dynamic
+			assetType: assetType,
 			originalFileName,
 			contract: {
 				connect: {
@@ -102,7 +103,7 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-	const { anchor } = req.query
+	const { anchor, assetType } = req.query
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
@@ -114,22 +115,24 @@ export default async function handle(req, res) {
 		}
 	})
 
-	const contract = nft.contract
 
 	// TODO: What to do with assets that aren't attached to any other NFT?
 	// Should this clean up run on an async job?
 	await dropAssetsFromNFT(nft)
 
 	const form = new formidable.IncomingForm()
+	const tmpDir = path.join(process.env.STORAGE_DIR, "upload") 
+	form.uploadDir = tmpDir
+
 	form.parse(req, async (err, fields, files) => {
 		const uploadedFile = files.assets
-
+		
 		if (!allowedMimeTypes.includes(uploadedFile.type)) {
-			return res.status(422).json({ message: 'File type is not allowed' })
+			rmSync(uploadedFile.path)
+			return res.status(422).json({ message: 'File type ${uploadedFile.type} is not allowed' })
 		}
 
-		const filePath = uploadedFile.path
-		const fileContent = readFileSync(filePath)
+		const fileContent = readFileSync(uploadedFile.path)
 		const fileHash = computeFileHash(nft.contract.csn, fileContent)
 
 		const existingAsset = await prisma.asset.findFirst({
@@ -140,17 +143,28 @@ export default async function handle(req, res) {
 
 		if (existingAsset) {
 			await connectWithExistingAsset(existingAsset, nft)
-
+			rmSync(uploadedFile.path)
 			return res.json({
 				existingAsset
 			})
 		} else {
 			try {
-				writeFileSync(path.join(STORAGE_DIR, fileHash), fileContent)
+				// Split files per Smart contract. 
+				// This is a logical separation and also reduces the risk of Filesystem-overload
+				// due to too many files in the same directory
+				const targetDir = path.join(STORAGE_DIR, nft.contract.csn)
+				const storageFilePath = path.join(nft.contract.csn, fileHash)
+				const targetFile = path.join(targetDir, fileHash)
+
+				// Create contract-directory in case it does not exist
+				mkdirSync(targetDir, {recursive:true})
+				renameSync(uploadedFile.path, targetFile)
 
 				const asset = await createAsset({
 					nft,
 					fileHash,
+					storageFilePath,
+					assetType,
 					contractId: nft.contract.id,
 					originalFileName: uploadedFile.name
 				})
@@ -160,7 +174,7 @@ export default async function handle(req, res) {
 				})
 			} catch (error) {
 				console.error(error)
-
+				rmSync(uploadedFile.path)
 				return res.status(500).json({
 					error: 'There was an error when storing the asset'
 				})
