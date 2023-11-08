@@ -22,8 +22,8 @@ const allowedMimeTypes = [
 	mime.getType('mp4'),
 	mime.getType('mkv'),
 	mime.getType('avi'),
-	mime.getType('webm'),
-	mime.getType('webp'),
+	// mime.getType('webm'), // Stop support for webm, see https://github.com/authenticvision/digitalsoul/issues/43
+	// mime.getType('webp'), // Stop support for webp, see https://github.com/authenticvision/digitalsoul/issues/43
 	mime.getType('mov'),
 	mime.getType('wmv')
 ]
