@@ -59,6 +59,7 @@ export async function getServerSideProps(context) {
 	}
 }
 
+
 const NFTView = ({ contract, wallet, anchor, ...props }) => {
 	if (props.forbidden) {
 		return (
@@ -67,6 +68,7 @@ const NFTView = ({ contract, wallet, anchor, ...props }) => {
 	}
 
 	const { nft, isLoading, error, mutate } = useNFT(anchor)
+	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
 	const onFinishEditing = () => {
 		mutate()
@@ -75,7 +77,7 @@ const NFTView = ({ contract, wallet, anchor, ...props }) => {
 	return (
 		<>
 			<NextHead>
-				<title>DigitalSoul - Studio - {nft ? nft.slid : anchor}</title>
+				<title>DigitalSoul - Studio - {nftCaption} </title>
 			</NextHead>
 
 			<AppLayout wallet={wallet} contractId={contract.id}>

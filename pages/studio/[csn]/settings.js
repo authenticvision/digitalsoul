@@ -2,7 +2,7 @@ import NextHead from 'next/head'
 import Link from 'next/link'
 
 import { AppLayout, Loading, ErrorPage } from '@/components/ui'
-import { DefaultContractNFTView } from '@/components/studio'
+import { DefaultContractNFTView, NFTCard } from '@/components/studio'
 
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth/next'
 import { auth } from 'auth'
 
 import prisma from '@/lib/prisma'
+import NFTView from './[anchor]'
 
 export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
@@ -141,8 +142,7 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 								</div>
 
 								<div className="flex ml-8">
-									<DefaultContractNFTView nft={defaultNFT}
-										onFinishEdit={onReplaceImage} />
+									<NFTCard nft={defaultNFT} />
 								</div>
 							</div>
 
