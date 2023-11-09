@@ -20,13 +20,16 @@ const NFTCard = ({ nft, contractName, ...props }) => {
 				{hasAssets? (
 					<Image src={assetURL} fill alt={nft.metadata?.description} />
 				) : (
-					<Image src="/nft-fallback-cover.webp" fill alt={nft.metadata?.description} />
+					<Image src="/nft-fallback-cover.webp" fill
+						   alt={nft.metadata?.description} />
 				)}
 			</figure>
 			<div className="card-body pb-[5px]">
 				<div className="flex flex-row items-end justify-between">
 					<div className="flex flex-col text-left">
-						<div className="w-full text-gray-400 text-xs">{truncate(nft.contract.csn, 22)}</div>
+						<div className="w-full text-gray-400 text-xs">
+							{truncate(nft.contract.csn, 22)}
+						</div>
 						<div className="font-bold text-lg">{nft.slid}</div>
 					</div>
 					<div className="flex flex-col text-right text-gray-400">
