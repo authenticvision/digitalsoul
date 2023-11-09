@@ -28,14 +28,9 @@ const NFTCard = ({ nft, contractName, ...props }) => {
 				<div className="flex flex-row items-end justify-between">
 					<div className="flex flex-col text-left">
 						<div className="w-full text-gray-400 text-xs">
-							{truncate(nft.contract.csn, 22)}
+							{formatAddress(nft.anchor, 22)}
 						</div>
 						<div className="font-bold text-lg">{nft.slid}</div>
-					</div>
-					<div className="flex flex-col text-right text-gray-400">
-						<div className="font-bold text-xs leading-[1.44rem]">
-							owner {formatAddress(nft.contract.owner.address)}
-						</div>
 					</div>
 				</div>
 			</div>

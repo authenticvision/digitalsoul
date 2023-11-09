@@ -20,7 +20,7 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 										</Link>
 									</li>
 									<li>
-									<Link href={`/studio/${contract.csn.toLowerCase()}`}>
+										<Link href={`/studio/${contract.csn.toLowerCase()}`}>
 											Collection
 										</Link>
 									</li>
@@ -43,11 +43,21 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 						</>
 
 						<div className="ml-8">
+							<h2 className="text-1xl text-gray-400">
+								anchor <span className="font-bold text-white">
+									{formatAddress(nft.anchor)}
+								</span>
+							</h2>
 							<h1 className="text-2xl text-gray-400">
-								owned by <span className="font-bold text-white">
-									{formatAddress(wallet.address)}
+								<span className="font-bold text-white">
+									{nft.slid}
 								</span>
 							</h1>
+							<h2 className="text-1xl text-gray-400">
+								owned by <span className="font-bold text-white">
+									sooon
+								</span>
+							</h2>
 							<div className="py-6 w-full">
 								<TraitsBox nft={nft} />
 							</div>
