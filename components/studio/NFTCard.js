@@ -5,6 +5,7 @@ import Image from 'next/image'
 const NFTCard = ({ nft, contractName, ...props }) => {
 	const cardRootClassName = cn(`
 		card card-compact rounded-lg w-64 bg-shark-900 shadow-xl border
+		transition ease-in-out
 		border-raven-700 hover:border-white
 		`
 	)
