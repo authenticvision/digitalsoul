@@ -3,24 +3,37 @@ import { Button, Loading } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { usePathname } from 'next/navigation'
 import { useContracts } from '@/hooks/useContracts'
 
 const Sidebar = ({ address, ...props }) => {
 	const router = useRouter()
+	const pathname = usePathname()
 	const { csn } = router.query
 	const { contracts, isLoading, error } = useContracts(csn, address)
 
+
 	const currentContract = contracts
 		.find((item) => item.csn.toLowerCase() == csn)
+
+	const isAtNFT = (csn) => pathname.match(`/studio/${csn.toLowerCase()}`)
+	const isAtConfig = (csn) => pathname == `/studio/${csn.toLowerCase()}/settings`
 
 	const contractClasses = (contractId) => cn(
 		'font-bold link',
 		currentContract.id == contractId ? 'text-white' : 'link-hover text-gray-400'
 	)
 
-	const contractSubItemsClasses = (contractId) => cn(
-		'font-bold ml-4 mt-2 link',
-		currentContract.id == contractId ? 'link text-white' : 'link-hover text-gray-400',
+	const contractSubItemsClasses = (contract) => cn(
+		'font-bold ml-4 mt-2',
+		currentContract.id == contract.id ? 'text-white' : 'text-gray-400',
+		isAtNFT(contract.csn) && !isAtConfig(contract.csn) ? 'link' : 'link-hover'
+	)
+
+	const configClasses = (contract) => cn(
+		"font-bold ml-4 mt-2",
+		(currentContract.id == contract.id) ? 'text-white' : 'text-gray-400',
+		isAtConfig(contract.csn) ? 'link' : 'link-hover'
 	)
 
 	return (
@@ -44,13 +57,14 @@ const Sidebar = ({ address, ...props }) => {
 										</Link>
 
 										<Link href={`/studio/${contract.csn.toLowerCase()}`}
-											  className={contractSubItemsClasses(contract.id)}>
-											NFTs
+											  className={contractSubItemsClasses(contract)}>
+											Collection
 										</Link>
 
-										<div className="text-gray-600 font-bold ml-4 mt-2 cursor-not-allowed" disabled>
-											Config
-										</div>
+										<Link href={`/studio/${contract.csn.toLowerCase()}/settings`}
+											  className={configClasses(contract)}>
+											Settings
+										</Link>
 									</div>
 								))}
 							</div>

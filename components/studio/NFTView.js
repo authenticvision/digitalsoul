@@ -1,26 +1,16 @@
 import React, { useRef } from 'react'
 import Link from 'next/link'
 import { formatAddress, generateAssetURL } from '@/lib/utils'
-import { TraitsBox, NFTImageUploader } from '@/components/studio'
-import editImg from '@/public/icons/edit.svg'
+import { TraitsBox, NFTImageEdit, NFTCaption } from '@/components/studio'
 import Image from 'next/image'
 
 // TODO: Split this component into two, a standalone header & the body
 const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
-	const editingModal = useRef(null)
 
-	const onEdit = (event) => {
-		editingModal.current.showModal()
-	}
-
-	const onFinishUploading = (e) => {
-		editingModal.current.close()
-
-		onFinishEditing()
-	}
-
-	const hasAssets = nft.assets.length > 0
-	const assetURL  = hasAssets ? generateAssetURL(nft.assets[0].assetHash) : null
+	// There is a special anchor called 'default'.. In this case, it's a collection's default NFT
+	// and does not have an actual SLID or actual anchor.
+	// TODO this duplicates logic from NFTCaption
+	const staticCaption = nft.anchor == 'default' ? 'DEFAULT-NFT' : null
 
 	return (
 		<>
@@ -35,12 +25,16 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 											{contract.name}
 										</Link>
 									</li>
-									<li>NFTs</li>
+									<li>
+										<Link href={`/studio/${contract.csn.toLowerCase()}`}>
+											Collection
+										</Link>
+									</li>
 								</ul>
 							</div>
 
 							<div className="font-bold text-4xl">
-								{nft.slid}
+								{staticCaption? staticCaption : nft.slid}
 							</div>
 						</div>
 					</div>
@@ -50,31 +44,24 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 			<div className="flex w-9/12 ml-8 mt-8 mb-8">
 				<div className="grid">
 					<div className="flex items-center justify-center flex-col lg:flex-row">
-						<div className="relative group">
-							<button type="button" onClick={onEdit} className="absolute z-10 invisible group-hover:visible right-5 top-5 border cursor-pointer hover:shadow-white border-white rounded-full hover:shadow-sm">
-								<Image src={editImg} height={35} width={35} />
-							</button>
-
-							<dialog ref={editingModal} id="nft-modal-editing" className="modal">
-								<NFTImageUploader anchor={nft.anchor} onFinish={onFinishUploading} />
-							</dialog>
-
-							<div className="relative w-[350px] h-[350px]">
-								{hasAssets ? (
-									<Image src={assetURL} fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
-								) : (
-									<Image src="/nft-fallback-cover.webp" fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
-								)}
-							</div>
-
-						</div>
+						<>
+							<NFTImageEdit nft={nft} onFinishEditing={onFinishEditing} />
+						</>
 
 						<div className="ml-8">
-							<h1 className="text-2xl text-gray-400">
-								owned by <span className="font-bold text-white">
-									{formatAddress(wallet.address)}
-								</span>
-							</h1>
+							{staticCaption ? (
+								<div className="font-bold text-lg">{staticCaption}</div>
+							) : (
+								<div >
+									<NFTCaption nft={nft} />									
+									<h2 className="text-1xl text-gray-400">
+										owned by <span className="font-bold text-white">
+											sooon
+										</span>
+									</h2>
+									
+								</div>
+							)}
 							<div className="py-6 w-full">
 								<TraitsBox nft={nft} />
 							</div>

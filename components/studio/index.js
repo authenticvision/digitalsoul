@@ -3,7 +3,9 @@ import NFTTable from './NFTTable'
 import NFTCards from './NFTCards'
 import NFTCard from './NFTCard'
 import NFTView from './NFTView'
+import NFTImageEdit from './NFTImageEdit'
 import NFTImageUploader from './NFTImageUploader'
+import NFTCaption from './NFTCaption'
 import TraitsBox from './TraitsBox'
 
 export {
@@ -13,5 +15,7 @@ export {
 	NFTView,
 	NFTCard,
 	TraitsBox,
-	NFTImageUploader
+	NFTImageEdit,
+	NFTImageUploader,
+	NFTCaption
 }
