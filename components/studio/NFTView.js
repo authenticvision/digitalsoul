@@ -19,7 +19,11 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 											{contract.name}
 										</Link>
 									</li>
-									<li>NFTs</li>
+									<li>
+									<Link href={`/studio/${contract.csn.toLowerCase()}`}>
+											Collection
+										</Link>
+									</li>
 								</ul>
 							</div>
 

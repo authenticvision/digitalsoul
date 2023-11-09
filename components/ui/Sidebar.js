@@ -17,7 +17,7 @@ const Sidebar = ({ address, ...props }) => {
 		.find((item) => item.csn.toLowerCase() == csn)
 
 	const isAtNFT = (csn) => pathname.match(`/studio/${csn.toLowerCase()}`)
-	const isAtConfig = (csn) => pathname == `/studio/${csn.toLowerCase()}/config`
+	const isAtConfig = (csn) => pathname == `/studio/${csn.toLowerCase()}/settings`
 
 	const contractClasses = (contractId) => cn(
 		'font-bold link',
@@ -58,12 +58,12 @@ const Sidebar = ({ address, ...props }) => {
 
 										<Link href={`/studio/${contract.csn.toLowerCase()}`}
 											  className={contractSubItemsClasses(contract)}>
-											NFTs
+											Collection
 										</Link>
 
-										<Link href={`/studio/${contract.csn.toLowerCase()}/config`}
+										<Link href={`/studio/${contract.csn.toLowerCase()}/settings`}
 											  className={configClasses(contract)}>
-											Config
+											Settings
 										</Link>
 									</div>
 								))}

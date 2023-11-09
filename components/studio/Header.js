@@ -23,7 +23,7 @@ const Header = ({ mode, onChangeMode, contractName, ...props }) => {
 				</div>
 
 				<div className="font-bold text-4xl">
-					NFTs
+					Collection
 				</div>
 			</div>
 

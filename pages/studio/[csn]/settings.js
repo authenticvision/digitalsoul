@@ -90,7 +90,7 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 	return (
 		<>
 			<NextHead>
-				<title>DigitalSoul - Studio - Configuration of {contract.name}</title>
+				<title>DigitalSoul - Studio - Settings of {contract.name}</title>
 			</NextHead>
 			<AppLayout wallet={wallet}>
 				<div className="page w-full ">
@@ -107,7 +107,7 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 															{contract.name}
 														</Link>
 													</li>
-													<li>Config</li>
+													<li>Settings</li>
 												</ul>
 											</div>
 

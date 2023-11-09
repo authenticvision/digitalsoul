@@ -1,7 +1,7 @@
 const NFTTable = () => {
 	return (
 		<div>
-			I'm a table
+			Sooon
 		</div>
 	)
 }
