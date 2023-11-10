@@ -7,6 +7,7 @@ import NFTImageEdit from './NFTImageEdit'
 import NFTImageUploader from './NFTImageUploader'
 import NFTCaption from './NFTCaption'
 import TraitsBox from './TraitsBox'
+import MetadataBox from './MetadataBox'
 
 export {
 	Header,
@@ -15,6 +16,7 @@ export {
 	NFTView,
 	NFTCard,
 	TraitsBox,
+	MetadataBox,
 	NFTImageEdit,
 	NFTImageUploader,
 	NFTCaption
