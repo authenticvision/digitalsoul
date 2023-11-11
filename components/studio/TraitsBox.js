@@ -13,12 +13,10 @@ const TraitsBox = ({ nft, ...props }) => {
 				{hasTraits && (
 					<div className="grid grid-cols-3 grid-rows-3 gap-2 pb-4">
 						{nft.metadata.attributes.map((prop, index) => (
-							Object.keys(prop).map((item, itemIndex) => (
-								<div key={item} className="flex flex-col w-18 h-18 text-center rounded p-4">
-									<span>{item}</span>
-									<span className="mt-2">{prop[item]}</span>
-								</div>
-							))
+							<div key={index} className="flex flex-col w-18 h-18 text-center rounded p-4">
+								<span className="font-bold">{prop['trait_type']}</span>
+								<span className="mt-2">{prop['value']}</span>
+							</div>
 						))}
 					</div>
 				)}
