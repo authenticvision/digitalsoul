@@ -64,7 +64,7 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 							)}
 
 							<div className="py-6 w-full">
-								<MetadataBox nft={nft} />
+								<MetadataBox nft={nft} onFinish={onFinishEditing} />
 							</div>
 
 							<div className="py-6 w-full">
