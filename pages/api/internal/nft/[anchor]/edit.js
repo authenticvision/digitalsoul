@@ -3,6 +3,7 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]'
 
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
+import { fromZodError, isValidationErrorLike } from 'zod-validation-error';
 
 const allowedMethods = ['PUT']
 const metadataSchema = z.object({
@@ -60,28 +61,37 @@ export default async function handle(req, res) {
 		return res.status(404).json({ message: 'NFT does not exist' })
 	}
 
-	const result = metadataSchema.safeParse(metadata)
-
-	if (!result.success) {
-		const issues = result.error.format()
+	try {
+		const result = metadataSchema.parse(metadata)
+	} catch (err) {
+		const validationErrors = fromZodError(err);
+		console.error("ZodError: ", validationErrors);
 
 		return res.status(422).json({
-			message: 'Data is malshaped',
-			issues
+			message: '',
+			issues: validationErrors.toString()
 		})
 	}
 
-	const updatedMetadata = await prisma.NFT.update({
-		where: {
-			id: nft.id
-		},
-		data: {
-			metadata: metadata,
-			updatedAt: new Date()
-		}
-	})
+	try {
+		const updatedMetadata = await prisma.NFT.update({
+			where: {
+				id: nft.id
+			},
+			data: {
+				metadata: metadata,
+				updatedAt: new Date()
+			}
+		})
 
-	nft.metadata = metadata
+		nft.metadata = metadata
+	} catch (err) {
+		console.error(err)
+		return res.status(500).json({
+			message: 'There were some error when updating the metadata',
+		})
+	}
+
 
 	return res.json({ ...nft })
 }

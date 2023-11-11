@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { pp } from '@/lib/utils'
+import { pp, cn } from '@/lib/utils'
 import Link from 'next/link'
 
-const MetadataBox = ({ nft, readOnly = false, onError = () => {}, ...props }) => {
+const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () => {}, ...props }) => {
 	const [editing, setEditing] = useState(false)
 	const [metadata, setMetadata] = useState(nft.metadata || {})
+	const [error, setError] = useState()
 	const [renderedMetadata, setRenderedMetadata] = useState(pp(metadata))
 
 	const metadataKeys = Object.keys(metadata)?.filter((key) => key != 'attributes')
@@ -19,17 +20,16 @@ const MetadataBox = ({ nft, readOnly = false, onError = () => {}, ...props }) =>
 			})
 		}
 
+		setError()
 		setEditing(true)
 	}
 
 	const onCancel = () => {
+		setError()
 		setMetadata(nft.metadata || {})
 		setEditing(false)
 	}
 
-	// XXX: Maybe this component shouldn't post anything and just send back
-	// to the parent component what was changed. This adds a bit of complexity
-	// since demand that the parent keep track of the metadata separately
 	const save = async (parsedMetadata) => {
 		try {
 			const response = await fetch(`/api/internal/nft/${nft.anchor}/edit`, {
@@ -44,11 +44,23 @@ const MetadataBox = ({ nft, readOnly = false, onError = () => {}, ...props }) =>
 
 			const data = await response.json()
 
-			setMetadata(data.metadata)
-			setRenderedMetadata(pp(data.metadata))
-			setEditing(false)
+			if (response.ok) {
+				setMetadata(data.metadata)
+				setRenderedMetadata(pp(data.metadata))
+				setEditing(false)
+				setError()
+				onFinish()
+			} else {
+				let errorMsg = data.message
+
+				if (data.issues) {
+					errorMsg = `${errorMsg} ${data.issues}`
+				}
+
+				setError(errorMsg)
+			}
 		} catch (error) {
-			//onError('There was an error while trying to communicate with the API')
+			setError('There was an error while trying to communicate with the API')
 			console.error('Error: ', error);
 		}
 	}
@@ -58,17 +70,24 @@ const MetadataBox = ({ nft, readOnly = false, onError = () => {}, ...props }) =>
 			let data = JSON.parse(renderedMetadata)
 			save(data)
 		} catch (error) {
-			onError('JSON is invalid or cannot be parsed')
+			setError('JSON is invalid or cannot be parsed')
 		}
 	}
 
 	const onChangeMetadata = (e) => {
+		setError()
 		setRenderedMetadata(e.target.value)
 	}
 
 	useEffect(() => {
+		setError()
 		setRenderedMetadata(pp(metadata))
 	}, [metadata])
+
+	const textAreaClassNames = cn(
+		`textarea textarea-bordered textarea-lg w-full max-w-xs`,
+		error ? 'textarea-error' : ''
+	)
 
 	return (
 		<div className="collapse bg-[#29303f] collapse-arrow border rounded-lg border-raven-700">
@@ -80,8 +99,14 @@ const MetadataBox = ({ nft, readOnly = false, onError = () => {}, ...props }) =>
 			<div className="collapse-content relative">
 				{editing ? (
 					<div className="flex flex-col">
-						<textarea value={renderedMetadata} onChange={onChangeMetadata} className="textarea textarea-bordered textarea-lg w-full max-w-xs" >
-						</textarea>
+						<div className="form-control">
+							<textarea value={renderedMetadata} onChange={onChangeMetadata} className={textAreaClassNames}>
+							</textarea>
+							<label className="label">
+								<span className="label-text-alt text-error">{error}</span>
+							</label>
+						</div>
+
 						<div className="flex flex-row justify-between">
 							<button onClick={onCancel} className="btn btn-link text-white text-center">
 								Cancel
