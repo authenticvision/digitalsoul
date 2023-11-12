@@ -13,10 +13,7 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 	const onEdit = (e) => {
 		if (Object.keys(metadata).length == 0) {
 			setMetadata({
-				name: nft.slid,
-				description: "...",
-				attributes: [{
-				}]
+				attributes: [{"trait_type": "My Trait", "value": "is awesome" }]
 			})
 		}
 
@@ -85,7 +82,7 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 	}, [metadata])
 
 	const textAreaClassNames = cn(
-		`textarea textarea-bordered textarea-lg w-full max-w-xs`,
+		`textarea textarea-bordered textarea-lg w-full max-w-m text-xs`,
 		error ? 'textarea-error' : ''
 	)
 
@@ -100,7 +97,7 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 				{editing ? (
 					<div className="flex flex-col">
 						<div className="form-control">
-							<textarea value={renderedMetadata} onChange={onChangeMetadata} className={textAreaClassNames}>
+							<textarea value={renderedMetadata} onChange={onChangeMetadata} className={textAreaClassNames} cols="100" rows="15">
 							</textarea>
 							<label className="label">
 								<span className="label-text-alt text-error">{error}</span>
@@ -133,14 +130,14 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 						{metadataKeys.length == 0 && (
 							<div className="flex flex-col">
 								<p className="w-full">
-									This NFT has no metadata
+									This NFT has no additional metadata (attributes/traits below)
 								</p>
 							</div>
 						)}
 
 						{!readOnly && (
 							<button onClick={onEdit} className="btn btn-link text-white text-center">
-								Edit
+								Edit Attributes and Metadata
 							</button>
 						)}
 					</div>

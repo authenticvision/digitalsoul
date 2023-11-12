@@ -6,10 +6,10 @@ const TraitsBox = ({ nft, ...props }) => {
 		<div className="collapse bg-[#29303f] collapse-arrow border rounded-lg border-raven-700">
 			<input type="checkbox" />
 			<div className="collapse-title text-2xl font-bold">
-				Traits
+				Attributes (Traits)
 			</div>
 
-			<div className="collapse-content">
+			<div className="collapse-content collapse-open">
 				{hasTraits && (
 					<div className="grid grid-cols-3 grid-rows-3 gap-2 pb-4">
 						{nft.metadata.attributes.map((prop, index) => (
@@ -22,7 +22,7 @@ const TraitsBox = ({ nft, ...props }) => {
 				)}
 
 				{!hasTraits && (
-					<p className="w-full">This NFT has no traits</p>
+					<p className="w-full">This NFT has no traits.<br />Use Metadata-Edit above</p>
 				)}
 			</div>
 		</div>
