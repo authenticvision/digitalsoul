@@ -2,12 +2,15 @@ import NextHead from 'next/head'
 import Link from 'next/link'
 
 import { AppLayout, Loading, ErrorPage } from '@/components/ui'
-import { DefaultContractNFTView, NFTCard } from '@/components/studio'
+import { NFTCard } from '@/components/studio'
+import { EditableContractSettings } from '@/components/studio'
+
 
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
 import { getServerSession } from 'next-auth/next'
 import { auth } from 'auth'
+
 
 import prisma from '@/lib/prisma'
 import NFTView from './[anchor]'
@@ -38,7 +41,8 @@ export async function getServerSideProps(context) {
 		select: {
 			id: true,
 			name: true,
-			csn: true
+			csn: true,
+			settings: true,
 		}
 	})
 
@@ -60,8 +64,6 @@ export async function getServerSideProps(context) {
 			}
 		}
 	}
-
-
 
 	return {
 		props: {
@@ -127,8 +129,8 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 											<span className="label-text">Contract Name</span>
 										</label>
 										<input type="text" placeholder={contract.name}
-												readOnly
-												className="input input-bordered w-full max-w-xs" />
+											readOnly
+											className="input input-bordered w-full max-w-xs" />
 									</div>
 
 									<div className="form-control w-full max-w-xs">
@@ -136,10 +138,12 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 											<span className="label-text">Contract CSN</span>
 										</label>
 										<input type="text" placeholder={contract.csn}
-												readOnly
-												className="input input-bordered w-full max-w-xs" />
+											readOnly
+											className="input input-bordered w-full max-w-xs" />
 									</div>
+									<EditableContractSettings contract={contract} wallet={wallet} />
 								</div>
+
 
 								<div className="flex ml-8">
 									<NFTCard nft={defaultNFT} />
