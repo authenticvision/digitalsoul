@@ -1,26 +1,68 @@
-import { formatAddress} from '@/lib/utils'
+import React, { useState } from 'react';
+import { formatAddress, generateMetaDataURL } from '@/lib/utils';
+import Link from 'next/link'
+import Image from 'next/image'
+import { Button, Alert } from "@/components/ui"
+import { useRouter } from 'next/router';
 
+
+import viewTableIcon from '@/public/icons/view-table.svg'
+
+
+const Overlay = ({ jsonData, link, onClose }) => {
+    const formattedJson = JSON.stringify(jsonData, null, 2);
+
+    return (
+      <div className="modal modal-open">
+        <div className="modal-box justify-start text-left">
+          <h3 className="font-bold text-lg">Public Metadata</h3>
+          <h3 className="font-bold text-lg">{link}</h3>
+          <pre className="text-xs">{formattedJson}</pre>
+          <div className="modal-action">
+            <button onClick={onClose} className="btn">Close</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
 const NFTCaption = ({ nft, staticCaption, ...props }) => {
-    // Enforce a static caption for Default-NFTs
-    staticCaption = nft.anchor=='default' ? 'DEFAULT-NFT' : staticCaption
+    staticCaption = nft.anchor == 'default' ? 'DEFAULT-NFT' : staticCaption;
 
-    // TODO this shall not have static formatting but rather be usable in different locations, which
-    // will require different font sizes etc.
-	return (   
+    const [showOverlay, setShowOverlay] = useState(false);
+    const [jsonData, setJsonData] = useState(null);
+
+    const handleOpenOverlay = async (url) => {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        setJsonData(data);
+        setShowOverlay(true);
+      } catch (error) {
+        console.error('Error fetching JSON data:', error);
+      }
+    };
+
+    const metadataPreviewLink = generateMetaDataURL(nft);
+
+    return (
         <div className="flex flex-row items-end justify-between">
-        {staticCaption ? (
-            <div className="font-bold text-lg">{staticCaption}</div>
-        ) : (            
+            {staticCaption ? (
+                <div className="font-bold text-lg">{staticCaption}</div>
+            ) : (
                 <div className="flex flex-col text-left">
                     <div className="w-full text-gray-400 text-xs">
-                        {formatAddress(nft.anchor, 22)}
+                        <p>{formatAddress(nft.anchor, 22)} (<Link href="#" onClick={(e) => {e.stopPropagation(); handleOpenOverlay(metadataPreviewLink);}}>JSON</Link>)</p>
                     </div>
                     <div className="font-bold text-lg">{nft.slid}</div>
                 </div>
-        )}
-        </div>        
-	)
-}
+            )}
 
-export default NFTCaption
+            {showOverlay && (
+                <Overlay jsonData={jsonData} onClose={() => setShowOverlay(false)} />
+            )}
+        </div>
+    );
+};
+
+export default NFTCaption;
