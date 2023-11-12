@@ -7,8 +7,8 @@ import { fromZodError, isValidationErrorLike } from 'zod-validation-error';
 
 const allowedMethods = ['PUT']
 const metadataSchema = z.object({
-	name: z.string(),
-	description: z.string(),
+	name: z.string().optional(),
+	description: z.string().optional(),
 	external_url: z.string().optional(),
 	attributes: z.array(
 		z.object({
@@ -18,7 +18,7 @@ const metadataSchema = z.object({
 			max_value: z.number().optional(),
 			min_value: z.number().optional()
 		})
-	)
+	).optional().default([])
 })
 
 export default async function handle(req, res) {
