@@ -46,7 +46,12 @@ const storeContracts = async(signedContracts, wallet) => {
 						id: wallet.id
 					}
 				},
-				settings: {} // Create empty settings
+				settings: {
+					NFT_NAME: 'DigitalSoul [ANCHOR_SHORT]',
+					NFT_DESCRIPTION: 'This is a MetaAnchor DigitalSoul-NFT from [COLLECTION_NAME].',
+					// Do not claim NFTs, where the collection endpoint would return 404.
+					CLAIM_UNDEFINED_NFTS: false,
+				}
 			}
 		})
 
