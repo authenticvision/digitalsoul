@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/router'
 import NextHead from 'next/head.js'
-import { wait, poll } from '@/lib/landing/utils'
+import { poll } from '@/lib/landing/utils'
+import { generateMetaDataURL } from '@/lib/utils'
 
 import { useSession } from 'next-auth/react'
 import { getServerSession } from 'next-auth/next'
@@ -9,7 +9,7 @@ import prisma from "@/lib/prisma"
 import MetaAnchor from '@/lib/api.metaanchor.io'
 import { auth } from "auth"
 
-import { Alert, Button } from '@/components/ui'
+import { Alert } from '@/components/ui'
 import { Layout, OwnerCardView, ReceivingCardView, LostCardView } from '@/components/landing'
 
 const OWNER_STATUS = 'owner'
@@ -58,7 +58,7 @@ export async function getServerSideProps(context) {
 				}
 			})
 
-			if (!wallet) {	
+			if (!wallet) {
 				// TODO only create wallets with a valid SIP-token and also create one wallet per SIP token
 				// this ensures that at max. 1 wallet / scan is created, which prevents DoS / spamming of wallet table
 
@@ -77,7 +77,7 @@ export async function getServerSideProps(context) {
 					}
 				})
 
-				if(!wallet) {
+				if (!wallet) {
 					errorMsg = "Could not create wallet"
 				}
 			} else {
@@ -90,27 +90,41 @@ export async function getServerSideProps(context) {
 
 				// TODO: Sanitize and validate the assetData.anchor is a valid
 				// anchor, raw queries are sanitized by default
-				const nftResults = await prisma.$queryRaw`
-					SELECT slid, metadata, anchor, contracts.address AS contract_address,
-					contracts.name AS contract_name, contracts.csn AS contract_csn
-					FROM nfts
-					INNER JOIN contracts ON contracts.id = nfts.contract_id
-					WHERE nfts.anchor = ${assetData.anchor} LIMIT 1
-				`;
+				const nft = await prisma.NFT.findFirst({
+					where: {
+						anchor: assetData.anchor,
+						contract: {
+							csn: assetData.contract.csn
+						}
+					},
+					include: {
+						contract: true,
+						assets: true
+					}
+				})
 
-				if (nftResults.length == 1) {
-					nft = nftResults[0]
-				} else {
-					errorMsg = 'There are two NFTs locally, database is broken'
+				if (!nft) {
+					errorMsg = 'Cannot resolve NFT - database up to date?'
 				}
 
-				// TODO ADD: Check for "Is NFT defined?"
-				// If not, go to the udnefined status, which may allow the user to upload an image
-				// And then claim (mint) the NFT.
+				if (!nft.contract.settings?.CLAIM_UNDEFINED_NFT) {
+					try {
+						const url = new URL(generateMetaDataURL(nft), process.env.NEXTAUTH_URL).toString()
+						const response = await fetch(url);
+						const data = await response.json();
+						const status = await response.status;
+						if (status != 200) {
+							errorMsg = "NFT is undefined and cannot be claimed yet. Contact collection owner."
+						}
+					} catch (error) {
+						console.error(`Error fetching NFT-Metadata from ${url}`, error);
+						errorMsg = `Error retrieving NFT-Metadata from ${url}`
+					}
+				}
 			}
 		}
 	} else {
-		errorMsg= "GET-Parameters av_sip or av_beneficiary missing!"
+		errorMsg = "GET-Parameters av_sip or av_beneficiary missing!"
 		noData = true
 	}
 
@@ -135,9 +149,9 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	const [ownershipStatus, setOwnershipStatus] = useState(
 		assetData?.owner == wallet?.address ? OWNER_STATUS : RECEIVING_STATUS
 	)
-	
+
 	const CurrentCard = useCallback(() => {
-		switch(ownershipStatus) {
+		switch (ownershipStatus) {
 			// TODO add a status "Undefined NFT". In this case, there may be a view,
 			// where the user can upload an image, as soon as uploaded, forward to RECEIVING_STATUS
 			// and actually claim it
@@ -168,7 +182,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 		}
 	}
 
-	const verifySipToken = async() => {
+	const verifySipToken = async () => {
 		const response = await fetch('/api/internal/landing/verify', {
 			method: "POST",
 			headers: {
