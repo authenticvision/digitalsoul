@@ -1,6 +1,6 @@
 // EditableContractSettings.js
 import { useState, useEffect } from 'react';
-import { Button, Alert } from '../ui';
+import { Button, Tooltip, Alert } from '../ui';
 
 const EditableContractSettings = ({ wallet, contract, ...props }) => {
   const [nftName, setNftName] = useState(contract.settings?.NFT_NAME);
@@ -8,16 +8,12 @@ const EditableContractSettings = ({ wallet, contract, ...props }) => {
   const [success, setSuccess] = useState();
   const [error, setError] = useState()
 
+  const variableText = "Use [VARIABLE] to insert dynamic content. Supported variables: ANCHOR, ANCHOR_SHORT, CONTRACT_ADDRESS, COLLECTION_NAME, COLLECTION_NAME_SHORT"
+
   const onFinish = () => {
     setSuccess("Changes saved successfully");
     setTimeout(() => setSuccess(), 1500); // Hide alert after 3 second
   }
-
-  {error && (
-    <div className="mt-5">
-      <Alert text={error} type='error' />
-    </div>
-  )}
 
   const save = async (newSettings) => {
     try {
@@ -65,41 +61,42 @@ const EditableContractSettings = ({ wallet, contract, ...props }) => {
   }
 
   return (
-
     <div>
-      <div className="form-control w-full max-w-xs">
+      <div className="form-control w-full">
         <label className="label">
-          <span className="label-text">NFT Name Name</span>
+          <span className="label-text">NFT-Name</span>
+          <Tooltip text={`Added as 'name' to NFT metadata. ${variableText}`}><p>(?)</p></Tooltip>
         </label>
         <input type="text" value={nftName}
-          className="input input-bordered w-full max-w-xs"
+          className="input input-bordered w-full"
           onChange={(e) => setNftName(e.target.value)}
         />
       </div>
 
-      <div className="form-control w-full max-w-xs">
+      <div className="form-control w-full">
         <label className="label">
-          <span className="label-text">NFT Description</span>
+          <span className="label-text">NFT-Description</span>
+          <Tooltip text={`Added as 'descripton' to NFT metadata. ${variableText}`}><p>(?)</p></Tooltip>
         </label>
         <input type="text" value={nftDescription}
           onChange={(e) => setNftDescription(e.target.value)}
-          className="input input-bordered w-full max-w-xs" />
+          className="input input-bordered w-full" />
       </div>
 
       <button onClick={onSave} className="ml-2 btn btn-link text-white text-center">
         Save
       </button>
       {error && (
-				<div className="mt-5">
-					<Alert text={error} type='success' />
-				</div>
-			)}
+        <div className="mt-5">
+          <Alert text={error} type='success' />
+        </div>
+      )}
 
       {success && (
-				<div className="mt-5">
-					<Alert text={success} type='success' />
-				</div>
-			)}
+        <div className="mt-5">
+          <Alert text={success} type='success' />
+        </div>
+      )}
     </div>
   );
 }
