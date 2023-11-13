@@ -29,7 +29,7 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 
 	const save = async (parsedMetadata) => {
 		try {
-			const response = await fetch(`/api/internal/nft/${nft.anchor}/edit`, {
+			const response = await fetch(`/api/internal/nft/${nft.contract.csn}/${nft.anchor}/edit`, {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",

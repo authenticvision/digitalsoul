@@ -33,7 +33,7 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-	const { anchor } = req.query
+	const { anchor, csn } = req.query
 	const { metadata: rawMetadata } = req.body
 	let metadata = rawMetadata
 
@@ -52,7 +52,11 @@ export default async function handle(req, res) {
 		where: {
 			anchor: anchor,
 			contract: {
-				ownerId: session.wallet.id
+				ownerId: session.wallet.id,
+				csn: {
+					equals: csn, 
+					mode: "insensitive"
+				}
 			}
 		}
 	})
