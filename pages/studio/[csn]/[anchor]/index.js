@@ -30,6 +30,10 @@ export async function getServerSideProps(context) {
 		where: {
 			anchor: anchor,
 			contract: {
+				csn: {
+					equals: csn,
+					mode: "insensitive"
+				},
 				ownerId: session.wallet.id
 			}
 		},
