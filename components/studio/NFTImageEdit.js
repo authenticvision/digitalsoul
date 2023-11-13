@@ -26,7 +26,7 @@ const NFTImageEdit = ({
 		onFinishEditing()
 	}
 
-	const hasAssets = nft.assets.length > 0
+	const hasAssets = nft.assets?.length > 0
 	const assetURL  = hasAssets ? generateAssetURL(nft.assets[0].assetHash) : null
 
 	return (

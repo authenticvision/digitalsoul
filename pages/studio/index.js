@@ -1,10 +1,6 @@
 import NextHead from 'next/head.js'
 
 import { AppLayout, Loading, ErrorPage } from '@/components/ui'
-import { NFTView as NFTProfileView } from '@/components/studio'
-
-import { useSession } from 'next-auth/react'
-import { getServerSession } from 'next-auth/next'
 import { auth } from 'auth'
 
 import prisma from '@/lib/prisma'

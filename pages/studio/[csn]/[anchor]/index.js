@@ -71,7 +71,7 @@ const NFTView = ({ contract, wallet, anchor, ...props }) => {
 		)
 	}
 
-	const { nft, isLoading, error, mutate } = useNFT(anchor)
+	const { nft, isLoading, error, mutate } = useNFT({csn: contract.csn, anchor: anchor})
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
 	const onFinishEditing = () => {

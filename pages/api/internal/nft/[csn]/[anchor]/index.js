@@ -17,9 +17,9 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-	const { anchor } = req.query
+	const { anchor, csn } = req.query
 
-	if (!anchor) {
+	if (!anchor || !csn) {
 		return res.status(400).json({ message: 'Missing required parameters' })
 	}
 
@@ -27,7 +27,11 @@ export default async function handle(req, res) {
 		where: {
 			anchor: anchor,
 			contract: {
-				ownerId: session.wallet.id
+				ownerId: session.wallet.id,
+				csn: {
+					equals: csn,
+					mode: "insensitive"
+				}
 			}
 		},
 		include: {
