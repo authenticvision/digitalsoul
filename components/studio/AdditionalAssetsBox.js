@@ -45,7 +45,7 @@ const AdditionalAssetsBox = ({ nft, onUpdate, ...props }) => {
 										{formatAddress(asset.assetHash)}
 								</Link>
 
-								<span className="ml-2 btn btn-ghost btn-xs">
+								<span className="ml-2 btn btn-ghost btn-xs text-lg">
 									×
 								</span>
 							</div>
