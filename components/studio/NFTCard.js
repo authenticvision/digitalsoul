@@ -21,9 +21,12 @@ const NFTCard = ({ nft, contractName, staticCaption, ...props }) => {
 			  className={cardRootClassName}>
 			<figure className="w-[254px] h-[254px] object-cover relative">
 				{hasAssets? (
-					<Image src={assetURL} fill alt={nft.metadata?.description} />
+					<Image src={assetURL}
+						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+						fill alt={nft.metadata?.description} />
 				) : (
 					<Image src="/nft-fallback-cover.webp" fill
+						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 						   alt={nft.metadata?.description} />
 				)}
 			</figure>

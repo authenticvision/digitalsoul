@@ -43,12 +43,7 @@ const NFTImageEdit = ({
 				{hasAssets ? (
 					<Image src={assetURL} fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
 				) : (
-					<Image src="/nft-fallback-cover.webp" fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
-				)}
-			</div>
-
-		</div>
-	)
+					<Image src="/nft-fallback-cover.webp" fill className="object-cover max-w-sm rounded-lg shadow-2xl" />)} </div> </div>)
 }
 
 export default NFTImageEdit
