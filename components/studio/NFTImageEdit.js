@@ -27,7 +27,7 @@ const NFTImageEdit = ({
 	}
 
 	const hasAssets = nft.assets?.length > 0
-	const assetURL  = hasAssets ? generateAssetURL(nft.assets[0].assetHash) : null
+	const assetURL  = hasAssets ? generateAssetURL(nft.contract.csn, nft.assets[0].assetHash) : null
 
 	return (
 		<div className="relative group">

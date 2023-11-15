@@ -1,6 +1,5 @@
 import React, { useRef } from 'react'
 import Link from 'next/link'
-import { formatAddress, generateAssetURL } from '@/lib/utils'
 import { TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
 import Image from 'next/image'
 
