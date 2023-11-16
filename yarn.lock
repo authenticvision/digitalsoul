@@ -4134,6 +4134,13 @@ read-cache@^1.0.0:
   dependencies:
     pify "^2.3.0"
 
+read-chunk@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/read-chunk/-/read-chunk-4.0.3.tgz#d345230139210fc6d7ba4c607080c93630518310"
+  integrity sha512-wOYymxRWkxn3MlStSt7LxrMLRvynHKjzHVQPTCBbT29ViUwsT3EE09dE5iMDDGYQTL/s5TQZvBLuJTeZFeGQ4g==
+  dependencies:
+    pify "^5.0.0"
+
 readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.5.0, readable-stream@^3.6.0:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.2.tgz#56a9b36ea965c00c5a93ef31eb111a0f11056967"

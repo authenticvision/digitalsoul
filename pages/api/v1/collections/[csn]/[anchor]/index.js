@@ -150,7 +150,7 @@ export default async function handle(req, res) {
 		// Filling the assets
 		// Note this overwrites any pre-existing keys
 		nftToReturn.assets.map((a) => (
-			nftMetaData[a.assetType] =  new URL("/api/v1/assets/" + a.assetHash, process.env.NEXTAUTH_URL).toString()
+			nftMetaData[a.assetType] =  new URL("/api/v1/assets/" + contract.csn + "/" + a.assetHash, process.env.NEXTAUTH_URL).toString()
 		))
 
 		// ######################### Assemble the final Metadata
