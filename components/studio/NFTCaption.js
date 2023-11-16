@@ -45,9 +45,9 @@ const NFTCaption = ({ nft, staticCaption, ...props }) => {
 
 	const metadataPreviewLink = generateMetaDataURL(nft)
 
-	const onClickJSON = (e) => {
+	const onClickJSON = (e, metadataPreviewLink) => {
 		e.stopPropagation()
-		handleOpenOverlay()
+		handleOpenOverlay(metadataPreviewLink)
 	}
 
 
