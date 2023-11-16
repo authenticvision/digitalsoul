@@ -34,6 +34,7 @@ export async function getServerSideProps(context) {
 			id: true,
 			name: true,
 			csn: true,
+			address: true,
 			settings: true,
 		}
 	})
@@ -112,22 +113,33 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 										<label className="label">
 											<span className="label-text">Contract Name</span>
 										</label>
-										<input type="text" placeholder={contract.name}
+										<input type="text" value={contract.name}
 											readOnly
-											className="input input-bordered w-full" />
+											className="input input-bordered w-full text-raven-500" />
 									</div>
 
 									<div className="form-control w-full ">
 										<label className="label">
 											<span className="label-text">Contract CSN</span>
 										</label>
-										<input type="text" placeholder={contract.csn}
+										<input type="text" value={contract.csn}
 											readOnly
-											className="input input-bordered w-full" />
+											className="input input-bordered w-full text-raven-500" />
 									</div>
+
+									<div className="form-control w-full ">
+										<label className="label">
+											<span className="label-text">Contract Address</span>
+										</label>
+										<input type="text" value={contract.address}
+											readOnly
+											className="input input-bordered w-full text-raven-500" />
+									</div>
+
+									<hr className="mt-8 mb-4 border-raven-900"/>
+
 									<EditableContractSettings contract={contract} wallet={wallet} />
 								</div>
-
 
 								<div className="flex ml-8">
 									<NFTCard nft={defaultNFT} />
