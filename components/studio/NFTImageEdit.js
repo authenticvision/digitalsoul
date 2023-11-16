@@ -27,7 +27,7 @@ const NFTImageEdit = ({
 	}
 
 	const hasAssets = nft.assets?.length > 0
-	const assetURL  = hasAssets ? generateAssetURL(nft.assets[0].assetHash) : null
+	const assetURL  = hasAssets ? generateAssetURL(nft.contract.csn, nft.assets[0].assetHash) : null
 
 	return (
 		<div className="relative group">
@@ -43,12 +43,7 @@ const NFTImageEdit = ({
 				{hasAssets ? (
 					<Image src={assetURL} fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
 				) : (
-					<Image src="/nft-fallback-cover.webp" fill className="object-cover max-w-sm rounded-lg shadow-2xl" />
-				)}
-			</div>
-
-		</div>
-	)
+					<Image src="/nft-fallback-cover.webp" fill className="object-cover max-w-sm rounded-lg shadow-2xl" />)} </div> </div>)
 }
 
 export default NFTImageEdit

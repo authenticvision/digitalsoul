@@ -3,36 +3,15 @@ import React, { useState, useEffect } from 'react'
 
 import { Loading } from '@/components/ui'
 import { useRouter } from 'next/router'
+import { useNFTs } from '@/hooks'
 
 import { Header, NFTTable, NFTCards } from '@/components/studio'
 
 const NFTList = ({ contractId, contractName, ...props }) => {
 	const router = useRouter()
 	const { csn } = router.query
-
-	const [nfts, setNFTs] = useState([])
-	const [isLoading, setIsLoading] = useState(contractId != undefined)
-	const [error, setError] = useState()
+	const { nfts, error, isLoading } = useNFTs(contractId)
 	const [mode, setMode] = useState('card')
-
-	useEffect(() => {
-		async function fetchNFTs() {
-			try {
-				const response = await fetch(`/api/internal/nfts/${contractId}`)
-				const { nfts } = await response.json()
-
-				setNFTs(nfts)
-				setIsLoading(false)
-			} catch (error) {
-				setError(error)
-				setIsLoading(false)
-			}
-		}
-
-		if (contractId) {
-			fetchNFTs()
-		}
-	}, [contractId])
 
 	const onChangeMode = (mode) => {
 		setMode(mode)
