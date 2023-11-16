@@ -18,14 +18,14 @@ const allowedMimeTypes = [
 	mime.getType('jpg'),
 	mime.getType('gif'),
 	mime.getType('png'),
-	mime.getType('m4a'),
-	mime.getType('mp4'),
-	mime.getType('mkv'),
-	mime.getType('avi'),
+	//mime.getType('webp'), // Stop support for webp, see https://github.com/authenticvision/digitalsoul/issues/43
+	//mime.getType('m4a'),
+	//mime.getType('mp4'),
+	//mime.getType('mkv'),
+	//mime.getType('avi'),
 	// mime.getType('webm'), // Stop support for webm, see https://github.com/authenticvision/digitalsoul/issues/43
-	// mime.getType('webp'), // Stop support for webp, see https://github.com/authenticvision/digitalsoul/issues/43
-	mime.getType('mov'),
-	mime.getType('wmv')
+	//mime.getType('mov'),
+	//mime.getType('wmv')
 ]
 
 export const config = {
@@ -103,18 +103,23 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-	const { anchor, assetType } = req.query
+	const { csn, anchor, assetType } = req.query
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
-			anchor
+			anchor,
+			contract: {
+				csn: {
+					equals: csn, 
+					mode: "insensitive"
+				}
+			}
 		},
 		include: {
 			contract: true,
 			assets: true
 		}
 	})
-
 
 	// TODO: What to do with assets that aren't attached to any other NFT?
 	// Should this clean up run on an async job?

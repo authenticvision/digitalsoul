@@ -13,7 +13,7 @@ registerPlugin(
 	FilePondPluginImagePreview
 )
 
-const NFTImageUploader = ({ anchor, onFinish, ...props }) => {
+const NFTImageUploader = ({ nft, onFinish, ...props }) => {
 	const [assets, setAssets] = useState([])
 
 	const afterProcess = () => {
@@ -35,12 +35,12 @@ const NFTImageUploader = ({ anchor, onFinish, ...props }) => {
 					allowRevert={false}
 					allowReorder={false}
 					credits={false}
-					maxFiles={3}
-					maxFileSize={'3MB'}
+					maxFiles={1}
+					maxFileSize={'30MB'}
 					onprocessfiles={afterProcess}
-					server={`/api/internal/assets/${anchor}/image`}
+					server={`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/image`}
 					name="assets"
-					labelIdle='Drag & Drop your NFT files or <span class="filepond--label-action">Browse</span>'
+					labelIdle='Drag & Drop your images (jpg, png, gif) or <span class="filepond--label-action">Browse</span>'
 				/>
 			</div>
 

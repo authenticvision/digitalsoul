@@ -36,7 +36,7 @@ const NFTImageEdit = ({
 			</button>
 
 			<dialog ref={editingModal} id="nft-modal-editing" className="modal">
-				<NFTImageUploader anchor={nft.anchor} onFinish={onFinishUploading} />
+				<NFTImageUploader nft={nft} onFinish={onFinishUploading} />
 			</dialog>
 
 			<div className="relative w-[350px] h-[350px]">
