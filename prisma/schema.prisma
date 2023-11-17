@@ -43,16 +43,16 @@ model Contract {
   /// Contract-Settings and configurations defining the behavior of endpoints and pages
   settings Json
 
-  nfts      NFT[]
-  assets    Asset[]
+  nfts   NFT[]
+  assets Asset[]
 
-   // The new fields:
-  defaultNft  NFT?     @relation("DefaultNFT", fields: [defaultNftId], references: [id])
-  defaultNftId String? @map(name: "default_nft_id") @unique
+  // The new fields:
+  defaultNft   NFT?    @relation("DefaultNFT", fields: [defaultNftId], references: [id])
+  defaultNftId String? @unique @map(name: "default_nft_id")
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
-  
+
   @@map(name: "contracts")
 }
 
@@ -76,19 +76,19 @@ model NFT {
 }
 
 model Asset {
-  id                String   @id @default(cuid())
-  contract          Contract @relation(fields: [contractId], references: [id])
+  id       String   @id @default(cuid())
+  contract Contract @relation(fields: [contractId], references: [id])
 
-  assetHash         String @map(name: "asset_hash")
-  originalFileName  String @map(name: "original_file_name")
-  filePath          String @map(name: "file_path")
+  assetHash        String @map(name: "asset_hash")
+  originalFileName String @map(name: "original_file_name")
+  filePath         String @map(name: "file_path")
 
-  assetType         String @map(name: "asset_type")
+  assetType String @map(name: "asset_type")
 
   nfts NFT[]
 
-  createdAt DateTime   @default(now()) @map(name: "created_at")
-  updatedAt DateTime   @default(now()) @map(name: "updated_at")
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @default(now()) @map(name: "updated_at")
   contractId String   @map(name: "contract_id")
 
   @@map(name: "assets")
