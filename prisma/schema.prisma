@@ -70,7 +70,8 @@ model NFT {
   assets Asset[]
 
   // New back-reference field:
-  defaultForContract Contract? @relation("DefaultNFT")
+  defaultForContract Contract?    @relation("DefaultNFT")
+  AssetsNFTs         AssetsNFTs[]
 
   @@map(name: "nfts")
 }
@@ -87,9 +88,22 @@ model Asset {
 
   nfts NFT[]
 
-  createdAt  DateTime @default(now()) @map(name: "created_at")
-  updatedAt  DateTime @default(now()) @map(name: "updated_at")
-  contractId String   @map(name: "contract_id")
+  createdAt  DateTime     @default(now()) @map(name: "created_at")
+  updatedAt  DateTime     @default(now()) @map(name: "updated_at")
+  contractId String       @map(name: "contract_id")
+  AssetsNFTs AssetsNFTs[]
 
   @@map(name: "assets")
+}
+
+model AssetsNFTs {
+  asset Asset @relation(fields: [assetId], references: [id])
+  nft   NFT   @relation(fields: [nftId], references: [id])
+
+  assetId   String @map(name: "asset_id")
+  nftId     String @map(name: "nft_id")
+  assetType String @map(name: "asset_type")
+
+  @@id([assetId, nftId])
+  @@map(name: "assets_nfts")
 }
