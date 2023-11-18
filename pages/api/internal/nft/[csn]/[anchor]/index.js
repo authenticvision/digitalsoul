@@ -37,8 +37,8 @@ export default async function handle(req, res) {
 		include: {
 			contract: true,
 			assets: {
-				orderBy: {
-					updatedAt: 'desc'
+				include: {
+					asset: true
 				}
 			}
 		}
