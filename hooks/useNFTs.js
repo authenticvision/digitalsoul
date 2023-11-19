@@ -15,7 +15,7 @@ export const useNFTs = (contractId) => {
 	)
 
 	return {
-		nfts: data?.nfts,
+		nfts: data?.nfts || [],
 		error,
 		mutate,
 		isLoading
