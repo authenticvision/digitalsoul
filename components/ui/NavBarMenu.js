@@ -11,13 +11,6 @@ const NavBarMenu = () => {
 	const { disconnectAsync } = useDisconnect()
 	const { data: session, status } = useSession()
 
-	const onDisconnect = async(e) => {
-		e.preventDefault()
-
-		await disconnectAsync()
-		signOut()
-	}
-
 	return (
 		<div className="dropdown dropdown-end">
 			<label tabIndex={0} className="btn btn-ghost">
@@ -37,7 +30,7 @@ const NavBarMenu = () => {
 
 				{session && (
 					<li>
-						<Link href="#" onClick={onDisconnect}>
+						<Link href="/logout">
 							Disconnect
 						</Link>
 					</li>
