@@ -36,7 +36,7 @@ function prismaTestContext() {
 			databaseUrl = `${process.env.POSTGRESQL_PRISMA_URL}&schema=${schema}`
 			process.env.POSTGRESQL_PRISMA_URL = databaseUrl
 
-			execSync(`${prismaBinary} db push --skip-generate`, {
+			execSync(`${prismaBinary} db push --skip-generate --schema=./schema.prisma`, {
 				//stdio: 'inherit', XXX: Enable when debugging
 				env: {
 					...process.env,
