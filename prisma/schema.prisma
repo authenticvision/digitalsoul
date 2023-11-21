@@ -21,12 +21,13 @@ model Config {
 }
 
 model Wallet {
-  id        String     @id @default(cuid())
-  address   String     @unique
-  email     String?    @unique
-  createdAt DateTime   @default(now()) @map(name: "created_at")
-  updatedAt DateTime   @default(now()) @map(name: "updated_at")
-  contracts Contract[]
+  id         String       @id @default(cuid())
+  address    String       @unique
+  email      String?      @unique
+  createdAt  DateTime     @default(now()) @map(name: "created_at")
+  updatedAt  DateTime     @default(now()) @map(name: "updated_at")
+  contracts  Contract[]
+  assetsNFTs AssetsNFTs[]
 
   @@map(name: "wallets")
 }
@@ -96,9 +97,18 @@ model AssetsNFTs {
   asset Asset @relation(fields: [assetId], references: [id])
   nft   NFT   @relation(fields: [nftId], references: [id])
 
-  assetId   String @map(name: "asset_id")
-  nftId     String @map(name: "nft_id")
-  assetType String @map(name: "asset_type")
+  assetId   String  @map(name: "asset_id")
+  nftId     String  @map(name: "nft_id")
+  assetType String  @map(name: "asset_type")
+  active    Boolean @default(false)
+  private   Boolean @default(false)
+
+  assignedBy   Wallet? @relation(fields: [assignedById], references: [id])
+  assignedById String? @map(name: "assigned_by")
+
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+  assignedAt DateTime @default(now()) @map(name: "assigned_at")
 
   @@id([assetId, nftId])
   @@map(name: "assets_nfts")
