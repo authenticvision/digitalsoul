@@ -11,7 +11,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			method: 'POST',
 			query: {
 				csn: 'BEEF',
-				anchor: '0xCOFFEE'
+				anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731'
 			}
 		})
 
@@ -26,7 +26,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			method: 'GET',
 			query: {
 				csn: 'BEEF',
-				anchor: '0xCOFFEE'
+				anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731'
 			}
 		})
 
@@ -39,10 +39,10 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 		})
 	})
 
-	it('responds with the name, description and a URL for the primary asset', async () => {
+	it('responds with the name, description based on contract settings', async () => {
 		const wallet = await ctx.db.wallet.create({
 			data: {
-				address: '0xDEADBEEF'
+				address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // this is the first hardhat testing wallet
 			}
 		})
 
@@ -50,9 +50,12 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			data: {
 				csn: 'BEEF',
 				name: 'Deadbeef',
-				address: '0xCONTRACT',
+				address: '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
 				network: 'local-test',
-				settings: {},
+				settings: {
+					NFT_NAME: "DigitalSoul [ANCHOR_SHORT]", // Tests the contract-wise settings including Variables
+					NFT_DESCRIPTION: "Contract is deployed at [CONTRACT_ADDRESS] as '[COLLECTION_NAME]'" // 
+				},
 				owner: {
 					connect: {
 						id: wallet.id
@@ -64,9 +67,9 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 		const nft = await ctx.db.NFT.create({
 			data: {
 				slid: 'TEST',
-				anchor: '0xCOFFEE',
+				anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731',
 				metadata: {
-					name: 'Something'
+					"some": "value"
 				},
 				contract: {
 					connect: {
@@ -80,7 +83,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			method: 'GET',
 			query: {
 				csn: 'BEEF',
-				anchor: '0xCOFFEE'
+				anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731'
 			}
 		})
 
@@ -88,7 +91,9 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 		const data = await res._getJSONData()
 
 		expect(data).toEqual({
-			name: 'Something'
+			name: 'DigitalSoul 0x505d…4731',
+			description: "Contract is deployed at 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF as 'Deadbeef'",
+			some: "value"
 		})
 	})
 })
