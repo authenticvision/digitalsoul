@@ -38,7 +38,11 @@ export default async function handle(req, res) {
 			updatedAt: 'desc'
 		},
 		include: {
-			assets: true,
+			assets: {
+				include: {
+					asset: true
+				}
+			},
 			contract: {
 				include: {
 					owner: true

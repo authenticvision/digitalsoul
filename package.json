@@ -11,7 +11,7 @@
     "db:baseline": "npx prisma migrate resolve --applied prisma/migrations/0_init/migration.sql",
     "db:reset": "prisma db push --force-reset",
     "prod:db": "npx prisma generate && npx prisma migrate deploy",
-    "dev:migrate": "prisma db push && npm run dev",
+    "dev:migrate": "prisma migrate dev && npm run dev",
     "prod:migrate:start": "npm run prod:db && npm run start"
   },
   "dependencies": {

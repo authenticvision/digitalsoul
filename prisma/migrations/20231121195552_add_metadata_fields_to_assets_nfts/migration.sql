@@ -1,0 +1,10 @@
+-- AlterTable
+ALTER TABLE "assets_nfts" ADD COLUMN     "active" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "assigned_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "assigned_by" TEXT,
+ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "private" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- AddForeignKey
+ALTER TABLE "assets_nfts" ADD CONSTRAINT "assets_nfts_assigned_by_fkey" FOREIGN KEY ("assigned_by") REFERENCES "wallets"("id") ON DELETE SET NULL ON UPDATE CASCADE;

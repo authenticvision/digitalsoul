@@ -104,13 +104,19 @@ export default async function handle(req, res) {
 			},
 			include: {
 				assets: {
-					include: {}
+					include: {
+						asset: true
+					}
 				},
 				contract: {
 					include: {
 						defaultNft: {
 							include: {
-								assets: {}
+								assets: {
+									include: {
+										asset: true
+									}
+								}
 							}
 						}
 					}
@@ -125,19 +131,20 @@ export default async function handle(req, res) {
 		}
 
 		if (nft.slid == "0") {
-			return res.status(404).json({message: 'NFT does not exist on our records'})
+			return res.status(404).json({ message: 'NFT does not exist on our records' })
 		}
+
 		let nftToReturn = undefined
-		if (nft.metadata || nft.assets.length>0) {
+		if (nft.metadata || nft.assets.length > 0) {
 			nftToReturn = nft
 		} else {
-			if (nft.contract?.defaultNft.metadata || nft.contract?.defaultNft.assets.length>0) {
+			if (nft.contract?.defaultNft.metadata || nft.contract?.defaultNft.assets.length > 0) {
 				nftToReturn = nft.contract.defaultNft
 			}
 		}
 
 		if (!nftToReturn) {
-			return res.status(404).json({"message": "No metadata found"})
+			return res.status(404).json({ "message": "No metadata found" })
 		}
 
 		// ######################### Collection-based Metadata
@@ -149,9 +156,14 @@ export default async function handle(req, res) {
 		let nftMetaData = nftToReturn.metadata? nftToReturn.metadata : {}
 		// Filling the assets
 		// Note this overwrites any pre-existing keys
-		nftToReturn.assets.map((a) => (
-			nftMetaData[a.assetType] =  new URL("/api/v1/assets/" + contract.csn + "/" + a.assetHash, process.env.NEXTAUTH_URL).toString()
-		))
+		nftToReturn.assets.map((a) => {
+			const asset = a.asset
+
+			return nftMetaData[a.assetType] = new URL(
+				`/api/v1/assets/${contract.csn}/${asset.assetHash}`,
+				process.env.NEXTAUTH_URL
+			).toString()
+		})
 
 		// ######################### Assemble the final Metadata
 		// This merges collectionBasedMetaData and nftMetaData.
