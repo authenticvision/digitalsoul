@@ -36,17 +36,22 @@ export const config = {
 
 const STORAGE_DIR = process.env.STORAGE_DIR
 
-const dropAssetsFromNFT = async (nft) => {
-	await prisma.NFT.update({
-		where: {
-			id: nft.id
-		},
-		data: {
-			assets: {
-				set: []
-			}
-		}
-	})
+const softDeleteAssetsFromNFT = async (nft, assetType) => {
+	const ids = nft.assets
+		.filter((nftAsset) => nftAsset.assetType == assetType)
+		.map(async(nftAsset) => {
+			return await prisma.assetNFT.update({
+				where: {
+					assetId_nftId: {
+						nftId: nft.id,
+						assetId: nftAsset.assetId
+					}
+				},
+				data: {
+					active: false
+				}
+			})
+		})
 }
 
 const computeFileHash = (csn, file) => {
@@ -55,39 +60,67 @@ const computeFileHash = (csn, file) => {
 	return id(`${csn}:${hashedFile}`)
 }
 
-const connectWithExistingAsset = async (asset, nft) => {
-	await prisma.NFT.update({
-		where: {
-			id: nft.id
-		},
+const connectWithExistingAsset = async (wallet, asset, assetType, nft) => {
+	await prisma.assetNFT.create({
 		data: {
-			updatedAt: new Date(),
-			assets: {
-				connect: [{
+			active: true,
+			assetType,
+			assignedAt: new Date(),
+			assignedBy: {
+				connect: {
+					id: wallet.id
+				}
+			},
+			nft: {
+				connect: {
+					id: nft.id
+				}
+			},
+			asset: {
+				connect: {
 					id: asset.id
-				}]
+				}
 			}
+		},
+		include: {
+			asset: true
 		}
 	})
 }
 
-const createAsset = async ({ nft, fileHash, storageFilePath, assetType, originalFileName, contractId }) => {
-	await prisma.asset.create({
+const createAsset = async ({ wallet, nft, assetCtx, contractId }) => {
+	const { fileHash, storageFilePath, assetType, originalFileName } = assetCtx
+
+	return await prisma.assetNFT.create({
 		data: {
-			filePath: storageFilePath,
-			assetHash: fileHash,
 			assetType: assetType,
-			originalFileName,
-			contract: {
+			active: true,
+			assignedAt: new Date(),
+			assignedBy: {
 				connect: {
-					id: contractId
+					id: wallet.id
 				}
 			},
-			nfts: {
-				connect: [{
+			asset: {
+				create: {
+					filePath: storageFilePath,
+					assetHash: fileHash,
+					originalFileName,
+					contract: {
+						connect: {
+							id: contractId
+						}
+					}
+				}
+			},
+			nft: {
+				connect: {
 					id: nft.id
-				}]
+				}
 			}
+		},
+		include: {
+			asset: true
 		}
 	})
 }
@@ -104,13 +137,14 @@ export default async function handle(req, res) {
 	}
 
 	const { csn, anchor, assetType } = req.query
+	const wallet = session.wallet
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
 			anchor,
 			contract: {
 				csn: {
-					equals: csn, 
+					equals: csn,
 					mode: "insensitive"
 				}
 			}
@@ -121,17 +155,16 @@ export default async function handle(req, res) {
 		}
 	})
 
-	// TODO: What to do with assets that aren't attached to any other NFT?
-	// Should this clean up run on an async job?
-	await dropAssetsFromNFT(nft)
+	// TODO: Migrate this into a service
+	await softDeleteAssetsFromNFT(nft, assetType)
 
 	const form = new formidable.IncomingForm()
-	const tmpDir = path.join(process.env.STORAGE_DIR, "upload") 
+	const tmpDir = path.join(process.env.STORAGE_DIR, "upload")
 	form.uploadDir = tmpDir
 
 	form.parse(req, async (err, fields, files) => {
 		const uploadedFile = files.assets
-		
+
 		if (!allowedMimeTypes.includes(uploadedFile.type)) {
 			rmSync(uploadedFile.path)
 			return res.status(422).json({ message: 'File type ${uploadedFile.type} is not allowed' })
@@ -147,14 +180,14 @@ export default async function handle(req, res) {
 		})
 
 		if (existingAsset) {
-			await connectWithExistingAsset(existingAsset, nft)
+			await connectWithExistingAsset(wallet, existingAsset, assetType, nft)
 			rmSync(uploadedFile.path)
 			return res.json({
 				existingAsset
 			})
 		} else {
 			try {
-				// Split files per Smart contract. 
+				// Split files per Smart contract.
 				// This is a logical separation and also reduces the risk of Filesystem-overload
 				// due to too many files in the same directory
 				const targetDir = path.join(STORAGE_DIR, nft.contract.csn)
@@ -165,17 +198,20 @@ export default async function handle(req, res) {
 				mkdirSync(targetDir, {recursive:true})
 				renameSync(uploadedFile.path, targetFile)
 
-				const asset = await createAsset({
+				const assetNFT = await createAsset({
+					wallet,
 					nft,
-					fileHash,
-					storageFilePath,
-					assetType,
+					assetCtx: {
+						fileHash,
+						storageFilePath,
+						originalFileName: uploadedFile.name,
+						assetType
+					},
 					contractId: nft.contract.id,
-					originalFileName: uploadedFile.name
 				})
 
 				return res.json({
-					asset
+					asset: assetNFT.asset
 				})
 			} catch (error) {
 				console.error(error)
