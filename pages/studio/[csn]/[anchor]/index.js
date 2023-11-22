@@ -50,7 +50,7 @@ export async function getServerSideProps(context) {
 		}
 	}
 
-	const wallet = { id: session.wallet.id, address: session.wallet.address }
+	const wallet = { id: session.wallet.id, address: session.wallet.address?.toLowerCase() }
 
 	const contract = JSON.parse(JSON.stringify(nft.contract))
 

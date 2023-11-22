@@ -16,7 +16,9 @@ export default async function handle(req, res) {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
 
-	const { address } = req.body
+	let { address } = req.body
+	address = address?.toLowerCase()
+
 	let errorMsg
 	let walletResult
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import NextHead from 'next/head.js'
 import { poll } from '@/lib/landing/utils'
-import { generateMetaDataURL } from '@/lib/utils'
+import { generateMetaDataURL, addressMatch } from '@/lib/utils'
 
 import { useSession } from 'next-auth/react'
 import { getServerSession } from 'next-auth/next'
@@ -45,13 +45,16 @@ export async function getServerSideProps(context) {
 			errorMsg = 'Error while trying to fetch API, maybe invalid av_sip?'
 		}
 
+		// ensure we only store lower-case
+		const beneficiary = av_beneficiary.toLowerCase()
+
 		if (assetData) {
 			// Only bother with wallet-logic, if the SIP token is valid. This is already some way
 			// of authorization preventing DoS or spamming the wallet-table
 			// Find wallet, in case it does not exist, persist it (which allows us to later join easily on it
 			wallet = await prisma.wallet.findUnique({
 				where: {
-					address: av_beneficiary
+					address: beneficiary
 				},
 				select: {
 					address: true,
@@ -63,7 +66,7 @@ export async function getServerSideProps(context) {
 				// this ensures that at max. 1 wallet / scan is created, which prevents DoS / spamming of wallet table
 
 				// FIXME this is duplicate code from wallets/index.js 
-				const address = av_beneficiary
+				const address = beneficiary
 				wallet = await prisma.wallet.upsert({
 					where: {
 						address
@@ -147,7 +150,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	const [error, setError] = useState(errorMsg)
 	const [newOwner, setNewOwner] = useState()
 	const [ownershipStatus, setOwnershipStatus] = useState(
-		assetData?.owner.toLowerCase() == wallet?.address.toLowerCase() ? OWNER_STATUS : RECEIVING_STATUS
+		addressMatch(assetData?.owner, wallet?.address) ? OWNER_STATUS : RECEIVING_STATUS
 	)
 
 	const CurrentCard = useCallback(() => {
@@ -167,7 +170,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	}, [ownershipStatus, nft, wallet, assetData, newOwner])
 
 	const nftWasClaimed = (result) => {
-		if (wallet.address.toLowerCase() == result.owner.toLowerCase()) {
+		if (addressMatch(wallet.address, result.owner)) {
 			return false
 		} else {
 			return true
@@ -175,7 +178,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	}
 
 	const nftWasTransfered = (result) => {
-		if (wallet.address.toLowerCase() != result.owner.toLowerCase()) {
+		if (!addressMatch(wallet.address, result.owner)) {
 			return false
 		} else {
 			return true

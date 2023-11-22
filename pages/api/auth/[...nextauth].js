@@ -24,15 +24,15 @@ export const authOptions = {
 				// allow the owner of the instance to disable registration
 				const wallet = await prisma.wallet.upsert({
 					where: {
-						address: credentials.address
+						address: credentials.address?.toLowerCase()
 					},
 					create: {
-						address: credentials.address
+						address: credentials.address?.toLowerCase()
 					},
 					update: {},
 				})
 
-				return { id: wallet.address }
+				return { id: wallet.address?.toLowerCase() }
 			},
 		}),
 	],
@@ -45,9 +45,9 @@ export const authOptions = {
 	callbacks: {
 		async jwt({ token, account, profile }) {
 			if (account) {
-				token.wallet = await prisma.wallet.findFirst({
+				token.wallet = await prisma.wallet.findUnique({
 					where: {
-						address: token.sub
+						address: token.sub?.toLowerCase()
 					}
 				})
 			}
@@ -55,8 +55,8 @@ export const authOptions = {
 			return token
 		},
 		async session({ session, token, user }) {
-			session.address = token.sub
-			session.user.name = token.sub
+			session.address = token.sub?.toLowerCase()
+			session.user.name = token.sub?.toLowerCase()
 			session.wallet = token.wallet
 
 			return session

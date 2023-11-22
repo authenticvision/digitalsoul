@@ -32,10 +32,7 @@ export default async function handle(req, res) {
 
 	const wallet = await prisma.wallet.findUnique({
 		where: {
-			address: {
-				equals: address,
-				mode: "insensitive"
-			}
+			address: address?.toLowerCase()
 		}
 	})
 
@@ -50,7 +47,7 @@ export default async function handle(req, res) {
 
 	try {
 		const { data: response, status } = await api.claimNFT(
-			avSip, wallet.address
+			avSip, wallet.address?.toLowerCase()
 		)
 
 		if (status == 200) {

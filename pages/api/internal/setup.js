@@ -12,7 +12,7 @@ const registerInstance = async({ wallet, config }) => {
 	const hostURL = `${process.env.PROTOCOL}${process.env.HOST}:${process.env.PORT}`
 
 	const data = {
-		registrar: wallet.address,
+		registrar: wallet.address?.toLowerCase(),
 		instance_api_data: config.instanceApiKey,
 		authorization: config.signedMessage,
 		uri: hostURL,
@@ -38,6 +38,7 @@ const registerInstance = async({ wallet, config }) => {
 
 const createWalletAndConfig = async({ address, instanceApiKey, signedMessage }) => {
 	try {
+		address = address?.toLowerCase()
 		return await prisma.$transaction(async(tx) => {
 			let wallet = await prisma.wallet.upsert({
 				where: {

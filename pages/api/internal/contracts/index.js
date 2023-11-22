@@ -105,7 +105,7 @@ export default async function handle(req, res) {
 
 	const wallet = await prisma.wallet.findUnique({
 		where: {
-			address
+			address: address?.toLowerCase()
 		}
 	})
 

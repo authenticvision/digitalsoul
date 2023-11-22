@@ -11,8 +11,6 @@ export default async function handle(req, res) {
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
-	let errorMsg
-
 	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
 		return res.status(405).json({ message: 'Method not allowed.' })
 	}
@@ -25,7 +23,7 @@ export default async function handle(req, res) {
 
 	const wallet = await prisma.wallet.findUnique({
 		where: {
-			address
+			address: address?.toLowerCase()
 		}
 	})
 
