@@ -1,29 +1,23 @@
-import React, { useState, useEffect } from 'react'
+import useSWR from 'swr'
+
+const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
 export const useContracts = (csn, address) => {
-	const [contracts, setContracts] = useState([])
-	const [error, setError] = useState()
-	const [isLoading, setIsLoading] = useState(true)
-
-	useEffect(() => {
-		async function fetchContracts() {
-			try {
-				const response = await fetch(`/api/internal/wallets/${address}/contracts`)
-				const data = await response.json()
-
-				setContracts(data.contracts)
-				setIsLoading(false)
-			} catch (error) {
-				setError(error)
-			}
+	if (!address || !csn) {
+		return {
+			contracts: [],
+			isLoading: true
 		}
+	}
 
-		fetchContracts()
-	}, [csn, address])
+	const { data, error, isLoading, mutate } = useSWR(
+		`/api/internal/wallets/${address}/contracts`, fetcher
+	)
 
 	return {
+		contracts: data?.contracts || [],
 		error,
-		isLoading,
-		contracts
+		mutate,
+		isLoading
 	}
 }
