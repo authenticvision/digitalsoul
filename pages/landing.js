@@ -95,7 +95,7 @@ export async function getServerSideProps(context) {
 						anchor: assetData.anchor,
 						contract: {
 							csn: assetData.contract.csn
-						}
+						},
 					},
 					include: {
 						contract: true,
@@ -147,7 +147,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	const [error, setError] = useState(errorMsg)
 	const [newOwner, setNewOwner] = useState()
 	const [ownershipStatus, setOwnershipStatus] = useState(
-		assetData?.owner == wallet?.address ? OWNER_STATUS : RECEIVING_STATUS
+		assetData?.owner.toLowerCase() == wallet?.address.toLowerCase() ? OWNER_STATUS : RECEIVING_STATUS
 	)
 
 	const CurrentCard = useCallback(() => {
@@ -167,7 +167,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	}, [ownershipStatus, nft, wallet, assetData, newOwner])
 
 	const nftWasClaimed = (result) => {
-		if (wallet.address == result.owner) {
+		if (wallet.address.toLowerCase() == result.owner.toLowerCase()) {
 			return false
 		} else {
 			return true
@@ -175,7 +175,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	}
 
 	const nftWasTransfered = (result) => {
-		if (wallet.address != result.owner) {
+		if (wallet.address.toLowerCase() != result.owner.toLowerCase()) {
 			return false
 		} else {
 			return true
