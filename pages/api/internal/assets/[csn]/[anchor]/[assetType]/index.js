@@ -48,7 +48,8 @@ const softDeleteAssetsFromNFT = async (nft, assetType) => {
 					}
 				},
 				data: {
-					active: false
+					active: false,
+					updatedAt: new Date()
 				}
 			})
 		})
