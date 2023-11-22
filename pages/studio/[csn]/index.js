@@ -26,7 +26,7 @@ export async function getServerSideProps(context) {
 
 	const { csn } = context.query
 
-	const wallet = { id: session.wallet.id, address: session.wallet.address }
+	const wallet = { id: session.wallet.id, address: session.wallet.address?.toLowerCase() }
 
 	const contract = await prisma.contract.findFirst({
 		where: {

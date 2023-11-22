@@ -32,7 +32,7 @@ export async function getServerSideProps(context) {
 	if (session) {
 		wallet = await prisma.wallet.findUnique({
 			where: {
-				address: session.address
+				address: session.address?.toLowerCase()
 			}
 		})
 
