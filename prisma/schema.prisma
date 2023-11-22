@@ -21,13 +21,13 @@ model Config {
 }
 
 model Wallet {
-  id         String       @id @default(cuid())
-  address    String       @unique
-  email      String?      @unique
-  createdAt  DateTime     @default(now()) @map(name: "created_at")
-  updatedAt  DateTime     @default(now()) @map(name: "updated_at")
+  id         String     @id @default(cuid())
+  address    String     @unique
+  email      String?    @unique
+  createdAt  DateTime   @default(now()) @map(name: "created_at")
+  updatedAt  DateTime   @default(now()) @map(name: "updated_at")
   contracts  Contract[]
-  assetsNFTs AssetsNFTs[]
+  assetsNFTs AssetNFT[]
 
   @@map(name: "wallets")
 }
@@ -69,8 +69,8 @@ model NFT {
   contractId String   @map(name: "contract_id")
 
   // New back-reference field:
-  defaultForContract Contract?    @relation("DefaultNFT")
-  assets             AssetsNFTs[]
+  defaultForContract Contract?  @relation("DefaultNFT")
+  assets             AssetNFT[]
 
   @@map(name: "nfts")
 }
@@ -83,17 +83,15 @@ model Asset {
   originalFileName String @map(name: "original_file_name")
   filePath         String @map(name: "file_path")
 
-  assetType String @map(name: "asset_type")
-
-  createdAt  DateTime     @default(now()) @map(name: "created_at")
-  updatedAt  DateTime     @default(now()) @map(name: "updated_at")
-  contractId String       @map(name: "contract_id")
-  nfts       AssetsNFTs[]
+  createdAt  DateTime   @default(now()) @map(name: "created_at")
+  updatedAt  DateTime   @default(now()) @map(name: "updated_at")
+  contractId String     @map(name: "contract_id")
+  nfts       AssetNFT[]
 
   @@map(name: "assets")
 }
 
-model AssetsNFTs {
+model AssetNFT {
   asset Asset @relation(fields: [assetId], references: [id])
   nft   NFT   @relation(fields: [nftId], references: [id])
 
