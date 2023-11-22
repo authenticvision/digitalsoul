@@ -46,7 +46,11 @@ export async function getServerSideProps(context) {
 		},
 		include: {
 			contract: true,
-			assets: true
+			assets: {
+				include: {
+					asset:true
+				}
+			}
 		}
 	})
 
