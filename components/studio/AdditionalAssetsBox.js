@@ -8,14 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import editImg from '@/public/icons/edit.svg'
 
-// recebe um nft e puxa a lista de assets desse nft
-// cospe um evento de mudanças para o parent
-// pode remover um asset
-// adicionar um novo asset na lista interna
-
 const AdditionalAssetsBox = ({ nft, onUpdate, ...props }) => {
-	console.log(nft)
-
 	const [newAssetType, setNewAssetType] = useState('')
 	const uploadModal = useRef(null)
 
@@ -23,11 +16,11 @@ const AdditionalAssetsBox = ({ nft, onUpdate, ...props }) => {
 		uploadModal.current.showModal()
 	}
 
-	const onCancelUpload = () => {
-	}
+	const onCancelUpload = () => {}
 
 	const onFinishUploading = (e) => {
 		uploadModal.current.close()
+		setNewAssetType('')
 
 		onUpdate()
 	}
