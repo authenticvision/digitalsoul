@@ -8,7 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import editImg from '@/public/icons/edit.svg'
 
-const AdditionalAssetsBox = ({ nft, onUpdate, ...props }) => {
+const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 	const [newAssetType, setNewAssetType] = useState('')
 	const uploadModal = useRef(null)
 
@@ -25,12 +25,41 @@ const AdditionalAssetsBox = ({ nft, onUpdate, ...props }) => {
 		onUpdate()
 	}
 
+	const removeAsset = async (assetHash) => {
+		try {
+			const response = await fetch(`/api/internal/assets/${nft.anchor}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					assetHash
+				}),
+			})
+
+			const data = await response.json()
+
+			if (response.ok) {
+				onUpdate()
+			} else {
+				onError(data.message)
+			}
+		} catch (error) {
+			console.error('Error: ', error)
+			onError('There was an error while trying to communicate with the API')
+		}
+	}
+
+	const onRemoveAsset = async (assetHash) => {
+		await removeAsset(assetHash)
+	}
+
 	return (
 		<ElementBox title="Additional Assets">
 			<div className="flex flex-col">
 				<ul>
 					{nft.assets.map((asset) => (
-						<li>
+						<li key={asset.assetHash}>
 							<div>
 								{asset.assetType}:
 								<Link className="ml-2 link" target="_blank"
@@ -38,9 +67,10 @@ const AdditionalAssetsBox = ({ nft, onUpdate, ...props }) => {
 										{formatAddress(asset.assetHash)}
 								</Link>
 
-								<span className="ml-2 btn btn-ghost btn-xs text-lg">
+								<button onClick={() => onRemoveAsset(asset.assetHash)}
+									className="ml-2 btn btn-ghost btn-sm">
 									×
-								</span>
+								</button>
 							</div>
 						</li>
 					))}

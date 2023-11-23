@@ -1,17 +1,26 @@
-import React, { useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import Link from 'next/link'
 import { TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
 import { formatAddress, generateAssetURL } from '@/lib/utils'
+import { Alert } from '@/components/ui'
 import { AdditionalAssetsBox, TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
 import Image from 'next/image'
 
 // TODO: Split this component into two, a standalone header & the body
 const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
-
+	const [error, setError] = useState()
 	// There is a special anchor called 'default'.. In this case, it's a collection's default NFT
 	// and does not have an actual SLID or actual anchor.
 	// TODO this duplicates logic from NFTCaption
 	const staticCaption = nft.anchor == 'default' ? 'DEFAULT-NFT' : null
+
+	const onError = (error) => {
+		setError(error)
+
+		setTimeout(() => {
+			setError()
+		}, 3000)
+	}
 
 	return (
 		<>
@@ -53,7 +62,7 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 							{staticCaption ? (
 								<div className="font-bold text-lg">{staticCaption}</div>
 							) : (
-								<div >
+								<div>
 									<NFTCaption nft={nft} />
 									<h2 className="text-1xl text-gray-400">
 										owned by <span className="font-bold text-white">
@@ -61,6 +70,11 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 										</span>
 									</h2>
 
+									{error && (
+										<div className="mt-2">
+											<Alert type='error' text={error} />
+										</div>
+									)}
 								</div>
 							)}
 
@@ -73,7 +87,9 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 							</div>
 
 							<div className="py-6 w-full">
-								<AdditionalAssetsBox nft={nft} onUpdate={onFinishEditing} />
+								<AdditionalAssetsBox nft={nft}
+									onUpdate={onFinishEditing}
+									onError={onError} />
 							</div>
 						</div>
 					</div>
