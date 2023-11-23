@@ -58,20 +58,20 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 	return (
 		<ElementBox title="Assets">
 			<div className="flex flex-col">
+				<p>Refer <Link className = "link" href="https://docs.opensea.io/docs/metadata-standards" target="blank">OpenSea MetaData Standard</Link></p>
 				<ul>
 					{nft.assets.filter( (obj) => {return obj.active}).map((asset) => (
 						<li key={asset.asset.assetHash}>
 							<div>
+								<button onClick={() => onRemoveAsset(asset)}
+									className="ml-2 btn btn-ghost btn-sm">
+									X
+								</button>
 								{asset.assetType}:
 								<Link className="ml-2 link" target="_blank"
 									href={`/api/v1/assets/${nft.contract.csn}/${asset.asset.assetHash}`}>
 										{asset.asset.originalFileName}
 								</Link>
-
-								<button onClick={() => onRemoveAsset(asset)}
-									className="ml-2 btn btn-ghost btn-sm">
-									×
-								</button>
 							</div>
 						</li>
 					))}

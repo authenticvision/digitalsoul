@@ -102,6 +102,7 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 							<label className="label">
 								<span className="label-text-alt text-error">{error}</span>
 							</label>
+							<p>Refer <Link className = "link" href="https://docs.opensea.io/docs/metadata-standards" target="blank">OpenSea MetaData Standard</Link></p>
 						</div>
 
 						<div className="flex flex-row justify-between">
