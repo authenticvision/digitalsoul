@@ -38,14 +38,11 @@ const STORAGE_DIR = process.env.STORAGE_DIR
 
 const softDeleteAssetsFromNFT = async (nft, assetType) => {
 	const ids = nft.assets
-		.filter((nftAsset) => nftAsset.assetType == assetType)
+		.filter((nftAsset) => nftAsset.assetType == assetType && nftAsset.active == true)
 		.map(async(nftAsset) => {
 			return await prisma.assetNFT.update({
 				where: {
-					assetId_nftId: {
-						nftId: nft.id,
-						assetId: nftAsset.assetId
-					}
+					id: nftAsset.id
 				},
 				data: {
 					active: false,
@@ -163,7 +160,7 @@ export default async function handle(req, res) {
 	if (req.method == 'DELETE') {
 		// FIXME THIS IS SUPER DIRTY!!
 		console.log(`Soft-deleted ${assetType} from ${nft.anchor}@${nft.contract.csn}`)
-		return {}
+		return res.json({ ... nft})
 	}
 
 	const form = new formidable.IncomingForm()

@@ -92,8 +92,9 @@ model Asset {
 }
 
 model AssetNFT {
-  asset Asset @relation(fields: [assetId], references: [id])
-  nft   NFT   @relation(fields: [nftId], references: [id])
+  id    String  @id @default(cuid())
+  asset Asset   @relation(fields: [assetId], references: [id])
+  nft   NFT     @relation(fields: [nftId], references: [id])
 
   assetId   String  @map(name: "asset_id")
   nftId     String  @map(name: "nft_id")
@@ -108,6 +109,5 @@ model AssetNFT {
   updatedAt  DateTime @default(now()) @map(name: "updated_at")
   assignedAt DateTime @default(now()) @map(name: "assigned_at")
 
-  @@id([assetId, nftId])
   @@map(name: "assets_nfts")
 }
