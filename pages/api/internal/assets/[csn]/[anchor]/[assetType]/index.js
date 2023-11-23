@@ -12,7 +12,7 @@ import { readFileSync, renameSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { keccak256, id } from 'ethers'
 import { tmpdir } from "os"
 
-const allowedMethods = ['POST']
+const allowedMethods = ['POST', 'DELETE']
 
 const allowedMimeTypes = [
 	mime.getType('jpg'),
@@ -20,11 +20,11 @@ const allowedMimeTypes = [
 	mime.getType('png'),
 	//mime.getType('webp'), // Stop support for webp, see https://github.com/authenticvision/digitalsoul/issues/43
 	//mime.getType('m4a'),
-	//mime.getType('mp4'),
+	mime.getType('mp4'),
 	//mime.getType('mkv'),
 	//mime.getType('avi'),
 	// mime.getType('webm'), // Stop support for webm, see https://github.com/authenticvision/digitalsoul/issues/43
-	//mime.getType('mov'),
+	mime.getType('mov'),
 	//mime.getType('wmv')
 ]
 
@@ -156,8 +156,15 @@ export default async function handle(req, res) {
 		}
 	})
 
+	
 	// TODO: Migrate this into a service
 	await softDeleteAssetsFromNFT(nft, assetType)
+
+	if (req.method == 'DELETE') {
+		// FIXME THIS IS SUPER DIRTY!!
+		console.log(`Soft-deleted ${assetType} from ${nft.anchor}@${nft.contract.csn}`)
+		return {}
+	}
 
 	const form = new formidable.IncomingForm()
 	const tmpDir = path.join(process.env.STORAGE_DIR, "upload")

@@ -25,15 +25,16 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 		onUpdate()
 	}
 
-	const removeAsset = async (assetHash) => {
+	const removeAsset = async (asset) => {
+		console.log(asset)
+
 		try {
-			const response = await fetch(`/api/internal/assets/${nft.anchor}`, {
+			const response = await fetch(`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/${asset.assetType}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					assetHash
 				}),
 			})
 
@@ -50,24 +51,24 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 		}
 	}
 
-	const onRemoveAsset = async (assetHash) => {
-		await removeAsset(assetHash)
+	const onRemoveAsset = async (asset) => {
+		await removeAsset(asset)
 	}
 
 	return (
-		<ElementBox title="Additional Assets">
+		<ElementBox title="Assets">
 			<div className="flex flex-col">
 				<ul>
-					{nft.assets.map((asset) => (
-						<li key={asset.assetHash}>
+					{nft.assets.filter( (obj) => {return obj.active}).map((asset) => (
+						<li key={asset.asset.assetHash}>
 							<div>
 								{asset.assetType}:
 								<Link className="ml-2 link" target="_blank"
-									href={`/api/v1/assets/${asset.assetHash}`}>
-										{formatAddress(asset.assetHash)}
+									href={`/api/v1/assets/${nft.contract.csn}/${asset.asset.assetHash}`}>
+										{formatAddress(asset.asset.assetHash)}
 								</Link>
 
-								<button onClick={() => onRemoveAsset(asset.assetHash)}
+								<button onClick={() => onRemoveAsset(asset)}
 									className="ml-2 btn btn-ghost btn-sm">
 									×
 								</button>
@@ -86,7 +87,7 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 									className="input input-bordered w-full max-w-xs" />
 							</div>
 
-							<FileUploader disabled={!newAssetType} endpoint={`/api/internal/assets/${nft.anchor}/${newAssetType}`} maxFiles={1}
+							<FileUploader disabled={!newAssetType} endpoint={`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/${newAssetType}`} maxFiles={1}
 								onFinish={onFinishUploading} assetType={newAssetType} />
 
 							<div className="modal-action">

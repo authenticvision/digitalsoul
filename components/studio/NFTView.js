@@ -1,10 +1,7 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
-import { formatAddress, generateAssetURL } from '@/lib/utils'
 import { Alert } from '@/components/ui'
 import { AdditionalAssetsBox, TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
-import Image from 'next/image'
 
 // TODO: Split this component into two, a standalone header & the body
 const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {

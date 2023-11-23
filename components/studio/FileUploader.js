@@ -14,7 +14,7 @@ registerPlugin(
 )
 
 const FileUploader = ({
-	allowMultiple, endpoint, maxFiles, maxSize = '3MB', onFinish, disabled, ...props
+	allowMultiple, endpoint, maxFiles, maxSize = '30MB', onFinish, disabled, ...props
 }) => {
 	const [assets, setAssets] = useState([])
 
