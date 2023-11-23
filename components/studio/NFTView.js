@@ -1,6 +1,8 @@
 import React, { useRef } from 'react'
 import Link from 'next/link'
 import { TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
+import { formatAddress, generateAssetURL } from '@/lib/utils'
+import { AdditionalAssetsBox, TraitsBox, MetadataBox, NFTImageEdit, NFTCaption } from '@/components/studio'
 import Image from 'next/image'
 
 // TODO: Split this component into two, a standalone header & the body
@@ -68,6 +70,10 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 
 							<div className="py-6 w-full">
 								<TraitsBox nft={nft} />
+							</div>
+
+							<div className="py-6 w-full">
+								<AdditionalAssetsBox nft={nft} onUpdate={onFinishEditing} />
 							</div>
 						</div>
 					</div>
