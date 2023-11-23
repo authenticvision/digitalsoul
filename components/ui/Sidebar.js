@@ -9,13 +9,14 @@ const Sidebar = ({ address, ...props }) => {
 	const router = useRouter()
 	const pathname = usePathname()
 	const { csn } = router.query
-	const { contracts, isLoading } = useContracts(csn, address)
+	const { contracts, isLoading, error } = useContracts(csn, address)
 
 	const currentContract = contracts
 		.find((item) => item.csn.toLowerCase() == csn)
 
 	const isAtNFT = (csn) => pathname.match(`/studio/${csn.toLowerCase()}`)
 	const isAtConfig = (csn) => pathname == `/studio/${csn.toLowerCase()}/settings`
+	const isAtAssets = (csn) => pathname == `/studio/${csn.toLowerCase()}/assets`
 
 	const contractClasses = (contractId) => cn(
 		'font-bold link',
@@ -25,13 +26,19 @@ const Sidebar = ({ address, ...props }) => {
 	const contractSubItemsClasses = (contract) => cn(
 		'font-bold ml-4 mt-2',
 		currentContract.id == contract.id ? 'text-white' : 'text-gray-400',
-		isAtNFT(contract.csn) && !isAtConfig(contract.csn) ? 'link' : 'link-hover'
+		isAtNFT(contract.csn) && (!isAtConfig(contract.csn) && !isAtAssets(contract.csn)) ? 'link' : 'link-hover'
 	)
 
 	const configClasses = (contract) => cn(
 		"font-bold ml-4 mt-2",
 		(currentContract.id == contract.id) ? 'text-white' : 'text-gray-400',
 		isAtConfig(contract.csn) ? 'link' : 'link-hover'
+	)
+
+	const assetClasses = (contract) => cn(
+		"font-bold ml-4 mt-2",
+		(currentContract.id == contract.id) ? 'text-white' : 'text-gray-400',
+		isAtAssets(contract.csn) ? 'link' : 'link-hover'
 	)
 
 	return (
@@ -57,6 +64,11 @@ const Sidebar = ({ address, ...props }) => {
 										<Link href={`/studio/${contract.csn.toLowerCase()}`}
 											  className={contractSubItemsClasses(contract)}>
 											Collection
+										</Link>
+
+										<Link href={`/studio/${contract.csn.toLowerCase()}/assets`}
+											  className={assetClasses(contract)}>
+											Assets
 										</Link>
 
 										<Link href={`/studio/${contract.csn.toLowerCase()}/settings`}
