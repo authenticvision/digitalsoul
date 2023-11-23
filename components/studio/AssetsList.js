@@ -5,10 +5,19 @@ import { useRouter } from 'next/router'
 import { useAssets } from '@/hooks'
 
 import { Header } from '@/components/studio'
+import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
 
-const AssetCard = ({ asset, ...props }) => {
+import { PlusCircleIcon } from '@heroicons/react/24/outline'
+
+const AssetCard = ({ asset, csn, ...props }) => {
+	const assetURL  = generateAssetURL(
+		csn, asset.assetHash
+	)
+
 	return (
-		<div>{asset.id}</div>
+		<div className="relative">
+			<img className="h-auto max-w-full rounded-lg" src={assetURL} />
+		</div>
 	)
 }
 
@@ -17,6 +26,9 @@ const AssetsList = ({ contract, ...props }) => {
 	const { csn } = router.query
 	const { assets, error, isLoading } = useAssets(contract.csn)
 	const [mode, setMode] = useState('card')
+
+	const onAddAsset = () => {
+	}
 
 	return (
 		<div className="flex">
@@ -38,11 +50,17 @@ const AssetsList = ({ contract, ...props }) => {
 						<Header contractName={contract.name}
 								title={'Assets'}
 								disableInteractions={true} />
+
+						<div className="flex mr-8 pb-8 items-center">
+							<button onClick={onAddAsset} className="flex items-center justify-center w-10 h-10 rounded-full bg-raven-700 hover:bg-raven-600">
+								<PlusCircleIcon className="w-6 h-6 text-white" />
+							</button>
+						</div>
 					</div>
 
-					<div className="flex w-full ml-8 mt-8">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 ml-8 pr-4">
 						{assets.map((asset) => (
-							<AssetCard key={asset.id} asset={asset} />
+							<AssetCard key={asset.id} csn={contract.csn} asset={asset} />
 						))}
 					</div>
 				</div>
