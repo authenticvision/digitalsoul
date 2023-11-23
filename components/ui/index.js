@@ -9,6 +9,7 @@ import AppLayout from './AppLayout'
 import Sidebar from './Sidebar'
 import ErrorPage from './ErrorPage'
 import Tooltip from './Tooltip'
+import ElementBox from './ElementBox'
 
 export {
 	Logo,
@@ -20,6 +21,7 @@ export {
 	AppLayout,
 	Sidebar,
 	ErrorPage,
+	ElementBox,
 	NavBarMenu,
 	Tooltip,
 }
