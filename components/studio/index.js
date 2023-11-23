@@ -11,6 +11,7 @@ import MetadataBox from './MetadataBox'
 import EditableContractSettings from './EditableContractSettings'
 import AdditionalAssetsBox from './AdditionalAssetsBox'
 import FileUploader from './FileUploader'
+import AssetsList from './AssetsList'
 
 export {
 	Header,
@@ -22,6 +23,8 @@ export {
 	MetadataBox,
 	NFTImageEdit,
 	NFTImageUploader,
+	NFTCaption,
+	AssetsList,
 	EditableContractSettings,
 	FileUploader,
 	AdditionalAssetsBox,
