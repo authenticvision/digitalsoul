@@ -156,7 +156,7 @@ export default async function handle(req, res) {
 		let nftMetaData = nftToReturn.metadata? nftToReturn.metadata : {}
 		// Filling the assets
 		// Note this overwrites any pre-existing keys
-		nftToReturn.assets.map((a) => {
+		nftToReturn.assets.filter( (a) => {return a.active}).map((a) => {
 			const asset = a.asset
 
 			return nftMetaData[a.assetType] = new URL(
