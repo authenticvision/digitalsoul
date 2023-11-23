@@ -65,7 +65,7 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 								{asset.assetType}:
 								<Link className="ml-2 link" target="_blank"
 									href={`/api/v1/assets/${nft.contract.csn}/${asset.asset.assetHash}`}>
-										{formatAddress(asset.asset.assetHash)}
+										{asset.asset.originalFileName}
 								</Link>
 
 								<button onClick={() => onRemoveAsset(asset)}
