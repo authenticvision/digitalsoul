@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
-import { formatAddress, fillVariablesIntoString } from '@/lib/utils'
+import { formatAddress, fillVariablesIntoString, fixedLengthHexString } from '@/lib/utils'
 
 const allowedMethods = ['GET']
 
@@ -74,7 +74,8 @@ export default async function handle(req, res) {
 	let nft
 
 	// TODO: Sanitize this
-	const { csn, anchor } = req.query
+	const { csn } = req.query
+	const anchor = fixedLengthHexString(req.query.anchor, 64) // Anchors are bytes32, pad to 0x{64} characters
 
 	try {
 		contract = await prisma.contract.findFirst({
