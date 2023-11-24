@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
-import { formatAddress, fillVariablesIntoString, fixedLengthHexString } from '@/lib/utils'
+import { formatAddress, fillVariablesIntoString, fixedLengthHexString, nftHasActiveAssets } from '@/lib/utils'
 
 const allowedMethods = ['GET']
 
@@ -63,6 +63,8 @@ function fillMetadataVariables(metadata, nft) {
 	const strMetadataFilled = fillVariablesIntoString(strMetadata, variables)
 	return JSON.parse(fillVariablesIntoString(strMetadataFilled, variables)) // parse it back to an object
 }
+
+
 
 export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
@@ -136,10 +138,10 @@ export default async function handle(req, res) {
 		}
 
 		let nftToReturn = undefined
-		if (nft.metadata || nft.assets.length > 0) {
+		if (nft.metadata || nftHasActiveAssets(nft)) {
 			nftToReturn = nft
 		} else {
-			if (nft.contract?.defaultNft.metadata || nft.contract?.defaultNft.assets.length > 0) {
+			if (nft.contract?.defaultNft.metadata || nftHasActiveAssets(nft.contract?.defaultNft)) {
 				nftToReturn = nft.contract.defaultNft
 			}
 		}
