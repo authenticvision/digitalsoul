@@ -27,6 +27,5 @@ export {
 	AssetsList,
 	EditableContractSettings,
 	FileUploader,
-	AdditionalAssetsBox,
-	NFTCaption
+	AdditionalAssetsBox
 }
