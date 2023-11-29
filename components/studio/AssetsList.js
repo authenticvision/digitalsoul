@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
-import { Loading } from '@/components/ui'
+import { Loading, Modal } from '@/components/ui'
 import { useRouter } from 'next/router'
 import { useAssets } from '@/hooks'
 
@@ -25,9 +25,14 @@ const AssetsList = ({ contract, ...props }) => {
 	const router = useRouter()
 	const { csn } = router.query
 	const { assets, error, isLoading } = useAssets(contract.csn)
-	const [mode, setMode] = useState('card')
+	const uploadAssetModal = useRef(null)
 
 	const onAddAsset = () => {
+		uploadAssetModal.current.showModal()
+	}
+
+	const onCloseModal = () => {
+		uploadAssetModal.current.close()
 	}
 
 	return (
@@ -52,10 +57,14 @@ const AssetsList = ({ contract, ...props }) => {
 								disableInteractions={true} />
 
 						<div className="flex mr-8 pb-8 items-center">
-							<button onClick={onAddAsset} className="flex items-center justify-center w-10 h-10 rounded-full bg-raven-700 hover:bg-raven-600">
+							<button type="button" onClick={onAddAsset} className="flex items-center justify-center w-10 h-10 rounded-full bg-raven-700 hover:bg-raven-600">
 								<PlusCircleIcon className="w-6 h-6 text-white" />
 							</button>
 						</div>
+
+						<Modal refObj={uploadAssetModal}>
+							Oi
+						</Modal>
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 ml-8 pr-4">
