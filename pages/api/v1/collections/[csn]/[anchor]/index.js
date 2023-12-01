@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
-import { formatAddress, fillVariablesIntoString } from '@/lib/utils'
+import { formatAddress, fillVariablesIntoString, fixedLengthHexString, nftDefined } from '@/lib/utils'
 
 const allowedMethods = ['GET']
 
@@ -64,6 +64,8 @@ function fillMetadataVariables(metadata, nft) {
 	return JSON.parse(fillVariablesIntoString(strMetadataFilled, variables)) // parse it back to an object
 }
 
+
+
 export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
 	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
@@ -74,7 +76,8 @@ export default async function handle(req, res) {
 	let nft
 
 	// TODO: Sanitize this
-	const { csn, anchor } = req.query
+	const { csn } = req.query
+	const anchor = fixedLengthHexString(req.query.anchor, 64) // Anchors are bytes32, pad to 0x{64} characters
 
 	try {
 		contract = await prisma.contract.findFirst({
@@ -135,10 +138,10 @@ export default async function handle(req, res) {
 		}
 
 		let nftToReturn = undefined
-		if (nft.metadata || nft.assets.length > 0) {
+		if (nftDefined(nft)) {
 			nftToReturn = nft
 		} else {
-			if (nft.contract?.defaultNft.metadata || nft.contract?.defaultNft.assets.length > 0) {
+			if (nftDefined(nft.contract?.defaultNft)) {
 				nftToReturn = nft.contract.defaultNft
 			}
 		}
