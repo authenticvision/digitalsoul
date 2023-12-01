@@ -1,7 +1,7 @@
-const Modal = ({ refObj, onOpen, onClose, children, ...props }) => {
+const Modal = ({ refObj, onOpen, onClose, children, className, ...props }) => {
 	return (
 		<dialog ref={refObj} id="nft-modal" className="modal">
-			<div className="modal-box">
+			<div className={`modal-box ${className}`}>
 				<div>
 					{children}
 				</div>
