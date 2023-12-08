@@ -12,7 +12,8 @@
     "db:reset": "prisma db push --force-reset",
     "prod:db": "npx prisma generate && npx prisma migrate deploy",
     "dev:migrate": "prisma migrate dev && npm run dev",
-    "prod:migrate:start": "npm run prod:db && npm run start"
+    "prod:migrate:start": "npm run prod:db && npm run start",
+    "test": "export $(xargs < .env.test) && NODE_ENV=test jest"
   },
   "dependencies": {
     "@ethersproject/keccak256": "^5.7.0",
@@ -34,9 +35,12 @@
     "formidable-serverless": "^1.1.1",
     "lottie-react": "^2.4.0",
     "mime": "^3.0.0",
+    "nanoid": "^5.0.3",
     "next": "13.4.18",
     "next-auth": "^4.23.1",
+    "node-mocks-http": "^1.13.0",
     "paseto": "^3.1.4",
+    "pg": "^8.11.3",
     "postcss": "8.4.28",
     "prisma": "^5.1.1",
     "react": "18.2.0",
@@ -51,5 +55,12 @@
     "zod": "^3.22.2",
     "zod-validation-error": "^2.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-mock-extended": "^3.0.5"
+  }
 }
