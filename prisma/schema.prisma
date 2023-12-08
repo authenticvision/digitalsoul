@@ -63,6 +63,7 @@ model NFT {
   anchor   String
   slid     String
   metadata Json?
+  privateData Json? @map(name: "private_data")
 
   createdAt  DateTime @default(now()) @map(name: "created_at")
   updatedAt  DateTime @default(now()) @map(name: "updated_at")
