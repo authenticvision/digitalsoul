@@ -16,7 +16,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - .:/srv/app
       - /srv/app/.next
@@ -25,6 +26,11 @@ services:
 
   db:
     image: postgres:15-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .db.env
     volumes:
