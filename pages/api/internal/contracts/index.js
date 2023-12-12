@@ -4,32 +4,12 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import MetaAnchor from '@/lib/api.metaanchor.io'
+import { fetchAnchors, storeNFTS } from "../contract/[csn]/fetchNfts"
 
 const allowedMethods = ['POST']
 
 const claimContract = async(api, csn, signedMessage) => {
 	return await api.claimContract(csn, signedMessage)
-}
-
-const fetchAnchors = async(api, csn) => {
-	return await api.getAnchors(csn)
-}
-
-const storeNFTS = async(anchors, contract) => {
-	return await Promise.all(anchors.map(async(anchor) => {
-		return await prisma.NFT.create({
-			data: {
-				slid: anchor.slid,
-				anchor: anchor.anchor,
-				metadata: undefined, // per default, do not set any metadata. Crucial for contract.default_nft logic to work
-				contract: {
-					connect: {
-						id: contract.id
-					}
-				}
-			}
-		})
-	}))
 }
 
 const storeContracts = async(signedContracts, wallet) => {
@@ -129,6 +109,8 @@ export default async function handle(req, res) {
 
 		// TODO: Move this to a background job instead of doing it here!
 		for (const contract of contracts) {
+			// TODO replace this via API-Call to /api/internal/contract/[CSN]/fetchNfts
+			// this is currently not possible due to the atomic commit structure and the endpoint fetching contracts via prisma
 			const { data: anchors } = await fetchAnchors(api, contract.csn)
 
 			if (anchors.length) {
