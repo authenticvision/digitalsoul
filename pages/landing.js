@@ -152,6 +152,8 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 	const [ownershipStatus, setOwnershipStatus] = useState(
 		addressMatch(assetData?.owner, wallet?.address) ? OWNER_STATUS : RECEIVING_STATUS
 	)
+	const [assetDataState, setAssetDataState] = useState(assetData);
+
 
 	const CurrentCard = useCallback(() => {
 		switch (ownershipStatus) {
@@ -159,15 +161,15 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 			// where the user can upload an image, as soon as uploaded, forward to RECEIVING_STATUS
 			// and actually claim it
 			case OWNER_STATUS:
-				return (<OwnerCardView wallet={wallet} assetData={assetData} />)
+				return (<OwnerCardView wallet={wallet} assetData={assetDataState} />)
 			case RECEIVING_STATUS:
-				return (<ReceivingCardView wallet={wallet} assetData={assetData} />)
+				return (<ReceivingCardView wallet={wallet} assetData={assetDataState} />)
 			case LOST_STATUS:
 				return (<LostCardView wallet={wallet} newOwner={newOwner} />)
 			default:
-				return (<ReceivingCardView wallet={wallet} assetData={assetData} />)
+				return (<ReceivingCardView wallet={wallet} assetData={assetDataState} />)
 		}
-	}, [ownershipStatus, nft, wallet, assetData, newOwner])
+	}, [ownershipStatus, nft, wallet, assetData, newOwner, assetDataState])
 
 	const nftWasClaimed = (result) => {
 		if (addressMatch(wallet.address, result.owner)) {
@@ -214,7 +216,8 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 		const data = response.json()
 
 		if (response.ok) {
-			await poll(verifySipToken, nftWasClaimed, 3000)
+			const result = await poll(verifySipToken, nftWasClaimed, 3000)
+			setAssetDataState(result); // Update the asset data state
 			setOwnershipStatus(OWNER_STATUS)
 		} else {
 			setError('Something went wrong when trying to claim NFT')
@@ -223,6 +226,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 
 	const checkNFTOwnership = async () => {
 		const result = await poll(verifySipToken, nftWasTransfered, 3000)
+		setAssetDataState(result); // Update the asset data state
 		setNewOwner(result.owner)
 		setOwnershipStatus(LOST_STATUS)
 	}
@@ -253,7 +257,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, props }) 
 
 					{!error && (
 						<div className="flex justify-center py-2 flex-col">
-							<CurrentCard nft={nft} assetData={assetData} wallet={wallet} />
+							<CurrentCard nft={nft} assetData={assetDataState} wallet={wallet} />
 						</div>
 					)}
 				</main>
