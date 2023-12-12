@@ -98,7 +98,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 	})
 
 	describe('private data', () => {
-		it('responds with the variable name when the private data is not set', async () => {
+		it('replaces variable with empty string when private data is not set', async () => {
 			const wallet = await ctx.db.wallet.create({
 				data: {
 					address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // this is the first hardhat testing wallet
@@ -132,7 +132,8 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 						"attributes": [{
 							"type": "SuperFancy",
 							"value": "[MY_PRIVATE_VALUE]"
-						}]
+						}],
+						"an_array": ["PRESERVE_THIS"] // This is NOT a variable and needs to stay untouched preserved
 					},
 					privateData: {
 						"something-else": "002"
@@ -157,78 +158,13 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			const data = await res._getJSONData()
 
 			expect(data).toEqual({
-				name: 'DigitalSoul #[MY_PRIVATE_VALUE]',
+				name: 'DigitalSoul #',
 				description: "Contract is deployed at 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF as 'Deadbeef'",
 				some: "value",
+				an_array: ["PRESERVE_THIS"],
 				attributes: [{
 					type: "SuperFancy",
-					value: "[MY_PRIVATE_VALUE]"
-				}]
-			})
-		})
-
-		it('responds with the variable name when the private data is not set', async () => {
-			const wallet = await ctx.db.wallet.create({
-				data: {
-					address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // this is the first hardhat testing wallet
-				}
-			})
-
-			const contract = await ctx.db.contract.create({
-				data: {
-					csn: 'BEEF',
-					name: 'Deadbeef',
-					address: '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
-					network: 'local-test',
-					settings: {
-						NFT_NAME: "DigitalSoul #[MY_PRIVATE_VALUE]", // Tests the contract-wise settings including Variables
-						NFT_DESCRIPTION: "Contract is deployed at [CONTRACT_ADDRESS] as '[COLLECTION_NAME]'" //
-					},
-					owner: {
-						connect: {
-							id: wallet.id
-						}
-					}
-				}
-			})
-
-			const nft = await ctx.db.NFT.create({
-				data: {
-					slid: 'TEST',
-					anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731',
-					metadata: {
-						"some": "value",
-						"attributes": [{
-							"type": "SuperFancy",
-							"value": "[MY_PRIVATE_VALUE]"
-						}]
-					},
-					contract: {
-						connect: {
-							id: contract.id
-						}
-					}
-				}
-			})
-
-			const { req, res } = createMocks({
-				method: 'GET',
-				query: {
-					csn: 'BEEF',
-					anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731'
-				}
-			})
-
-			await api(req, res)
-			const data = await res._getJSONData()
-
-			expect(data).toEqual({
-				name: 'DigitalSoul #[MY_PRIVATE_VALUE]',
-				description: "Contract is deployed at 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF as 'Deadbeef'",
-				some: "value",
-				attributes: [{
-					type: "SuperFancy",
-					value: "[MY_PRIVATE_VALUE]"
+					value: ""
 				}]
 			})
 		})

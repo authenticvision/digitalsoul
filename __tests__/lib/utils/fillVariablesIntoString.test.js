@@ -12,13 +12,13 @@ describe('utils.fillVariablesIntoString', () => {
 		expect(actual).toEqual(expected)
 	})
 
-	it('replace the value with the variable name when variable does not exist', () => {
+	it('replace the value with empty string when variable does not exist', () => {
 		const variables = {
 			"MY_VALUE": "123"
 		}
 
 		const str = "Hello [SOMETHING]"
-		const expected = "Hello [SOMETHING]"
+		const expected = "Hello "
 		const actual = fillVariablesIntoString(str, variables)
 		expect(actual).toEqual(expected)
 	})
