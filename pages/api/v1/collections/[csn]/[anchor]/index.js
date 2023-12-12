@@ -59,7 +59,7 @@ function fillMetadataVariables(metadata, nft) {
 	}
 
 	// Add private data as variables, convert them to upper-case
-	if(nft.privateData) {
+	if (nft.privateData) {
 		Object.keys(nft.privateData).forEach(key => {
 			variables[key.toUpperCase()] = nft.privateData[key]
 		})

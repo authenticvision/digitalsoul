@@ -54,7 +54,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 				network: 'local-test',
 				settings: {
 					NFT_NAME: "DigitalSoul [ANCHOR_SHORT]", // Tests the contract-wise settings including Variables
-					NFT_DESCRIPTION: "Contract is deployed at [CONTRACT_ADDRESS] as '[COLLECTION_NAME]'" // 
+					NFT_DESCRIPTION: "Contract is deployed at [CONTRACT_ADDRESS] as '[COLLECTION_NAME]'" //
 				},
 				owner: {
 					connect: {
