@@ -13,7 +13,7 @@
     "prod:db": "npx prisma generate && npx prisma migrate deploy",
     "dev:migrate": "prisma migrate dev && npm run dev",
     "prod:migrate:start": "npm run prod:db && npm run start",
-    "test": "export $(xargs < .env.test) && NODE_ENV=test jest"
+    "test": "export $(xargs < .env.test) && NODE_ENV=test npx prisma db push && NODE_ENV=test jest"
   },
   "dependencies": {
     "@ethersproject/keccak256": "^5.7.0",
@@ -56,6 +56,7 @@
     "zod-validation-error": "^2.1.0"
   },
   "devDependencies": {
+    "@quramy/jest-prisma": "^1.7.2",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
