@@ -29,7 +29,7 @@ function generateCollectionMetadata(nft) {
 function fillMetadataVariables(metadata, nft) {
 	// TODO proper documentation and easier configuration
 	// Hardcoding is certainly not the way to go forward
-	const variables = {
+	let variables = {
 		// ############### Label-Details
 		// This is the anchor in its full length
 		// e.g. 0x96af27ebecfb5fcc4631db56c62a3ba2b3bed954740dddaa36c510580a72a2ec
@@ -56,6 +56,13 @@ function fillMetadataVariables(metadata, nft) {
 		// The smart contract address in short-representation
 		// e.g. 0xa257...f101d
 		'CONTRACT_ADDRESS_SHORT': formatAddress(nft.contract.address)
+	}
+
+	// Add private data as variables, convert them to upper-case
+	if (nft.privateData) {
+		Object.keys(nft.privateData).forEach(key => {
+			variables[key.toUpperCase()] = nft.privateData[key]
+		})
 	}
 
 	// The easiest really is to dump metadata to a string and then convert to object again
