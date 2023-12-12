@@ -1,9 +1,11 @@
+/**
+ * @jest-environment @quramy/jest-prisma/environment
+ */
+
+import prisma from '@/lib/prisma'
+
 import api from '@/pages/api/v1/collections/[csn]/[anchor]'
 import { createMocks } from 'node-mocks-http'
-
-import { createTestContext } from '@/__tests__/__helpers'
-
-const ctx = createTestContext()
 
 describe('/api/v1/collections/[csn]/[anchor]', () => {
 	it('responds with a 405 if using wrong method', async () => {
@@ -40,13 +42,13 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 	})
 
 	it('responds with the name, description based on contract settings', async () => {
-		const wallet = await ctx.db.wallet.create({
+		const wallet = await prisma.wallet.create({
 			data: {
 				address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // this is the first hardhat testing wallet
 			}
 		})
 
-		const contract = await ctx.db.contract.create({
+		const contract = await prisma.contract.create({
 			data: {
 				csn: 'BEEF',
 				name: 'Deadbeef',
@@ -64,7 +66,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			}
 		})
 
-		const nft = await ctx.db.NFT.create({
+		const nft = await prisma.NFT.create({
 			data: {
 				slid: 'TEST',
 				anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731',
@@ -99,13 +101,13 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 
 	describe('private data', () => {
 		it('replaces variable with empty string when private data is not set', async () => {
-			const wallet = await ctx.db.wallet.create({
+			const wallet = await prisma.wallet.create({
 				data: {
 					address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // this is the first hardhat testing wallet
 				}
 			})
 
-			const contract = await ctx.db.contract.create({
+			const contract = await prisma.contract.create({
 				data: {
 					csn: 'BEEF',
 					name: 'Deadbeef',
@@ -123,7 +125,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 				}
 			})
 
-			const nft = await ctx.db.NFT.create({
+			const nft = await prisma.NFT.create({
 				data: {
 					slid: 'TEST',
 					anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731',
@@ -170,13 +172,13 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 		})
 
 		it('responds with replaced nft.private_data variables', async () => {
-			const wallet = await ctx.db.wallet.create({
+			const wallet = await prisma.wallet.create({
 				data: {
 					address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' // this is the first hardhat testing wallet
 				}
 			})
 
-			const contract = await ctx.db.contract.create({
+			const contract = await prisma.contract.create({
 				data: {
 					csn: 'BEEF',
 					name: 'Deadbeef',
@@ -194,7 +196,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 				}
 			})
 
-			const nft = await ctx.db.NFT.create({
+			const nft = await prisma.NFT.create({
 				data: {
 					slid: 'TEST',
 					anchor: '0x505def45449ab0da5a5d58456298c4e2634c698cccc30f6259e3c6695c664731',
