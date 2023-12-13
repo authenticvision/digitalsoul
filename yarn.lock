@@ -915,6 +915,20 @@
   resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-5.1.1.tgz#9c26d209f93a563e048eab63b1976f222f1707d0"
   integrity sha512-NV/4nVNWFZSJCCIA3HIFJbbDKO/NARc9ej0tX5S9k2EVbkrFJC4Xt9b0u4rNZWL4V+F5LAjvta8vzEUw0rw+HA==
 
+"@quramy/jest-prisma-core@^1.7.0":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@quramy/jest-prisma-core/-/jest-prisma-core-1.7.2.tgz#b2601e09547a4c57e2b7aac072777db7a1e81fde"
+  integrity sha512-sv8mmW+piefNJRrc23UagWEbQULcMK8LiPDggZ90QdNNuEN89D3Q4vY6f/6Qw+VxPAzFkojhnH2VkQt6556shg==
+  dependencies:
+    chalk "^4.0.0"
+
+"@quramy/jest-prisma@^1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@quramy/jest-prisma/-/jest-prisma-1.7.2.tgz#97447aa2aa4a7a97d24061a58fe16af228e6c0ce"
+  integrity sha512-qgonanQPmQ+KfJ1x54pdUfoMut6/ONF6dNBe1AxeVoUzVU6k0OrBNRksFgE806Hk3GkEbwUnd44wm+MSF4E+hA==
+  dependencies:
+    "@quramy/jest-prisma-core" "^1.7.0"
+
 "@rushstack/eslint-patch@^1.1.3":
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.3.3.tgz#16ab6c727d8c2020a5b6e4a176a243ecd88d8d69"
