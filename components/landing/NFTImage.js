@@ -4,8 +4,6 @@ import { Button } from '@/components/ui'
 import playIcon from '@/public/icons/play.svg'
 import stopIcon from '@/public/icons/stop.svg'
 
-
-
 const NFTImage = ({ assetData, ...props }) => {
   const [metadata, setMetadata] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

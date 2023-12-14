@@ -1,5 +1,4 @@
-// EditableContractSettings.js
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button, Tooltip, Alert } from '../ui';
 
 const EditableContractSettings = ({ wallet, contract, ...props }) => {
@@ -84,7 +83,7 @@ const EditableContractSettings = ({ wallet, contract, ...props }) => {
       </div>
 
       <Button text="Save" onClick={onSave}
-              className="ml-2 btn btn-link text-white text-center" />
+              className="ml-2 btn btn-link text-white text-center" /> 
       {error && (
         <div className="mt-5">
           <Alert text={error} type='success' />

@@ -1,5 +1,3 @@
-import React, { useState } from 'react'
-
 import Image from 'next/image'
 import { Button } from '@/components/ui'
 import viewCardIcon from '@/public/icons/view-image.svg'
@@ -10,6 +8,7 @@ const Header = ({ mode, onChangeMode, contractName, ...props }) => {
 	const activeStyle = {
 		fill: 'white'
 	}
+
 	// TODO: Paint this SVG when active. We might need to install SVGR to do
 	// that which is a bit off-scope at this exact moment
 	const ViewCard = () => (<Image style={activeStyle} src={viewCardIcon} width={25} height={25} />)
