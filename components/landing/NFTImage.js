@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image'
+import { Button } from '@/components/ui'
 import playIcon from '@/public/icons/play.svg'
 import stopIcon from '@/public/icons/stop.svg'
 
@@ -50,7 +51,7 @@ const NFTImage = ({ assetData, ...props }) => {
             <source src={metadata.animation_url} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-          <button
+          <Button
             onClick={stopVideo}
             style={{
               position: 'absolute',
@@ -60,7 +61,7 @@ const NFTImage = ({ assetData, ...props }) => {
             }}
           >
             <Image src={stopIcon} priority height={50} width={50} />
-          </button>
+          </Button>
         </>
       ) : (
         <>
@@ -68,7 +69,7 @@ const NFTImage = ({ assetData, ...props }) => {
             <img src={metadata.image} alt="NFT" {...props} />
           </a>
           {metadata.animation_url && (
-            <button
+            <Button
               onClick={playVideo}
               style={{
                 position: 'absolute',
@@ -78,7 +79,7 @@ const NFTImage = ({ assetData, ...props }) => {
               }}
             >
               <Image src={playIcon} priority height={50} width={50} />
-            </button>
+            </Button>
           )}
         </>
       )}

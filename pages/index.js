@@ -85,7 +85,9 @@ const Landing = (props) => {
 								</p>
 
 								{!session && (
-									<Button href="/auth" text="Connect" />
+									<Link href="/auth" text="Connect" className="btn">
+										Connect
+									</Link>
 								)}
 							</div>
 						</div>

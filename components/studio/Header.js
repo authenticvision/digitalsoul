@@ -29,15 +29,15 @@ const Header = ({ mode, onChangeMode, contractName, ...props }) => {
 
 			<div className="flex">
 				<div className="join">
-					<button className="btn join-item text-white fill-inherit"
+					<Button className="btn join-item text-white fill-inherit"
 						onClick={() => onChangeMode('card')}>
 						<ViewCard />
-					</button>
+					</Button>
 
-					<button className="btn join-item"
+					<Button className="btn join-item"
 						onClick={() => onChangeMode('table')}>
 						<ViewTable />
-					</button>
+					</Button>
 				</div>
 			</div>
 
