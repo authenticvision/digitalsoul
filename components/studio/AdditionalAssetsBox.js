@@ -63,10 +63,8 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 					{nft.assets.filter( (obj) => {return obj.active}).map((asset) => (
 						<li key={asset.asset.assetHash}>
 							<div>
-								<button onClick={() => onRemoveAsset(asset)}
-									className="ml-2 btn btn-ghost btn-sm">
-									X
-								</button>
+								<Button onClick={() => onRemoveAsset(asset)}
+									className="ml-2 btn btn-ghost btn-sm" text="X" />
 								{asset.assetType}:
 								<Link className="ml-2 link" target="_blank"
 									href={`/api/v1/assets/${nft.contract.csn}/${asset.asset.assetHash}`}>
@@ -92,7 +90,7 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 
 							<div className="modal-action">
 								<form method="dialog">
-									<button onClick={onCancelUpload} className="btn">Cancel</button>
+									<Button text="Cancel" onClick={onCancelUpload} className="btn" />
 								</form>
 							</div>
 						</div>

@@ -1,13 +1,6 @@
 import React, { useState } from 'react'
 import { formatAddress, generateMetaDataURL } from '@/lib/utils'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Button, Alert } from "@/components/ui"
-import { useRouter } from 'next/router'
-
-
-import viewTableIcon from '@/public/icons/view-table.svg'
-
+import { Button } from "@/components/ui"
 
 const Overlay = ({ jsonData, link, onClose }) => {
 	const formattedJson = JSON.stringify(jsonData, null, 2)
@@ -19,7 +12,7 @@ const Overlay = ({ jsonData, link, onClose }) => {
 				<h3 className="font-bold text-lg">{link}</h3>
 				<pre className="text-xs">{formattedJson}</pre>
 				<div className="modal-action">
-					<button onClick={onClose} className="btn">Close</button>
+					<Button onClick={onClose} className="btn" text="Close" />
 				</div>
 			</div>
 		</div>
@@ -59,11 +52,12 @@ const NFTCaption = ({ nft, staticCaption, ...props }) => {
 				<div className="flex flex-col text-left">
 					<div className="w-full text-gray-400 text-xs">
 						<p>{formatAddress(nft.anchor, 22)}
-							<button
-								className="ml-1"
-								onClick={(e) => onClickJSON(e, metadataPreviewLink)}>
-								(JSON)
-							</button>
+							<Button
+								className="ml-1 text-white"
+								onClick={(e) => onClickJSON(e, metadataPreviewLink)}
+								variant="btn-link"
+								text="(JSON)"
+							/>
 						</p>
 					</div>
 					<div className="font-bold text-lg">{nft.slid}</div>

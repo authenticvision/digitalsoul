@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Button } from '@/components/ui'
 import { pp, cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -106,13 +107,8 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 						</div>
 
 						<div className="flex flex-row justify-between">
-							<button onClick={onCancel} className="btn btn-link text-white text-center">
-								Cancel
-							</button>
-
-							<button onClick={onSave} className="ml-2 btn btn-link text-white text-center">
-								Save
-							</button>
+							<Button text="Cancel" onClick={onCancel} className="btn btn-link text-white text-center" />
+							<Button text="Save" onClick={onSave} className="ml-2 btn btn-link text-white text-center" />
 						</div>
 					</div>
 				) : (
@@ -137,9 +133,9 @@ const MetadataBox = ({ nft, readOnly = false, onFinish = () => {}, onError = () 
 						)}
 
 						{!readOnly && (
-							<button onClick={onEdit} className="btn btn-link text-white text-center">
-								Edit Attributes and Metadata
-							</button>
+							<Button text="Edit Attributes and Metadata"
+											onClick={onEdit}
+											className="btn btn-link text-white text-center" />
 						)}
 					</div>
 				)}

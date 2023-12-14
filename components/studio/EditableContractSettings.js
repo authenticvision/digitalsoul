@@ -83,9 +83,8 @@ const EditableContractSettings = ({ wallet, contract, ...props }) => {
           className="input input-bordered w-full" />
       </div>
 
-      <button onClick={onSave} className="ml-2 btn btn-link text-white text-center">
-        Save
-      </button>
+      <Button text="Save" onClick={onSave}
+              className="ml-2 btn btn-link text-white text-center" />
       {error && (
         <div className="mt-5">
           <Alert text={error} type='success' />

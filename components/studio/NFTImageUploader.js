@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+import { Button } from '@/components/ui'
+
 import { FilePond, registerPlugin } from 'react-filepond'
 import 'filepond/dist/filepond.min.css'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
@@ -46,7 +48,7 @@ const NFTImageUploader = ({ nft, onFinish, ...props }) => {
 
 			<div className="modal-action">
 				<form method="dialog">
-					<button onClick={onCloseModal} className="btn">Cancel</button>
+					<Button text="Cancel" onClick={onCloseModal} className="btn" />
 				</form>
 			</div>
 		</div>
