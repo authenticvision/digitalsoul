@@ -1,10 +1,7 @@
 import React, { useState } from 'react'
-import Router from 'next/router'
 import { useConnect, useAccount, useSignMessage } from 'wagmi'
 import { signIn } from 'next-auth/react'
-import Image from 'next/image'
 import { Layout, Logo, Button } from '@/components/ui'
-import Setup from '@/components/Setup'
 import NextHead from 'next/head.js'
 import prisma from '@/lib/prisma'
 
@@ -19,13 +16,14 @@ export const getServerSideProps = async ({ req }) => {
 }
 
 const Auth = (props) => {
-	const [showLoading, setShowLoading] = useState(false)
+	const [loading, setLoading] = useState(false)
 	const { connect, connectAsync, connectors, error, isLoading, pendingConnector } =
 		useConnect()
 
 	const { address, connector, isConnected } = useAccount()
 
 	const onConnect = async({ connector }) => {
+		setLoading(true)
 		let callbackUrl = '/'
 
 		if (!props.isConfigured) {
@@ -41,6 +39,7 @@ const Auth = (props) => {
 		const { account, error } = await connectAsync({ connector })
 
 		if (error) {
+			setLoading(false)
 			// TODO: Display error
 			throw error
 		}
@@ -65,6 +64,7 @@ const Auth = (props) => {
 						<div className="w-full items-center justify-center text-center mt-5">
 							{connectors.map((connector) => (
 								<Button text={`Connect with ${connector.name}`}
+										disabled={isLoading}
 										onClick={() => onConnect({ connector })}
 										key={connector.id} />
 							))}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import Router from "next/router"
-import { useSignMessage, useAccount, useDisconnect } from 'wagmi'
+import { useSignMessage, useAccount } from 'wagmi'
 import { recoverMessageAddress } from 'viem'
 
 import { Button, Alert } from "@/components/ui"
