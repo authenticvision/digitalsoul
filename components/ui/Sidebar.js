@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react'
 import { Button, Loading } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { usePathname } from 'next/navigation'
-import { useContracts } from '@/hooks/useContracts'
+import { useContracts } from '@/hooks'
 
 const Sidebar = ({ address, ...props }) => {
 	const router = useRouter()
 	const pathname = usePathname()
 	const { csn } = router.query
-	const { contracts, isLoading, error } = useContracts(csn, address)
-
+	const { contracts, isLoading } = useContracts(csn, address)
 
 	const currentContract = contracts
 		.find((item) => item.csn.toLowerCase() == csn)
