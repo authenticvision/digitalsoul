@@ -51,7 +51,7 @@
     "swr": "^2.2.4",
     "tailwindcss": "3.3.3",
     "viem": "^1.10.14",
-    "wagmi": "^1.4.2",
+    "wagmi": "^1.4.12",
     "zod": "^3.22.2",
     "zod-validation-error": "^2.1.0"
   },
