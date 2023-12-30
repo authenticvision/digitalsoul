@@ -11,6 +11,7 @@ import ErrorPage from './ErrorPage'
 import Tooltip from './Tooltip'
 import ElementBox from './ElementBox'
 import Modal from './Modal'
+import SelectableCardList from './SelectableCardList'
 
 export {
 	Logo,
@@ -25,5 +26,6 @@ export {
 	ElementBox,
 	NavBarMenu,
 	Tooltip,
-	Modal
+	Modal,
+	SelectableCardList
 }

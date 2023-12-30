@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
-import { Button, ElementBox } from '@/components/ui'
+import { Button, ElementBox, Modal, SelectableCardList } from '@/components/ui'
 import { FileUploader } from '@/components/studio'
+import { useAssets } from '@/hooks'
 
 import { formatAddress } from '@/lib/utils'
 
@@ -11,23 +12,28 @@ import editImg from '@/public/icons/edit.svg'
 const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 	const [newAssetType, setNewAssetType] = useState('')
 	const uploadModal = useRef(null)
+	const selectAssetModal = useRef(null)
+	const { assets, isLoading, error, mutate } = useAssets(nft.contract.csn)
 
 	const displayModal = () => {
-		uploadModal.current.showModal()
+		selectAssetModal.current.showModal()
 	}
 
 	const onCancelUpload = () => {}
 
-	const onFinishUploading = (e) => {
-		uploadModal.current.close()
+	const onCloseModal = (e) => {
+		selectAssetModal.current.close()
 		setNewAssetType('')
+		mutate()
 
 		onUpdate()
 	}
 
-	const removeAsset = async (asset) => {
+	const onSelectAsset = (asset) => {
 		console.log(asset)
+	}
 
+	const removeAsset = async (asset) => {
 		try {
 			const response = await fetch(`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/${asset.assetType}`, {
 				method: "DELETE",
@@ -58,7 +64,11 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 	return (
 		<ElementBox title="Assets">
 			<div className="flex flex-col">
-				<p>Refer <Link className = "link" href="https://docs.opensea.io/docs/metadata-standards" target="blank">OpenSea MetaData Standard</Link></p>
+				<p>Refer
+					<Link className = "link"
+						href="https://docs.opensea.io/docs/metadata-standards"
+						target="blank">OpenSea MetaData Standard</Link>
+				</p>
 				<ul>
 					{nft.assets.filter( (obj) => {return obj.active}).map((asset) => (
 						<li key={asset.asset.assetHash}>
@@ -76,25 +86,21 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 				</ul>
 
 				<div className="flex mt-4">
-					<dialog ref={uploadModal} id="nft-modal-upload" className="modal">
-						<div className="modal-box">
-							<div className="mb-4 text-center">
-								<input type="text" value={newAssetType} onChange={(e) => setNewAssetType(e.target.value)}
-									placeholder="Asset Type"
-									required
-									className="input input-bordered w-full max-w-xs" />
-							</div>
-
-							<FileUploader disabled={!newAssetType} endpoint={`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/${newAssetType}`} maxFiles={1}
-								onFinish={onFinishUploading} assetType={newAssetType} />
-
-							<div className="modal-action">
-								<form method="dialog">
-									<Button text="Cancel" onClick={onCancelUpload} className="btn" />
-								</form>
-							</div>
+					<Modal refObj={selectAssetModal} onClose={onCloseModal} className="w-11/12 max-w-5xl">
+						<div className="mb-4 text-center">
+							<input type="text" value={newAssetType}
+								onChange={(e) => setNewAssetType(e.target.value)}
+								placeholder="Asset Type"
+								required
+								className="input input-bordered w-full max-w-xs" />
 						</div>
-					</dialog>
+
+						<div>
+							<SelectableCardList onSelect={onSelectAsset}
+												disabled={!newAssetType}
+												items={assets} />
+						</div>
+					</Modal>
 
 					<Button href="#" onClick={displayModal} btnType="button" text="Add new asset" />
 				</div>
