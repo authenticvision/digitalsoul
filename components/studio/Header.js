@@ -3,8 +3,7 @@ import { Button } from '@/components/ui'
 import viewCardIcon from '@/public/icons/view-image.svg'
 import viewTableIcon from '@/public/icons/view-table.svg'
 
-const Header = ({ mode, onChangeMode, contractName, ...props }) => {
-
+const Header = ({ mode, onChangeMode, contractName, title, disableInteractions, ...props }) => {
 	const activeStyle = {
 		fill: 'white'
 	}
@@ -22,27 +21,31 @@ const Header = ({ mode, onChangeMode, contractName, ...props }) => {
 				</div>
 
 				<div className="font-bold text-4xl">
-					Collection
+					{title}
 				</div>
 			</div>
 
-			<div className="flex">
-				<div className="join">
-					<Button className="btn join-item text-white fill-inherit"
-						onClick={() => onChangeMode('card')}>
-						<ViewCard />
-					</Button>
+			{!disableInteractions && (
+				<>
+					<div className="flex">
+						<div className="join">
+							<Button className="btn join-item text-white fill-inherit"
+								onClick={() => onChangeMode('card')}>
+								<ViewCard />
+							</Button>
 
-					<Button className="btn join-item"
-						onClick={() => onChangeMode('table')}>
-						<ViewTable />
-					</Button>
-				</div>
-			</div>
+							<Button className="btn join-item"
+								onClick={() => onChangeMode('table')}>
+								<ViewTable />
+							</Button>
+						</div>
+					</div>
 
-			<div className="flex">
-				&nbsp;
-			</div>
+					<div className="flex">
+						&nbsp;
+					</div>
+				</>
+			)}
 		</div>
 	)
 }

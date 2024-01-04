@@ -10,6 +10,7 @@ import Sidebar from './Sidebar'
 import ErrorPage from './ErrorPage'
 import Tooltip from './Tooltip'
 import ElementBox from './ElementBox'
+import Modal from './Modal'
 
 export {
 	Logo,
@@ -24,4 +25,5 @@ export {
 	ElementBox,
 	NavBarMenu,
 	Tooltip,
+	Modal
 }
