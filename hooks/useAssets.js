@@ -1,4 +1,5 @@
 import useSWR from 'swr'
+import { generateAssetURL } from '@/lib/utils'
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
@@ -14,8 +15,18 @@ export const useAssets = (contractCsn) => {
 		`/api/internal/assets/${contractCsn}`, fetcher
 	)
 
+
+	const assets = data?.assets.map((asset) => {
+		return {
+			...asset,
+			assetURL: generateAssetURL(
+				contractCsn, asset.assetHash
+			)
+		}
+	})
+
 	return {
-		assets: data?.assets || [],
+		assets: assets || [],
 		error,
 		mutate,
 		isLoading
