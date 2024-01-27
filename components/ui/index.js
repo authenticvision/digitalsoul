@@ -12,6 +12,7 @@ import Tooltip from './Tooltip'
 import ElementBox from './ElementBox'
 import Modal from './Modal'
 import SelectableCardList from './SelectableCardList'
+import StudioHeader from './StudioHeader'
 
 export {
 	Logo,
@@ -27,5 +28,6 @@ export {
 	NavBarMenu,
 	Tooltip,
 	Modal,
-	SelectableCardList
+	SelectableCardList,
+	StudioHeader
 }
