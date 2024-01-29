@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-const StudioHeader = ({ contract, nft, staticCaption }) => (
+const StudioHeader = ({ title, contract, nft, staticCaption }) => (
 	<div className="flex border-b border-raven-700">
 		<div className="flex w-full ml-8 mt-8">
 			<div className="flex flex-row justify-between items-center w-full pl-8 pb-8">
@@ -22,7 +22,7 @@ const StudioHeader = ({ contract, nft, staticCaption }) => (
 
 					<div className="flex items-center justify-between w-full pr-8">
 						<h1 className="font-bold text-4xl">
-							{staticCaption ? staticCaption : nft.slid}
+							{title}
 						</h1>
 					</div>
 				</div>
