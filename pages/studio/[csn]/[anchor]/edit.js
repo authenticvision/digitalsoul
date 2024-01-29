@@ -79,11 +79,19 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	const {
 		register, handleSubmit, control, formState: { errors }
 	}  = useForm({
-		values: { ...nft, metadataProps: nft?.metadataAsProps}
+		values: {
+			...nft,
+			attributes: nft?.metadata?.attributes,
+			metadataProps: nft?.metadataAsProps
+		}
 	})
 
 	const { fields: metadataFields, append: appendMetadata, remove: removeMetadata } = useFieldArray({
 		name: 'metadataProps', control
+	})
+
+	const { fields: traitFields, append: appendTrait, remove: removeTrait } = useFieldArray({
+		name: 'attributes', control
 	})
 
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
@@ -99,7 +107,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		}, {})
 
 		const combinedMetadata = {
-			attributes: nft.metadata?.attributes,
 			 ...newMetadata
 		}
 
@@ -110,6 +117,8 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		if (data.metadata?.description) {
 			combinedMetadata.description = data.metadata?.description
 		}
+
+		combinedMetadata.attributes = data.attributes
 
 		fetch(`/api/internal/nft/${contract.csn}/${anchor}/edit`, {
 			method: 'PUT',
@@ -125,6 +134,14 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 	const removeMetadataProp = (index) => {
 		removeMetadata(index)
+	}
+
+	const addNewTraitProp = () => {
+		appendTrait({ trait_type: '', value: '' })
+	}
+
+	const removeTraitProp = (index) => {
+		removeTrait(index)
 	}
 
 	return (
@@ -176,7 +193,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 											</div>
 
 											<div className="form-control my-4">
-												<h2 className="text-2xl font-bold mb-4">
+												<h2 className="text-2xl font-bold my-4">
 													Metadata
 												</h2>
 
@@ -205,6 +222,42 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 												<Button btnType="button" onClick={addNewMetadataProp} className="mt-2">
 													Add a new property
+												</Button>
+											</div>
+
+
+											<div className="form-control my-4">
+												<h2 className="text-2xl font-bold my-4">
+													Traits
+												</h2>
+
+												{traitFields.map((field, index) => (
+													<div key={field.id} className="flex flex-row w-full">
+														<input
+															className="input input-bordered mr-2 mb-2"
+															type="text"
+															placeholder="Trait Type"
+															{...register(`attributes.${index}.trait_type`)}
+														/>
+
+														<input
+															className="input input-bordered"
+															type="text"
+															placeholder="Value"
+															{...register(`attributes.${index}.value`)}
+														/>
+
+														{(traitFields.length > 1) && (
+															<Button btnType="button"
+																onClick={removeTraitProp} className="ml-2">
+																	Remove
+																</Button>
+														)}
+													</div>
+												))}
+
+												<Button btnType="button" onClick={addNewTraitProp} className="mt-2">
+													Add a new trait
 												</Button>
 											</div>
 
