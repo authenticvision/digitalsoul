@@ -82,7 +82,9 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		values: { ...nft, metadataProps: nft?.metadataAsProps}
 	})
 
-	const { fields, append, remove } = useFieldArray({ name: 'metadataProps', control })
+	const { fields: metadataFields, append: appendMetadata, remove: removeMetadata } = useFieldArray({
+		name: 'metadataProps', control
+	})
 
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
@@ -118,7 +120,11 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	}
 
 	const addNewMetadataProp = () => {
-		append({ name: '', value: '' })
+		appendMetadata({ name: '', value: '' })
+	}
+
+	const removeMetadataProp = (index) => {
+		removeMetadata(index)
 	}
 
 	return (
@@ -170,11 +176,11 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 											</div>
 
 											<div className="form-control my-4">
-												<h2 className="text-xl font-bold">
+												<h2 className="text-2xl font-bold mb-4">
 													Metadata
 												</h2>
 
-												{fields.map((field, index) => (
+												{metadataFields.map((field, index) => (
 													<div key={field.id} className="flex flex-row w-full">
 														<input
 															className="input input-bordered mr-2 mb-2"
@@ -188,9 +194,9 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 															{...register(`metadataProps.${index}.value`)}
 														/>
 
-														{(fields.length > 1) && (
+														{(metadataFields.length > 1) && (
 															<Button btnType="button"
-																onClick={() => remove(index)} className="ml-2">
+																onClick={removeMetadataProp} className="ml-2">
 																	Remove
 																</Button>
 														)}
