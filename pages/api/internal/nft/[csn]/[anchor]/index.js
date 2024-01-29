@@ -45,5 +45,17 @@ export default async function handle(req, res) {
 		return res.status(404).json({ message: 'NFT does not exist' })
 	}
 
+	const metadataKeys = Object.keys(nft.metadata || {})
+
+	if (metadataKeys) {
+		nft.metadataAsProps = []
+		metadataKeys.forEach((key) => {
+			if (key != 'attributes' && key != 'name' && key != 'description') {
+				nft.metadataAsProps.push({ name: key, value: nft.metadata[key] })
+			}
+		})
+	}
+
+
 	return res.json({ ...nft })
 }
