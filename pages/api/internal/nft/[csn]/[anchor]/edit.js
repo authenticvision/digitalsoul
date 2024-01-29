@@ -19,7 +19,7 @@ const metadataSchema = z.object({
 			min_value: z.number().optional()
 		})
 	).optional().default([])
-})
+}).passthrough()
 
 export default async function handle(req, res) {
 	const session = await getServerSession(req, res, authOptions)
@@ -30,19 +30,7 @@ export default async function handle(req, res) {
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
 	const { anchor, csn } = req.query
-	const { metadata: rawMetadata } = req.body
-	let metadata = rawMetadata
-
-	if (typeof rawMetadata == "string") {
-		try {
-			metadata = JSON.parse(rawMetadata)
-		} catch (error) {
-			console.error(error)
-			return res.status(422).json({
-				message: 'JSON is either malformatted or not a JSON object'
-			})
-		}
-	}
+	const { metadata } = JSON.parse(req.body || {})
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
@@ -50,7 +38,7 @@ export default async function handle(req, res) {
 			contract: {
 				ownerId: session.wallet.id,
 				csn: {
-					equals: csn, 
+					equals: csn,
 					mode: "insensitive"
 				}
 			}
@@ -68,7 +56,7 @@ export default async function handle(req, res) {
 		console.error("ZodError: ", validationErrors);
 
 		return res.status(422).json({
-			message: '',
+			message: 'There was some error when validating the metadata',
 			issues: validationErrors.toString()
 		})
 	}
