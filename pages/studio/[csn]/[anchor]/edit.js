@@ -9,7 +9,7 @@ import { auth } from 'auth'
 import { useNFT } from '@/hooks'
 import prisma from '@/lib/prisma'
 
-import { useForm, SubmitHandler } from "react-hook-form"
+import { useForm, useFieldArray, SubmitHandler } from "react-hook-form"
 
 export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
@@ -77,17 +77,48 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	})
 
 	const {
-		register, handleSubmit, watch, formState: { errors }
-	}  = useForm()
+		register, handleSubmit, control, formState: { errors }
+	}  = useForm({
+		values: { ...nft, metadataProps: nft?.metadataAsProps}
+	})
+
+	const { fields, append, remove } = useFieldArray({ name: 'metadataProps', control })
 
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
 	const onFinishEditing = async () => {
-		await mutate()
 	}
 
 	const onSubmit = (data) => {
-		console.log(data)
+		const newMetadata = (data.metadataProps || []).reduce((obj, prop) => {
+			obj[prop.name] = prop.value
+
+			return obj
+		}, {})
+
+		const combinedMetadata = {
+			attributes: nft.metadata?.attributes,
+			 ...newMetadata
+		}
+
+		if (data.metadata?.name) {
+			combinedMetadata.name = data.metadata?.name
+		}
+
+		if (data.metadata?.description) {
+			combinedMetadata.description = data.metadata?.description
+		}
+
+		fetch(`/api/internal/nft/${contract.csn}/${anchor}/edit`, {
+			method: 'PUT',
+			body: JSON.stringify({
+				metadata: combinedMetadata
+			})
+		})
+	}
+
+	const addNewMetadataProp = () => {
+		append({ name: '', value: '' })
 	}
 
 	return (
@@ -101,13 +132,15 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 					<main className="flex flex-col">
 						{nft ? (
 							<>
-								<StudioHeader contract={contract} nft={nft} staticCaption={nftCaption} />
+								<StudioHeader title={`Editing ${nftCaption}`}
+											contract={contract} nft={nft}
+											staticCaption={nftCaption} />
 
-								<div className="flex mx-8 mt-8 mb-8">
-									<div className="grid w-full">
+								<div className="flex m-8">
+									<div className="grid w-full px-8">
 										<form onSubmit={handleSubmit(onSubmit)}>
 											<div className="flex items-center justify-center items-center">
-												<NFTImageEdit nft={nft} onFinishEditing={onFinishEditing} />
+
 											</div>
 
 											<div className="form-control my-4 md:w-3/12">
@@ -115,12 +148,10 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												<input
 													className="input input-bordered"
 													type="text"
-													{...register("name", {
-														required: "This field is required",
-													})}
+													{...register("metadata.name")}
 												/>
 												<span className="text-red-600 mt-2">
-													{errors?.name?.message}
+													{errors?.metadata?.name?.message}
 												</span>
 											</div>
 
@@ -130,14 +161,45 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 													className="textarea textarea-bordered"
 													rows={5}
 													style={{ verticalAlign: "top" }}
-													{...register("description", {
-														required: "This field is required",
-													})}
+													{...register("metadata.description")}
 												/>
 
 												<span className="text-red-600 mt-2">
-													{errors?.description?.message}
+													{errors?.metadata?.description?.message}
 												</span>
+											</div>
+
+											<div className="form-control my-4">
+												<h2 className="text-xl font-bold">
+													Metadata
+												</h2>
+
+												{fields.map((field, index) => (
+													<div key={field.id} className="flex flex-row w-full">
+														<input
+															className="input input-bordered mr-2 mb-2"
+															type="text"
+															{...register(`metadataProps.${index}.name`)}
+														/>
+
+														<input
+															className="input input-bordered"
+															type="text"
+															{...register(`metadataProps.${index}.value`)}
+														/>
+
+														{(fields.length > 1) && (
+															<Button btnType="button"
+																onClick={() => remove(index)} className="ml-2">
+																	Remove
+																</Button>
+														)}
+													</div>
+												))}
+
+												<Button btnType="button" onClick={addNewMetadataProp} className="mt-2">
+													Add a new property
+												</Button>
 											</div>
 
 
