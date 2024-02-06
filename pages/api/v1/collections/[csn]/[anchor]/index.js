@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 import { formatAddress, fillVariablesIntoString, fixedLengthHexString, nftDefined } from '@/lib/utils'
+import { makePublicEndpoint } from '@/lib/apiHelpers';
 
 const allowedMethods = ['GET']
 
@@ -72,12 +72,8 @@ function fillMetadataVariables(metadata, nft) {
 }
 
 
-
 export default async function handle(req, res) {
-	// TODO: Move this somewhere else, probably as a utility function
-	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
-		return res.status(405).json({ message: 'Method not allowed.' })
-	}
+	if (!await makePublicEndpoint(req, res, allowedMethods)) return;
 
 	let contract
 	let nft

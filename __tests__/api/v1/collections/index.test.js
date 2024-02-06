@@ -90,6 +90,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 		})
 
 		await api(req, res)
+		expect(await res.getHeader('access-control-allow-origin')).toEqual('*') // CORS enabled
 		const data = await res._getJSONData()
 
 		expect(data).toEqual({
@@ -157,6 +158,7 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			})
 
 			await api(req, res)
+			expect(await res.getHeader('access-control-allow-origin')).toEqual('*') // CORS enabled
 			const data = await res._getJSONData()
 
 			expect(data).toEqual({
@@ -227,6 +229,8 @@ describe('/api/v1/collections/[csn]/[anchor]', () => {
 			})
 
 			await api(req, res)
+			expect(await res.getHeader('access-control-allow-origin')).toEqual('*') // CORS enabled
+
 			const data = await res._getJSONData()
 
 			expect(data).toEqual({
