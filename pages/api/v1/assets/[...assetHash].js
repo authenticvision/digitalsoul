@@ -1,21 +1,22 @@
 import express from 'express';
 import {fileTypeFromBuffer} from 'file-type';
 import {readChunk} from 'read-chunk';
-import fs from 'fs';
 import path from 'path';
-
+import { makePublicEndpoint} from '@/lib/apiHelpers';
 export const config = {
   api: { externalResolver: true }
 };
 
 const handler = express();
 
+
 // Middleware to determine and set the MIME type
-async function setMimeType(req, res, next) {
+async function setHeaders(req, res, next) {
+  if(!await makePublicEndpoint(req, res, ['GET'])) return;
+
   const filePath = path.join(process.env.STORAGE_DIR, req.path);
 
   try {
-	
 	// Best-practice from docs	https://www.npmjs.com/package/file-type
 	const buffer = await readChunk(filePath, {length: 4100});
 	const fileTypeResult = await fileTypeFromBuffer(buffer);
@@ -33,6 +34,6 @@ async function setMimeType(req, res, next) {
   next();
 }
 
-handler.use(['/api/v1/assets', '/assets'], setMimeType, express.static(process.env.STORAGE_DIR));
+handler.use(['/api/v1/assets', '/assets'], setHeaders, express.static(process.env.STORAGE_DIR));
 
 export default handler;
