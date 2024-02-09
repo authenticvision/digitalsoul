@@ -1,14 +1,12 @@
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 import MetaAnchor from '@/lib/api.metaanchor.io'
+import { checkAllowedMethods } from '@/lib/apiHelpers';
 
 const allowedMethods = ['POST']
 
 export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
-	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
-		return res.status(405).json({ message: 'Method not allowed.' })
-	}
+	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
 	const { avSip, address } = req.body
 

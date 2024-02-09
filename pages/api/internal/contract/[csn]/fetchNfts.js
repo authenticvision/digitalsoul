@@ -2,6 +2,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import prisma from '@/lib/prisma'
 import MetaAnchor from '@/lib/api.metaanchor.io'
+import { checkAllowedMethods } from '@/lib/apiHelpers';
+
 
 const allowedMethods = ['GET']
 
@@ -53,10 +55,7 @@ export default async function handle(req, res) {
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
-	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
-		return res.status(405).json({ message: 'Method not allowed.' })
-	}
-
+  if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
 	const { csn } = req.query
 	const config = await prisma.config.findFirst()
