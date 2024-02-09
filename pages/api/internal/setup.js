@@ -3,7 +3,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 
 import crypto from 'crypto'
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+import { checkAllowedMethods } from "@/lib/apiHelpers"
 
 const allowedMethods = ['POST']
 
@@ -75,10 +75,7 @@ export default async function handle(req, res) {
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
-	// TODO: Move this somewhere else, probably as a utility function
-	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
-		return res.status(405).json({ message: 'Method not allowed.' })
-	}
+	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
 	const { signedMessage, address } = req.body
 	const instanceApiKey = crypto.randomBytes(32).toString('hex')

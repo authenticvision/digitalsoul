@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
-
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
-import { fromZodError, isValidationErrorLike } from 'zod-validation-error';
+import { fromZodError } from 'zod-validation-error';
+import { checkAllowedMethods } from '@/lib/apiHelpers';
 
 const allowedMethods = ['PUT']
 const metadataSchema = z.object({
@@ -27,11 +27,7 @@ export default async function handle(req, res) {
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
-	let errorMsg
-
-	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
-		return res.status(405).json({ message: 'Method not allowed.' })
-	}
+	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
 	const { anchor, csn } = req.query
 	const { metadata: rawMetadata } = req.body

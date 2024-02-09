@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 
 import path from 'path'
-
+import { checkAllowedMethods } from "@/lib/apiHelpers"
 import prisma from '@/lib/prisma'
 
 import formidable from 'formidable-serverless'
@@ -112,10 +112,8 @@ export default async function handle(req, res) {
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
-	// TODO: Move this somewhere else, probably as a utility function
-	if (!allowedMethods.includes(req.method) || req.method == 'OPTIONS') {
-		return res.status(405).json({ message: 'Method not allowed.' })
-	}
+	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
+
 
 	const { csn, anchor, assetType } = req.query
 	const wallet = session.wallet
