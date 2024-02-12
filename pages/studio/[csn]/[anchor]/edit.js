@@ -5,16 +5,17 @@ import Image from 'next/image'
 import editImg from '@/public/icons/edit.svg'
 import { ArrowTopRightOnSquareIcon, TrashIcon, XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
 
-import { AppLayout, StudioHeader, Loading, ErrorPage, Button } from '@/components/ui'
-import { Table } from 'react-daisyui'
+import { AppLayout, StudioHeader, Loading, ErrorPage, Button, SelectableCardList } from '@/components/ui'
+import { Table, Modal } from 'react-daisyui'
 import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
 
 import { auth } from 'auth'
 
-import { useNFT } from '@/hooks'
+import { useNFT, useAssets } from '@/hooks'
 import prisma from '@/lib/prisma'
 
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form"
+import { set } from 'zod'
 
 export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
@@ -98,9 +99,19 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		)
 	}
 
+	const [selectedImage, setSelectedImage] = useState(null)
+	const [displayLinkAssetModal, setDisplayLinkAssetModal] = useState(false)
+	const [newAssetType, setNewAssetType] = useState('')
+	const [newAsset, setNewAsset] = useState(null)
+	const [pendingAdditionalAssets, setPendingAdditionalAssets] = useState([])
+
 	const { nft, isLoading, error, mutate } = useNFT({
 		csn: contract.csn, anchor: anchor
 	})
+
+	const { assets, isLoading: isLoadingAssets, error: errorAssets } = useAssets(
+		contract.csn
+	)
 
 	const {
 		register, handleSubmit, control, formState: { errors }
@@ -111,8 +122,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 			metadataProps: nft?.metadataAsProps
 		}
 	})
-
-	const [selectedImage, setSelectedImage] = useState(null)
 
 	const { fields: metadataFields, append: appendMetadata, remove: removeMetadata } = useFieldArray({
 		name: 'metadataProps', control
@@ -127,7 +136,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	const additionalAssets = nft?.assets
 		.filter((obj) => { return obj.active && obj.assetType !== 'image' })
 
-	const onSubmit = (data) => {
+	const onSubmit = async (data) => {
 		const newMetadata = (data.metadataProps || []).reduce((obj, prop) => {
 			obj[prop.name] = prop.value
 
@@ -148,14 +157,30 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 		combinedMetadata.attributes = data.attributes
 
+		const preparedAdditionalAssets = pendingAdditionalAssets.map((asset) => {
+			return {
+				assetType: asset.assetType,
+				assetId: asset.asset.id,
+				assetHash: asset.asset.assetHash
+			}
+		})
+
 		const formData = new FormData()
 		formData.append('metadata', JSON.stringify(combinedMetadata))
 		formData.append('image', selectedImage)
+		formData.append('additionalAssets', JSON.stringify(preparedAdditionalAssets))
 
-		fetch(`/api/internal/nft/${contract.csn}/${anchor}/edit`, {
+		await fetch(`/api/internal/nft/${contract.csn}/${anchor}/edit`, {
 			method: 'PUT',
 			body: formData
 		})
+
+		setPendingAdditionalAssets([])
+		setSelectedImage(null)
+		setNewAsset(null)
+		setNewAssetType('')
+
+		mutate()
 	}
 
 	const addNewMetadataProp = () => {
@@ -184,6 +209,23 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		setSelectedImage(null)
 	}
 
+	const onSelectAsset = (asset) => {
+		setNewAsset(asset)
+	}
+
+	const saveAdditionalAsset = (asset) => {
+		console.log('saveAdditionalAsset')
+
+		setPendingAdditionalAssets([...pendingAdditionalAssets, {
+			assetType: newAssetType,
+			asset: newAsset
+		}])
+
+		setDisplayLinkAssetModal(false)
+		setNewAssetType('')
+		setNewAsset(null)
+	}
+
 	const removeAdditionalAsset = async (asset) => {
 		try {
 			const response = await fetch(`/api/internal/assets/${contract.csn}/${anchor}/${asset.assetType}`, {
@@ -194,13 +236,32 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 				body: JSON.stringify({
 				}),
 			})
+
+			if (response.ok) {
+				mutate()
+			}
 		} catch (error) {
 			console.error('Error: ', error)
 		}
 	}
 
+	const removePendingAdditionalAsset = (asset) => {
+		setPendingAdditionalAssets(
+			pendingAdditionalAssets
+				.filter((obj) => obj.asset.assetHash !== asset.asset.assetHash)
+		)
+	}
+
+	const toggleLinkAssetModal = () => {
+		setNewAssetType('')
+		setDisplayLinkAssetModal(!displayLinkAssetModal)
+	}
+
 	const primaryAsset = discoverPrimaryAsset(nft)
 	const assetURL = primaryAsset ? generateAssetURL(nft?.contract.csn, primaryAsset?.asset?.assetHash) : null
+	const availableAssets = assets?.filter((asset) => {
+		return !additionalAssets?.find((obj) => obj.asset.assetHash === asset.assetHash)
+	})
 
 	return (
 		<>
@@ -385,6 +446,34 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 																		</span>
 																	</Table.Row>
 																))}
+
+																{pendingAdditionalAssets.map((asset, index) => (
+																	<Table.Row key={index}>
+																		<span>
+																			<div className="badge badge-secondary">
+																				Pending
+																			</div>
+																		</span>
+																		<span>{asset.assetType}</span>
+																		<span>{asset.asset.originalFileName}</span>
+																		<span>{asset.asset.assetHash}</span>
+
+																		<span>
+																			<Link className="link"
+																				  target="_blank"
+																				  href={`/api/v1/assets/${nft.contract.csn}/${asset.asset.assetHash}`}>
+																				<ArrowTopRightOnSquareIcon />
+																			</Link>
+																		</span>
+
+																		<span>
+																			<Button btnType="button" className="btn-ghost"
+																					onClick={() => removePendingAdditionalAsset(asset)}>
+																				<TrashIcon className="h-4 text-red-500" />
+																			</Button>
+																		</span>
+																	</Table.Row>
+																))}
 															</Table.Body>
 														</Table>
 													)}
@@ -401,9 +490,40 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 														Add a new asset
 													</Button>
 
-													<Button btnType="button" onClick={addNewTraitProp} className="w-1/2 mt-2">
+													<Button btnType="button" onClick={toggleLinkAssetModal} className="w-1/2 mt-2">
 														Link to Existing Asset
 													</Button>
+												</div>
+
+												<div className="flex mt-4">
+													{displayLinkAssetModal && (
+														<Modal.Legacy className="w-8/12 max-w-5xl" open={displayLinkAssetModal} onClickBackdrop={toggleLinkAssetModal}>
+															<Modal.Header className="font-bold text-center">
+																Select a new Asset
+															</Modal.Header>
+															<Modal.Body>
+																<div className="mb-4 text-center">
+																	<input type="text" value={newAssetType}
+																		onChange={(e) => setNewAssetType(e.target.value)}
+																		placeholder="Asset Type"
+																		required
+																		className="input input-bordered w-full max-w-xs" />
+																</div>
+
+																<div>
+																	<SelectableCardList onSelect={onSelectAsset}
+																		disabled={!newAssetType}
+																		items={availableAssets} />
+																</div>
+															</Modal.Body>
+															<Modal.Actions>
+																<div className="flex flex-row justify-between w-full">
+																	<Button onClick={toggleLinkAssetModal} btnType='button'>Close</Button>
+																	<Button onClick={saveAdditionalAsset} btnType='button'>Save</Button>
+																</div>
+															</Modal.Actions>
+														</Modal.Legacy>
+													)}
 												</div>
 											</div>
 

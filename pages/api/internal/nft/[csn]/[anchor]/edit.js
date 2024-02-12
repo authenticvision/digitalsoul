@@ -122,6 +122,7 @@ export default async function handle(req, res) {
 	}
 
 	const metadata = JSON.parse(fields.metadata || {})
+	const additionalAssets = JSON.parse(fields.additionalAssets || {})
 
 	// XXX: We always upload the file, we could add a check to see if the
 	// computed hash matches an existing asset and skip the upload
@@ -228,6 +229,56 @@ export default async function handle(req, res) {
 			return res.status(500).json({
 				message: 'There were some error when updating the metadata',
 			})
+		}
+	}
+
+	if (additionalAssets) {
+		for (const asset of additionalAssets) {
+			const assetTypeSchema = z.object({
+				assetId: z.string(),
+				assetType: z.string()
+			})
+
+			try {
+				assetTypeSchema.parse(asset)
+			} catch (err) {
+				const validationErrors = fromZodError(err);
+				console.error("ZodError: ", validationErrors);
+
+				return res.status(422).json({
+					message: 'There was some error when validating the additional assets',
+					issues: validationErrors.toString()
+				})
+			}
+
+			try {
+				const assetNFT = await prisma.AssetNFT.create({
+					data: {
+						assetType: asset.assetType,
+						active: true,
+						asset: {
+							connect: {
+								id: asset.assetId
+							}
+						},
+						assignedBy: {
+							connect: {
+								id: session.wallet.id
+							}
+						},
+						nft: {
+							connect: {
+								id: nft.id
+							}
+						}
+					}
+				})
+			} catch (err) {
+				console.error(err)
+				return res.status(500).json({
+					message: 'There were some error when updating the additional assets',
+				})
+			}
 		}
 	}
 
