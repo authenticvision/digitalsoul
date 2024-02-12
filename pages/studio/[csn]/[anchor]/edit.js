@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import NextHead from 'next/head'
+import Image from 'next/image'
+import editImg from '@/public/icons/edit.svg'
+import { XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
 
 import { AppLayout, StudioHeader, Loading, ErrorPage, Button } from '@/components/ui'
 import { NFTImageEdit } from '@/components/studio'
+import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
 
 import { auth } from 'auth'
 
@@ -65,6 +69,27 @@ export async function getServerSideProps(context) {
 	}
 }
 
+const ImageCard = ({ asset, url, ...props }) => {
+	return (
+		<div className="relative group">
+			<Image
+				className="h-auto max-w-full rounded-lg"
+				width={500}
+				height={500}
+				src={asset ? asset : url} />
+
+			{url && (
+				<label htmlFor="image"
+					className="w-[3rem] h-[3rem] flex items-center justify-center absolute z-10 invisible group-hover:visible right-5
+					top-5 border cursor-pointer btn btn-circle hover:shadow-white border-white
+					hover:shadow-sm">
+						<PencilIcon className="w-6 h-6"/>
+				</label>
+			)}
+		</div>
+	)
+}
+
 const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	if (props.forbidden) {
 		return (
@@ -85,6 +110,8 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 			metadataProps: nft?.metadataAsProps
 		}
 	})
+
+	const [selectedImage, setSelectedImage] = useState(null)
 
 	const { fields: metadataFields, append: appendMetadata, remove: removeMetadata } = useFieldArray({
 		name: 'metadataProps', control
@@ -120,11 +147,13 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 		combinedMetadata.attributes = data.attributes
 
+		const formData = new FormData()
+		formData.append('metadata', JSON.stringify(combinedMetadata))
+		formData.append('image', selectedImage)
+
 		fetch(`/api/internal/nft/${contract.csn}/${anchor}/edit`, {
 			method: 'PUT',
-			body: JSON.stringify({
-				metadata: combinedMetadata
-			})
+			body: formData
 		})
 	}
 
@@ -144,6 +173,19 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		removeTrait(index)
 	}
 
+	const handleFileChange = (e) => {
+		const file = e.target.files[0]
+
+		setSelectedImage(file)
+	}
+
+	const handleRemoveImage = () => {
+		setSelectedImage(null)
+	}
+
+	const primaryAsset = discoverPrimaryAsset(nft)
+	const assetURL  = primaryAsset ? generateAssetURL(nft?.contract.csn, primaryAsset?.asset?.assetHash) : null
+
 	return (
 		<>
 			<NextHead>
@@ -162,7 +204,34 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 								<div className="flex m-8">
 									<div className="grid w-full px-8">
 										<form onSubmit={handleSubmit(onSubmit)}>
-											<div className="flex items-center justify-center items-center">
+											<div className="flex flex-col items-center justify-center items-center">
+												<input id="image" className="hidden" type="file" onChange={handleFileChange} />
+												{selectedImage && (
+													<div className="mt-2 relative group">
+														<ImageCard
+															asset={URL.createObjectURL(selectedImage)}
+														/>
+
+														<Button btnType='button'
+															variant="btn-circle"
+															onClick={handleRemoveImage}
+															className="absolute z-10 invisible group-hover:visible right-5
+																top-5 border cursor-pointer hover:shadow-white border-white
+																rounded-full hover:shadow-sm"
+															aria-label="Remove image">
+															<XMarkIcon
+																className="w-8 h-8"/>
+														</Button>
+													</div>
+												)}
+
+												{!selectedImage && (
+													<div className="mt-2">
+														<ImageCard
+															url={assetURL}
+														/>
+													</div>
+												)}
 
 											</div>
 
