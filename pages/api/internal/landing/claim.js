@@ -8,9 +8,9 @@ export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
-	const { avSip, address } = req.body
+	const { avSip, beneficiary } = req.body
 
-	if (!avSip || !address) {
+	if (!avSip || !beneficiary) {
 		return res.status(400).json({ message: 'Missing required parameters' })
 	}
 
@@ -28,24 +28,9 @@ export default async function handle(req, res) {
 		})
 	}
 
-	const wallet = await prisma.wallet.findUnique({
-		where: {
-			address: address?.toLowerCase()
-		}
-	})
-
-	if (!wallet) {
-		let errorMsg = 'The wallet address was not found.'
-		console.error(errorMsg)
-
-		return res.status(422).json({
-			message: errorMsg
-		})
-	}
-
 	try {
 		const { data: response, status } = await api.claimNFT(
-			avSip, wallet.address?.toLowerCase()
+			avSip, beneficiary
 		)
 
 		if (status == 200) {
