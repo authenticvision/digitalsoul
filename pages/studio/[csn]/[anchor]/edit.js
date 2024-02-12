@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import NextHead from 'next/head'
+import Link from 'next/link'
 import Image from 'next/image'
 import editImg from '@/public/icons/edit.svg'
-import { XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
+import { ArrowTopRightOnSquareIcon, TrashIcon, XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
 
 import { AppLayout, StudioHeader, Loading, ErrorPage, Button } from '@/components/ui'
-import { NFTImageEdit } from '@/components/studio'
+import { Table } from 'react-daisyui'
 import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
 
 import { auth } from 'auth'
@@ -123,8 +124,8 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
-	const onFinishEditing = async () => {
-	}
+	const additionalAssets = nft?.assets
+		.filter((obj) => { return obj.active && obj.assetType !== 'image' })
 
 	const onSubmit = (data) => {
 		const newMetadata = (data.metadataProps || []).reduce((obj, prop) => {
@@ -181,6 +182,21 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 	const handleRemoveImage = () => {
 		setSelectedImage(null)
+	}
+
+	const removeAdditionalAsset = async (asset) => {
+		try {
+			const response = await fetch(`/api/internal/assets/${contract.csn}/${anchor}/${asset.assetType}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+				}),
+			})
+		} catch (error) {
+			console.error('Error: ', error)
+		}
 	}
 
 	const primaryAsset = discoverPrimaryAsset(nft)
@@ -328,6 +344,67 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												<Button btnType="button" onClick={addNewTraitProp} className="mt-2">
 													Add a new trait
 												</Button>
+											</div>
+
+											<div className="form-control my-4">
+												<h2 className="text-2xl font-bold my-4">
+													Additional Assets
+												</h2>
+
+												<div>
+													{additionalAssets.length > 0 && (
+														<Table zebra={true}>
+															<Table.Head>
+																<span />
+																<span>Asset Type</span>
+																<span>Original File Name</span>
+																<span>Asset Hash</span>
+																<span></span>
+															</Table.Head>
+
+															<Table.Body>
+																{additionalAssets.map((asset, index) => (
+																	<Table.Row key={asset.asset.assetHash}>
+																		<span>{index + 1}</span>
+																		<span>{asset.assetType}</span>
+																		<span>{asset.asset.originalFileName}</span>
+																		<span>{asset.asset.assetHash}</span>
+
+																		<span>
+																			<Link className="link"
+																				  target="_blank"
+																				  href={`/api/v1/assets/${nft.contract.csn}/${asset.asset.assetHash}`}>
+																				<ArrowTopRightOnSquareIcon />
+																			</Link>
+																		</span>
+
+																		<span>
+																			<Button btnType="button" className="btn-ghost" onClick={() => removeAdditionalAsset(asset)}>
+																				<TrashIcon className="h-4 text-red-500" />
+																			</Button>
+																		</span>
+																	</Table.Row>
+																))}
+															</Table.Body>
+														</Table>
+													)}
+
+													{additionalAssets.length === 0 && (
+														<div className="text-center my-4">
+															This NFT does not have any additional assets
+														</div>
+													)}
+												</div>
+
+												<div className="flex flex-row w-full">
+													<Button btnType="button" onClick={addNewTraitProp} className="w-1/2 mt-2 mr-2">
+														Add a new asset
+													</Button>
+
+													<Button btnType="button" onClick={addNewTraitProp} className="w-1/2 mt-2">
+														Link to Existing Asset
+													</Button>
+												</div>
 											</div>
 
 
