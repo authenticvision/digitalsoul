@@ -9,7 +9,7 @@ export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
-	const { avSip } = req.body
+	const { avSip, walletAddress } = req.body
 
 	if (!avSip) {
 		return res.status(400).json({ message: 'Missing required parameters' })
@@ -30,8 +30,9 @@ export default async function handle(req, res) {
 	}
 
 	try {
-		const { data: response, status } = await api.getAssetBySip(
-			avSip
+		const { data: response, status } = await api.verifyOwner(
+			avSip, 
+			walletAddress
 		)
 
 		// TODO: Maybe add some validation of the status code?
