@@ -184,7 +184,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	}
 
 	const primaryAsset = discoverPrimaryAsset(nft)
-	const assetURL  = primaryAsset ? generateAssetURL(nft?.contract.csn, primaryAsset?.asset?.assetHash) : null
+	const assetURL = primaryAsset ? generateAssetURL(nft?.contract.csn, primaryAsset?.asset?.assetHash) : null
 
 	return (
 		<>
@@ -228,7 +228,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												{!selectedImage && (
 													<div className="mt-2">
 														<ImageCard
-															url={assetURL}
+															url={assetURL || '/nft-fallback-cover.webp'}
 														/>
 													</div>
 												)}
