@@ -153,7 +153,7 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 						</Modal.Legacy>
 					)}
 
-					<Button href="#" onClick={toggleDisplayModal} btnType="button" text="Add new asset" />
+					<Button href="#" onClick={toggleDisplayModal} btnType="button" text="Link new asset" />
 				</div>
 			</div>
 		</ElementBox>
