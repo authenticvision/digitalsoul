@@ -1,6 +1,8 @@
-import { useState, useRef } from 'react'
-import { Button, ElementBox } from '@/components/ui'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Button, ElementBox, SelectableCardList } from '@/components/ui'
 import { FileUploader } from '@/components/studio'
+import { useAssets } from '@/hooks'
+import { Modal } from 'react-daisyui'
 
 import { formatAddress } from '@/lib/utils'
 
@@ -10,24 +12,66 @@ import editImg from '@/public/icons/edit.svg'
 
 const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 	const [newAssetType, setNewAssetType] = useState('')
-	const uploadModal = useRef(null)
+	const [newAsset, setNewAsset] = useState('')
+	const [displayModal, setDisplayModal] = useState(false)
+	const selectAssetModal = useRef(null)
+	const { assets, isLoading, error, mutate } = useAssets(nft.contract.csn)
 
-	const displayModal = () => {
-		uploadModal.current.showModal()
+	const toggleDisplayModal = () => {
+		setDisplayModal(!displayModal)
 	}
+
+	useEffect(() => {
+		if (!displayModal) {
+			setDisplayModal(false)
+			setNewAssetType('')
+			mutate()
+
+			onUpdate()
+		}
+	}, [displayModal])
 
 	const onCancelUpload = () => {}
 
-	const onFinishUploading = (e) => {
-		uploadModal.current.close()
-		setNewAssetType('')
+	const onSelectAsset = (asset) => {
+		setNewAsset(asset)
+	}
 
-		onUpdate()
+	const saveAdditionalAsset = async () => {
+		try {
+			const response = await fetch(`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/link`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					assetId: newAsset.id,
+					assetType: newAssetType
+				})
+			})
+
+			const data = await response.json()
+
+			if (response.ok) {
+				setDisplayModal(false)
+				setNewAssetType('')
+				setNewAsset(null)
+
+				onUpdate()
+			} else {
+				setDisplayModal(false)
+				setNewAssetType('')
+				setNewAsset(null)
+
+				onError(data.message)
+			}
+		} catch (error) {
+			console.error('Error: ', error)
+			onError('There was an error while trying to communicate with the API')
+		}
 	}
 
 	const removeAsset = async (asset) => {
-		console.log(asset)
-
 		try {
 			const response = await fetch(`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/${asset.assetType}`, {
 				method: "DELETE",
@@ -58,9 +102,13 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 	return (
 		<ElementBox title="Assets">
 			<div className="flex flex-col">
-				<p>Refer <Link className = "link" href="https://docs.opensea.io/docs/metadata-standards" target="blank">OpenSea MetaData Standard</Link></p>
+				<p>Refer
+					<Link className="ml-1 link"
+						href="https://docs.opensea.io/docs/metadata-standards"
+						target="blank">OpenSea MetaData Standard</Link>
+				</p>
 				<ul>
-					{nft.assets.filter( (obj) => {return obj.active}).map((asset) => (
+					{nft.assets.filter((obj) => {return obj.active}).map((asset) => (
 						<li key={asset.asset.assetHash}>
 							<div>
 								<Button onClick={() => onRemoveAsset(asset)}
@@ -76,27 +124,36 @@ const AdditionalAssetsBox = ({ nft, onUpdate, onError, ...props }) => {
 				</ul>
 
 				<div className="flex mt-4">
-					<dialog ref={uploadModal} id="nft-modal-upload" className="modal">
-						<div className="modal-box">
-							<div className="mb-4 text-center">
-								<input type="text" value={newAssetType} onChange={(e) => setNewAssetType(e.target.value)}
-									placeholder="Asset Type"
-									required
-									className="input input-bordered w-full max-w-xs" />
-							</div>
+					{displayModal && (
+						<Modal.Legacy className="w-8/12 max-w-5xl" open={displayModal} onClickBackdrop={toggleDisplayModal}>
+							<Modal.Header className="font-bold text-center">
+								Select a new Asset
+							</Modal.Header>
+							<Modal.Body>
+								<div className="mb-4 text-center">
+									<input type="text" value={newAssetType}
+										onChange={(e) => setNewAssetType(e.target.value)}
+										placeholder="Asset Type"
+										required
+										className="input input-bordered w-full max-w-xs" />
+								</div>
 
-							<FileUploader disabled={!newAssetType} endpoint={`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/${newAssetType}`} maxFiles={1}
-								onFinish={onFinishUploading} assetType={newAssetType} />
+								<div>
+									<SelectableCardList onSelect={onSelectAsset}
+														disabled={!newAssetType}
+														items={assets} />
+								</div>
+							</Modal.Body>
+							<Modal.Actions>
+								<div className="flex flex-row justify-between w-full">
+									<Button onClick={saveAdditionalAsset}>Save</Button>
+									<Button onClick={toggleDisplayModal}>Close</Button>
+								</div>
+							</Modal.Actions>
+						</Modal.Legacy>
+					)}
 
-							<div className="modal-action">
-								<form method="dialog">
-									<Button text="Cancel" onClick={onCancelUpload} className="btn" />
-								</form>
-							</div>
-						</div>
-					</dialog>
-
-					<Button href="#" onClick={displayModal} btnType="button" text="Add new asset" />
+					<Button href="#" onClick={toggleDisplayModal} btnType="button" text="Add new asset" />
 				</div>
 			</div>
 		</ElementBox>
