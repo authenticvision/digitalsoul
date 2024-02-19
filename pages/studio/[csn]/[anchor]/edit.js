@@ -6,6 +6,7 @@ import editImg from '@/public/icons/edit.svg'
 import { ArrowTopRightOnSquareIcon, TrashIcon, XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
 
 import { AppLayout, StudioHeader, Loading, ErrorPage, Button, SelectableCardList } from '@/components/ui'
+import { FileUploader } from '@/components/studio'
 import { Table, Modal } from 'react-daisyui'
 import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
 
@@ -101,6 +102,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 	const [selectedImage, setSelectedImage] = useState(null)
 	const [displayLinkAssetModal, setDisplayLinkAssetModal] = useState(false)
+	const [displayAddAssetModal, setDisplayAddAssetModal] = useState(false)
 	const [newAssetType, setNewAssetType] = useState('')
 	const [newAsset, setNewAsset] = useState(null)
 	const [pendingAdditionalAssets, setPendingAdditionalAssets] = useState([])
@@ -183,6 +185,15 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		mutate()
 	}
 
+	const toggleLinkAssetModal = () => {
+		setNewAssetType('')
+		setDisplayLinkAssetModal(!displayLinkAssetModal)
+	}
+
+	const toggleAddAssetModal = () => {
+		setDisplayAddAssetModal(!displayAddAssetModal)
+	}
+
 	const addNewMetadataProp = () => {
 		appendMetadata({ name: '', value: '' })
 	}
@@ -214,8 +225,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	}
 
 	const saveAdditionalAsset = (asset) => {
-		console.log('saveAdditionalAsset')
-
 		setPendingAdditionalAssets([...pendingAdditionalAssets, {
 			assetType: newAssetType,
 			asset: newAsset
@@ -224,6 +233,24 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		setDisplayLinkAssetModal(false)
 		setNewAssetType('')
 		setNewAsset(null)
+	}
+
+	const addNewAsset = () => {
+		toggleAddAssetModal()
+
+	}
+
+	const onFinishUpload = (files) => {
+		setDisplayAddAssetModal(false)
+
+		const file = JSON.parse(files[0].serverId).asset
+		console.log(file)
+		setPendingAdditionalAssets([...pendingAdditionalAssets, {
+			assetType: newAssetType,
+			asset: file
+		}])
+
+		setNewAssetType('')
 	}
 
 	const removeAdditionalAsset = async (asset) => {
@@ -250,11 +277,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 			pendingAdditionalAssets
 				.filter((obj) => obj.asset.assetHash !== asset.asset.assetHash)
 		)
-	}
-
-	const toggleLinkAssetModal = () => {
-		setNewAssetType('')
-		setDisplayLinkAssetModal(!displayLinkAssetModal)
 	}
 
 	const primaryAsset = discoverPrimaryAsset(nft)
@@ -486,7 +508,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												</div>
 
 												<div className="flex flex-row w-full">
-													<Button btnType="button" onClick={addNewTraitProp} className="w-1/2 mt-2 mr-2">
+													<Button btnType="button" onClick={addNewAsset} className="w-1/2 mt-2 mr-2">
 														Add a new asset
 													</Button>
 
@@ -520,6 +542,34 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 																<div className="flex flex-row justify-between w-full">
 																	<Button onClick={toggleLinkAssetModal} btnType='button'>Close</Button>
 																	<Button onClick={saveAdditionalAsset} btnType='button'>Save</Button>
+																</div>
+															</Modal.Actions>
+														</Modal.Legacy>
+													)}
+
+													{(!displayLinkAssetModal && displayAddAssetModal) && (
+														<Modal.Legacy className="w-8/12 max-w-5xl" open={displayAddAssetModal} onClickBackdrop={toggleAddAssetModal}>
+															<Modal.Header className="font-bold text-center">
+																Upload a new Asset
+															</Modal.Header>
+															<Modal.Body>
+																<div className="mb-4 text-center">
+																	<div className="mb-4 text-center">
+																		<input type="text" value={newAssetType}
+																			onChange={(e) => setNewAssetType(e.target.value)}
+																			placeholder="Asset Type"
+																			required
+																			className="input input-bordered w-full max-w-xs" />
+																	</div>
+
+																	<FileUploader disabled={!newAssetType} endpoint={`/api/internal/contract/${contract.csn}/asset`}
+																		maxFiles={1} allowMultiple={false} onFinish={onFinishUpload}
+																	/>
+																</div>
+															</Modal.Body>
+															<Modal.Actions>
+																<div className="flex flex-row justify-between w-full">
+																	<Button onClick={toggleAddAssetModal} btnType='button'>Close</Button>
 																</div>
 															</Modal.Actions>
 														</Modal.Legacy>
