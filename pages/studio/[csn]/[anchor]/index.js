@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
+import { Tab, TabList, TabPanel, Tabs } from "@/components/studio/tabs.js";
+import React from 'react'
 import NextHead from 'next/head'
 
-import { AppLayout, Loading, ErrorPage } from '@/components/ui'
-import { NFTView as NFTProfileView } from '@/components/studio'
-
-import { useSession } from 'next-auth/react'
-import { getServerSession } from 'next-auth/next'
+import { AppLayout, Loading, ErrorPage, StudioHeader } from '@/components/ui'
+import NFTEdit from "./edit";
 import { auth } from 'auth'
 
 import { useNFT } from '@/hooks'
 import prisma from '@/lib/prisma'
+import NFTPreview from "./preview";
+import { NFTCaption } from "@/components/studio";
+
 
 export async function getServerSideProps(context) {
 	const session = await auth(context.req, context.res)
-	let nfts = []
 
 	if (!session) {
 		return {
@@ -63,8 +64,26 @@ export async function getServerSideProps(context) {
 	}
 }
 
+function NftTabs() {
+  return (
+    <div className="wrapper">
+      <Tabs>
+        <TabList aria-label="NFT-Details">
+          <Tab to="/">EDIT</Tab>
+          <Tab to="/preview">PREVIEW</Tab>
+        </TabList>
+        <div className="panels">
+          <TabPanel>
+            <Outlet />
+          </TabPanel>
+        </div>
+      </Tabs>
+    </div>
+  );
+}
 
-const NFTView = ({ contract, wallet, anchor, ...props }) => {
+
+const NFTOverview = ({ contract, wallet, anchor, ...props }) => {
 	if (props.forbidden) {
 		return (
 			<ErrorPage status={403} />
@@ -74,32 +93,39 @@ const NFTView = ({ contract, wallet, anchor, ...props }) => {
 	const { nft, isLoading, error, mutate } = useNFT({csn: contract.csn, anchor: anchor})
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
-	const onFinishEditing = () => {
-		mutate()
-	}
 
 	return (
-		<>
-			<NextHead>
-				<title>DigitalSoul - Studio - {nftCaption} </title>
-			</NextHead>
+        <>
+        <NextHead>
+            <title>DigitalSoul - Studio - {nftCaption} </title>
+        </NextHead>
 
-			<AppLayout wallet={wallet} contractId={contract.id}>
-				<div className="page w-full ">
-					<main className="flex flex-col">
-						{nft ? (
-							<NFTProfileView wallet={wallet} contract={contract}
-											nft={nft} onFinishEditing={onFinishEditing} />
-						) : (
-							<div className='text-center'>
-								<Loading size='lg' />
-							</div>
-						)}
-					</main>
-				</div>
-			</AppLayout>
-		</>
+        <AppLayout wallet={wallet} contractId={contract.id}>
+            <div className="page w-full ">
+            <StudioHeader title={`${nftCaption}`}
+											contract={contract} nft={nft}
+											staticCaption={nftCaption} />
+                <main className="flex flex-col mt-3 ml-12">
+                    {nft ? (
+                        <MemoryRouter>
+							<Routes>
+							<Route path="/" element={<NftTabs />}>
+								<Route path="/preview"  element={<NFTPreview contract={contract} anchor={anchor} wallet={wallet} />} />
+								<Route index element={<NFTEdit contract={contract} anchor={anchor} wallet={wallet} />} />
+							</Route>
+							</Routes>
+                      </MemoryRouter>
+                    ) : (
+                        <div className='text-center'>
+                            <Loading size='lg' />
+                        </div>
+                    )}
+                </main>
+            </div>
+        </AppLayout>
+        </>
 	)
 }
 
-export default NFTView
+export default NFTOverview;
+

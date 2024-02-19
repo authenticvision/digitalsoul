@@ -5,7 +5,7 @@ import Image from 'next/image'
 import editImg from '@/public/icons/edit.svg'
 import { ArrowTopRightOnSquareIcon, TrashIcon, XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
 
-import { AppLayout, StudioHeader, Loading, ErrorPage, Button, SelectableCardList } from '@/components/ui'
+import { AppLayout, Loading, ErrorPage, Button, SelectableCardList } from '@/components/ui'
 import { FileUploader } from '@/components/studio'
 import { Table, Modal } from 'react-daisyui'
 import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
@@ -287,18 +287,12 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 	return (
 		<>
-			<NextHead>
-				<title>DigitalSoul - Studio - Editing {nftCaption}</title>
-			</NextHead>
 
-			<AppLayout wallet={wallet} contractId={contract.id}>
 				<div className="page w-full">
 					<main className="flex flex-col">
 						{nft ? (
 							<>
-								<StudioHeader title={`Editing ${nftCaption}`}
-											contract={contract} nft={nft}
-											staticCaption={nftCaption} />
+								
 
 								<div className="flex m-8">
 									<div className="grid w-full px-8">
@@ -598,7 +592,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 						)}
 					</main>
 				</div>
-			</AppLayout>
 		</>
 	)
 

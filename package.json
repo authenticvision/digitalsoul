@@ -16,6 +16,7 @@
     "test": "export $(xargs < .env.test) && NODE_ENV=test npx prisma db push && NODE_ENV=test jest"
   },
   "dependencies": {
+    "@ariakit/react": "^0.4.1",
     "@ethersproject/keccak256": "^5.7.0",
     "@heroicons/react": "^2.0.18",
     "@prisma/client": "^5.2.0",
@@ -49,6 +50,7 @@
     "react-dom": "18.2.0",
     "react-filepond": "^7.1.2",
     "react-hook-form": "^7.49.3",
+    "react-router-dom": "^6.22.1",
     "read-chunk": "^4.0.3",
     "sha3": "^2.1.4",
     "sharp": "^0.32.6",
