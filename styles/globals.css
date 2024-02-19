@@ -49,3 +49,58 @@ li {
 .filepond--panel-root {
 	@apply bg-base-100 !important;
 }
+
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.tab-list {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab {
+  display: flex;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.25rem;
+  border-style: none;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.tab:hover {
+  background-color: hsl(204 100% 40%);
+}
+
+.tab[aria-disabled="true"] {
+  opacity: 0.5;
+}
+
+.tab[aria-selected="true"] {
+  background-color: hsl(204 100% 40%);
+  color: hsl(204 20% 100%);
+}
+
+.tab:hover[aria-selected="true"] {
+  background-color: hsl(204 100% 32%);
+}
+
+.tab:focus-visible,
+.tab[data-focus-visible] {
+  outline: 2px solid hsl(204 100% 40%);
+  outline-offset: 2px;
+}
+
+.panels {
+  padding: 0.5rem;
+}
