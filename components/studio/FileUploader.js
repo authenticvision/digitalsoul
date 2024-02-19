@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 import { FilePond, registerPlugin } from 'react-filepond'
 import 'filepond/dist/filepond.min.css'
@@ -17,10 +17,17 @@ const FileUploader = ({
 	allowMultiple, endpoint, maxFiles, maxSize = '30MB', onFinish, disabled, ...props
 }) => {
 	const [assets, setAssets] = useState([])
+	const pondRef = useRef(null)
 
-	const afterProcess = () => {
+	const afterProcessFiles = () => {
+		const processedFiles = pondRef.current.getFiles()
+
+		// XXX: This utter garbage is due to the fact that assets is never ready
+		// after processing the list of files. You can verify by logging the
+		// assets array here. It'll always be empty, even if we wrap this into
+		// a useCallback
 		setAssets([])
-		onFinish()
+		onFinish(processedFiles)
 	}
 
 	const onCloseModal = (e) => {
@@ -32,6 +39,7 @@ const FileUploader = ({
 			<FilePond
 				files={assets}
 				onupdatefiles={setAssets}
+				ref={pondRef}
 				allowMultiple={allowMultiple}
 				allowRevert={false}
 				allowReorder={false}
@@ -39,7 +47,7 @@ const FileUploader = ({
 				maxFiles={maxFiles}
 				disabled={disabled}
 				maxFileSize={maxSize}
-				onprocessfiles={afterProcess}
+				onprocessfiles={afterProcessFiles}
 				server={endpoint}
 				name="assets"
 				labelIdle='Drag & Drop your NFT files or <span class="filepond--label-action">Browse</span>'
