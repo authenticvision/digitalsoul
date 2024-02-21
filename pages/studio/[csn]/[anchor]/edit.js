@@ -237,14 +237,12 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 	const addNewAsset = () => {
 		toggleAddAssetModal()
-
 	}
 
 	const onFinishUpload = (files) => {
 		setDisplayAddAssetModal(false)
 
 		const file = JSON.parse(files[0].serverId).asset
-		console.log(file)
 		setPendingAdditionalAssets([...pendingAdditionalAssets, {
 			assetType: newAssetType,
 			asset: file
@@ -435,7 +433,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												</h2>
 
 												<div>
-													{additionalAssets.length > 0 && (
+													{(additionalAssets.length > 0 || pendingAdditionalAssets.length > 0) && (
 														<Table zebra={true}>
 															<Table.Head>
 																<span />
