@@ -413,7 +413,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 															{...register(`attributes.${index}.value`)}
 														/>
 
-														{(traitFields.length > 1) && (
+														{(traitFields.length > 0) && (
 															<Button btnType="button"
 																onClick={removeTraitProp} className="ml-2">
 																	Remove
