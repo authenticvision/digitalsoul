@@ -104,8 +104,6 @@ export default async function handle(req, res) {
 		return res.status(404).json({ message: 'NFT does not exist' })
 	}
 
-	console.log('nft exists, entering the form parsin')
-
 	const form = formidable({})
 	const tmpDir = path.join(process.env.STORAGE_DIR, "upload")
 	form.uploadDir = tmpDir
@@ -140,31 +138,14 @@ export default async function handle(req, res) {
 		const hashedFile = await computeKeccak256Hash(fileStream)
 		const fileCsnHash = computeCsnFileHash(contract.csn, hashedFile)
 
-		try {
-			// Split files per Smart contract. This is a logical separation and
-			// also reduces the risk of Filesystem-overload due to too many
-			// files in the same directory
-			const targetDir = path.join(STORAGE_DIR, contract.csn)
-			const storageFilePath = path.join(contract.csn, fileCsnHash)
-			const targetFile = path.join(targetDir, fileCsnHash)
-			const originalFileName = uploadedFile.originalFilename
+		const existingAsset = await prisma.asset.findFirst({
+			where: {
+				assetHash: fileCsnHash
+			}
+		})
 
-			// Create contract-directory in case it does not exist
-			mkdirSync(targetDir, { recursive: true })
-			renameSync(uploadedFile.filepath, targetFile)
-
-			const asset = await prisma.asset.create({
-				data: {
-					assetHash: fileCsnHash,
-					filePath: storageFilePath,
-					originalFileName: originalFileName,
-					contract: {
-						connect: {
-							id: contract.id
-						}
-					}
-				}
-			})
+		if (existingAsset) {
+			rmSync(uploadedFile.filepath)
 
 			// TODO: Move this crap into a service
 			await softDeleteAssetsFromNFT(nft, 'image')
@@ -175,7 +156,7 @@ export default async function handle(req, res) {
 					active: true,
 					asset: {
 						connect: {
-							id: asset.id
+							id: existingAsset.id
 						}
 					},
 					assignedBy: {
@@ -190,12 +171,64 @@ export default async function handle(req, res) {
 					}
 				}
 			})
-		} catch (error) {
-			console.error(error)
-			rmSync(uploadedFile.filepath)
-			return res.status(500).json({
-				error: 'There was an error when storing the image'
-			})
+		} else {
+			try {
+				// Split files per Smart contract. This is a logical separation and
+				// also reduces the risk of Filesystem-overload due to too many
+				// files in the same directory
+				const targetDir = path.join(STORAGE_DIR, contract.csn)
+				const storageFilePath = path.join(contract.csn, fileCsnHash)
+				const targetFile = path.join(targetDir, fileCsnHash)
+				const originalFileName = uploadedFile.originalFilename
+
+				// Create contract-directory in case it does not exist
+				mkdirSync(targetDir, { recursive: true })
+				renameSync(uploadedFile.filepath, targetFile)
+
+				const asset = await prisma.asset.create({
+					data: {
+						assetHash: fileCsnHash,
+						filePath: storageFilePath,
+						originalFileName: originalFileName,
+						contract: {
+							connect: {
+								id: contract.id
+							}
+						}
+					}
+				})
+
+				// TODO: Move this crap into a service
+				await softDeleteAssetsFromNFT(nft, 'image')
+
+				await prisma.AssetNFT.create({
+					data: {
+						assetType: 'image',
+						active: true,
+						asset: {
+							connect: {
+								id: asset.id
+							}
+						},
+						assignedBy: {
+							connect: {
+								id: session.wallet.id
+							}
+						},
+						nft: {
+							connect: {
+								id: nft.id
+							}
+						}
+					}
+				})
+			} catch (error) {
+				console.error(error)
+				rmSync(uploadedFile.filepath)
+				return res.status(500).json({
+					error: 'There was an error when storing the image'
+				})
+			}
 		}
 	}
 
