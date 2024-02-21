@@ -15,7 +15,7 @@ const NFTCard = ({ nft, contractName, staticCaption, ...props }) => {
 	const assetURL  = primaryAsset ? generateAssetURL(nft.contract.csn, primaryAsset?.asset?.assetHash) : null
 
 	return (
-		<Link href={`/studio/${nft.contract.csn.toLowerCase()}/${nft.anchor}`}
+		<Link href={`/studio/${nft.contract.csn.toLowerCase()}/${nft.anchor}/edit`}
 			  className={cardRootClassName}>
 			<figure className="w-[254px] h-[254px] object-cover relative">
 				{primaryAsset ? (
