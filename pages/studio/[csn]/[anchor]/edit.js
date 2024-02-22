@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import NextHead from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import editImg from '@/public/icons/edit.svg'
+import { useRouter } from 'next/router'
+import { useBeforeunload } from 'react-beforeunload'
 import { ArrowTopRightOnSquareIcon, TrashIcon, XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
 
 import { AppLayout, StudioHeader, Loading, ErrorPage, Button, SelectableCardList } from '@/components/ui'
@@ -94,6 +95,8 @@ const ImageCard = ({ asset, url, ...props }) => {
 }
 
 const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
+	const router = useRouter()
+
 	if (props.forbidden) {
 		return (
 			<ErrorPage status={403} />
@@ -116,7 +119,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	)
 
 	const {
-		register, handleSubmit, control, formState: { errors }
+		register, handleSubmit, control, formState: { errors, isDirty }
 	}  = useForm({
 		values: {
 			...nft,
@@ -132,6 +135,32 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	const { fields: traitFields, append: appendTrait, remove: removeTrait } = useFieldArray({
 		name: 'attributes', control
 	})
+
+	useBeforeunload(
+		pendingAdditionalAssets.length > 0 || isDirty ? (event) => event.preventDefault() : null
+	);
+
+	useEffect(() => {
+        const exitingFunction = () => {
+			const warningText = 'This page is asking you to confirm that you want to leave — information you’ve entered may not be saved.'
+			const pendingChanges = isDirty || pendingAdditionalAssets.length > 0
+
+			if (!pendingChanges) {
+				return
+			}
+
+			if (!window.confirm(warningText)) {
+				router.events.emit('routeChangeError');
+				throw 'routeChange aborted.';
+			}
+        };
+
+        router.events.on('routeChangeStart', exitingFunction);
+
+        return () => {
+            router.events.off('routeChangeStart', exitingFunction);
+        };
+    }, [isDirty, pendingAdditionalAssets]);
 
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
