@@ -6469,6 +6469,11 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-beforeunload@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/react-beforeunload/-/react-beforeunload-2.6.0.tgz#e7ead8dc39009a205b4249619050772595bfeefd"
+  integrity sha512-aKrGaRNc7fZQlDnmSYrXu4cbz9QEPhScA4A2mLxhjcULDy4VILLyLhSEjg2goIw3o5LQ1zss44kmQh5LXWYGCw==
+
 react-daisyui@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/react-daisyui/-/react-daisyui-5.0.0.tgz#9ce2fe8dd540f6b12650fc0d2e7953c1026789b3"
