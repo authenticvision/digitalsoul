@@ -74,6 +74,18 @@ export default async function handle(req, res) {
 		const hashedFile = await computeKeccak256Hash(fileStream)
 		const fileCsnHash = computeCsnFileHash(contract.csn, hashedFile)
 
+		const existingAsset = await prisma.asset.findFirst({
+			where: {
+				assetHash: fileCsnHash
+			}
+		})
+
+		if (existingAsset) {
+			return res.json({
+				asset: existingAsset
+			})
+		}
+
 		try {
 			// Split files per Smart contract. This is a logical separation and
 			// also reduces the risk of Filesystem-overload due to too many

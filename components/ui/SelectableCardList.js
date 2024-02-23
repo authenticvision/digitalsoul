@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { cn, inChunks } from '@/lib/utils'
 
-const SelectableCard = ({ item, selected, ...props }) => {
+const SelectableCard = ({ item, selected, disabled, ...props }) => {
 	const classNames = cn(
 		'h-auto max-w-full',
 		'border border-2',
-		selected ? 'border-shark-500' : 'border-slate-300'
+		selected ? 'border-shark-500' : 'border-slate-300',
+		disabled ? 'cursor-not-allowed' : 'cursor-pointer'
 	)
 
 	return (
@@ -45,6 +46,7 @@ const SelectableCardList = ({ onChange, items, onSelect, disabled, ...props}) =>
 								row.map((item) => (
 									<SelectableCard item={item}
 													key={item.id}
+													disabled={disabled}
 													onClick={(e) => onSelectCard(item.id)}
 													selected={item.id == selectedCardId} />
 								))

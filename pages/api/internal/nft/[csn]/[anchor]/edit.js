@@ -3,7 +3,12 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]'
 
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
-import { fromZodError, isValidationErrorLike } from 'zod-validation-error';
+import mime from 'mime'
+import { fromZodError } from 'zod-validation-error';
+import formidable from 'formidable';
+import path from 'path'
+import { renameSync, mkdirSync, rmSync, createReadStream } from 'fs';
+import { computeKeccak256Hash, computeCsnFileHash } from '@/lib/utils'
 
 const allowedMethods = ['PUT']
 const metadataSchema = z.object({
@@ -19,7 +24,45 @@ const metadataSchema = z.object({
 			min_value: z.number().optional()
 		})
 	).optional().default([])
-})
+}).passthrough()
+
+export const config = {
+	api: {
+		bodyParser: false,
+	}
+}
+
+const STORAGE_DIR = process.env.STORAGE_DIR
+
+const allowedMimeTypes = [
+	mime.getType('jpg'),
+	mime.getType('gif'),
+	mime.getType('png'),
+	//mime.getType('webp'), // Stop support for webp, see https://github.com/authenticvision/digitalsoul/issues/43
+	//mime.getType('m4a'),
+	mime.getType('mp4'),
+	//mime.getType('mkv'),
+	//mime.getType('avi'),
+	// mime.getType('webm'), // Stop support for webm, see https://github.com/authenticvision/digitalsoul/issues/43
+	mime.getType('mov'),
+	//mime.getType('wmv')
+]
+
+const softDeleteAssetsFromNFT = async (nft, assetType) => {
+	const ids = nft.assets
+		.filter((nftAsset) => nftAsset.assetType == assetType && nftAsset.active == true)
+		.map(async(nftAsset) => {
+			return await prisma.assetNFT.update({
+				where: {
+					id: nftAsset.id
+				},
+				data: {
+					active: false,
+					updatedAt: new Date()
+				}
+			})
+		})
+}
 
 export default async function handle(req, res) {
 	const session = await getServerSession(req, res, authOptions)
@@ -34,19 +77,6 @@ export default async function handle(req, res) {
 	}
 
 	const { anchor, csn } = req.query
-	const { metadata: rawMetadata } = req.body
-	let metadata = rawMetadata
-
-	if (typeof rawMetadata == "string") {
-		try {
-			metadata = JSON.parse(rawMetadata)
-		} catch (error) {
-			console.error(error)
-			return res.status(422).json({
-				message: 'JSON is either malformatted or not a JSON object'
-			})
-		}
-	}
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
@@ -54,9 +84,22 @@ export default async function handle(req, res) {
 			contract: {
 				ownerId: session.wallet.id,
 				csn: {
-					equals: csn, 
+					equals: csn,
 					mode: "insensitive"
 				}
+			}
+		},
+		include: {
+			assets: true
+		}
+	})
+
+	const contract = await prisma.Contract.findFirst({
+		where: {
+			ownerId: session.wallet.id,
+			csn: {
+				equals: csn,
+				mode: "insensitive"
 			}
 		}
 	})
@@ -65,37 +108,216 @@ export default async function handle(req, res) {
 		return res.status(404).json({ message: 'NFT does not exist' })
 	}
 
-	try {
-		const result = metadataSchema.parse(metadata)
-	} catch (err) {
-		const validationErrors = fromZodError(err);
-		console.error("ZodError: ", validationErrors);
+	const form = formidable({})
+	const tmpDir = path.join(process.env.STORAGE_DIR, "upload")
+	form.uploadDir = tmpDir
 
-		return res.status(422).json({
-			message: '',
-			issues: validationErrors.toString()
-		})
+	let fields, files
+
+	try {
+		[fields, files] = await form.parse(req)
+	} catch (err) {
+		console.error(err)
+
+		return res.status(500)
+			.json({ message: 'There was some error when parsing the form' })
 	}
 
-	try {
-		const updatedMetadata = await prisma.NFT.update({
+	const metadata = JSON.parse(fields.metadata || {})
+	const additionalAssets = JSON.parse(fields.additionalAssets || {})
+
+	// XXX: We always upload the file, we could add a check to see if the
+	// computed hash matches an existing asset and skip the upload
+	if (files.image) {
+		const uploadedFile = files.image[0]
+
+		if (!allowedMimeTypes.includes(uploadedFile.mimetype)) {
+			rmSync(uploadedFile.filepath)
+			return res.status(422).json({
+				message: `File type ${uploadedFile.mimetype} is not allowed`
+			})
+		}
+
+		const fileStream = createReadStream(uploadedFile.filepath)
+		const hashedFile = await computeKeccak256Hash(fileStream)
+		const fileCsnHash = computeCsnFileHash(contract.csn, hashedFile)
+
+		const existingAsset = await prisma.asset.findFirst({
 			where: {
-				id: nft.id
-			},
-			data: {
-				metadata: metadata,
-				updatedAt: new Date()
+				assetHash: fileCsnHash
 			}
 		})
 
-		nft.metadata = metadata
-	} catch (err) {
-		console.error(err)
-		return res.status(500).json({
-			message: 'There were some error when updating the metadata',
-		})
+		if (existingAsset) {
+			rmSync(uploadedFile.filepath)
+
+			// TODO: Move this crap into a service
+			await softDeleteAssetsFromNFT(nft, 'image')
+
+			await prisma.AssetNFT.create({
+				data: {
+					assetType: 'image',
+					active: true,
+					asset: {
+						connect: {
+							id: existingAsset.id
+						}
+					},
+					assignedBy: {
+						connect: {
+							id: session.wallet.id
+						}
+					},
+					nft: {
+						connect: {
+							id: nft.id
+						}
+					}
+				}
+			})
+		} else {
+			try {
+				// Split files per Smart contract. This is a logical separation and
+				// also reduces the risk of Filesystem-overload due to too many
+				// files in the same directory
+				const targetDir = path.join(STORAGE_DIR, contract.csn)
+				const storageFilePath = path.join(contract.csn, fileCsnHash)
+				const targetFile = path.join(targetDir, fileCsnHash)
+				const originalFileName = uploadedFile.originalFilename
+
+				// Create contract-directory in case it does not exist
+				mkdirSync(targetDir, { recursive: true })
+				renameSync(uploadedFile.filepath, targetFile)
+
+				const asset = await prisma.asset.create({
+					data: {
+						assetHash: fileCsnHash,
+						filePath: storageFilePath,
+						originalFileName: originalFileName,
+						contract: {
+							connect: {
+								id: contract.id
+							}
+						}
+					}
+				})
+
+				// TODO: Move this crap into a service
+				await softDeleteAssetsFromNFT(nft, 'image')
+
+				await prisma.AssetNFT.create({
+					data: {
+						assetType: 'image',
+						active: true,
+						asset: {
+							connect: {
+								id: asset.id
+							}
+						},
+						assignedBy: {
+							connect: {
+								id: session.wallet.id
+							}
+						},
+						nft: {
+							connect: {
+								id: nft.id
+							}
+						}
+					}
+				})
+			} catch (error) {
+				console.error(error)
+				rmSync(uploadedFile.filepath)
+				return res.status(500).json({
+					error: 'There was an error when storing the image'
+				})
+			}
+		}
 	}
 
+	if (metadata) {
+		try {
+			metadataSchema.parse(metadata)
+		} catch (err) {
+			const validationErrors = fromZodError(err);
+			console.error("ZodError: ", validationErrors);
+
+			return res.status(422).json({
+				message: 'There was some error when validating the metadata',
+				issues: validationErrors.toString()
+			})
+		}
+
+		try {
+			const updatedMetadata = await prisma.NFT.update({
+				where: {
+					id: nft.id
+				},
+				data: {
+					metadata: metadata,
+					updatedAt: new Date()
+				}
+			})
+
+			nft.metadata = metadata
+		} catch (err) {
+			console.error(err)
+			return res.status(500).json({
+				message: 'There were some error when updating the metadata',
+			})
+		}
+	}
+
+	if (additionalAssets) {
+		for (const asset of additionalAssets) {
+			const assetTypeSchema = z.object({
+				assetId: z.string(),
+				assetType: z.string()
+			})
+
+			try {
+				assetTypeSchema.parse(asset)
+			} catch (err) {
+				const validationErrors = fromZodError(err);
+				console.error("ZodError: ", validationErrors);
+
+				return res.status(422).json({
+					message: 'There was some error when validating the additional assets',
+					issues: validationErrors.toString()
+				})
+			}
+
+			try {
+				const assetNFT = await prisma.AssetNFT.create({
+					data: {
+						assetType: asset.assetType,
+						active: true,
+						asset: {
+							connect: {
+								id: asset.assetId
+							}
+						},
+						assignedBy: {
+							connect: {
+								id: session.wallet.id
+							}
+						},
+						nft: {
+							connect: {
+								id: nft.id
+							}
+						}
+					}
+				})
+			} catch (err) {
+				console.error(err)
+				return res.status(500).json({
+					message: 'There were some error when updating the additional assets',
+				})
+			}
+		}
+	}
 
 	return res.json({ ...nft })
 }

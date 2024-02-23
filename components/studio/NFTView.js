@@ -24,7 +24,7 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 			<div className="flex border-b border-raven-700">
 				<div className="flex w-full ml-8 mt-8">
 					<div className="flex flex-row justify-between items-center w-full pl-8 pb-8">
-						<div className="flex flex-col items-start">
+						<div className="flex flex-col items-start w-full">
 							<div className="text-gray-400 text-sm font-normal breadcrumbs">
 								<ul>
 									<li>
@@ -40,8 +40,17 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 								</ul>
 							</div>
 
-							<div className="font-bold text-4xl">
-								{staticCaption? staticCaption : nft.slid}
+							<div className="flex items-center justify-between w-full pr-8">
+								<h1 className="font-bold text-4xl">
+									{staticCaption? staticCaption : nft.slid}
+								</h1>
+
+								<Link className="ml-4 text-lg font-bold"
+									  href={
+										`/studio/${contract.csn.toLowerCase()}/${nft.anchor}/edit`
+										}>
+									Edit
+								</Link>
 							</div>
 						</div>
 					</div>
@@ -76,7 +85,7 @@ const NFTView = ({ nft, wallet, contract, onFinishEditing, ...props }) => {
 							)}
 
 							<div className="py-6 w-full">
-								<MetadataBox nft={nft} onFinish={onFinishEditing} />
+								<MetadataBox nft={nft} />
 							</div>
 
 							<div className="py-6 w-full">

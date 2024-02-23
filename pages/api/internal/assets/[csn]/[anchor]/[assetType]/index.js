@@ -2,31 +2,14 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 
 import path from 'path'
-import mime from 'mime'
 
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 import formidable from 'formidable-serverless'
 import { readFileSync, renameSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { keccak256, id } from 'ethers'
-import { tmpdir } from "os"
 
 const allowedMethods = ['POST', 'DELETE']
-
-const allowedMimeTypes = [
-	mime.getType('jpg'),
-	mime.getType('gif'),
-	mime.getType('png'),
-	//mime.getType('webp'), // Stop support for webp, see https://github.com/authenticvision/digitalsoul/issues/43
-	//mime.getType('m4a'),
-	mime.getType('mp4'),
-	//mime.getType('mkv'),
-	//mime.getType('avi'),
-	// mime.getType('webm'), // Stop support for webm, see https://github.com/authenticvision/digitalsoul/issues/43
-	mime.getType('mov'),
-	//mime.getType('wmv')
-]
 
 export const config = {
   api: {
@@ -169,11 +152,6 @@ export default async function handle(req, res) {
 
 	form.parse(req, async (err, fields, files) => {
 		const uploadedFile = files.assets
-
-		if (!allowedMimeTypes.includes(uploadedFile.type)) {
-			rmSync(uploadedFile.path)
-			return res.status(422).json({ message: 'File type ${uploadedFile.type} is not allowed' })
-		}
 
 		const fileContent = readFileSync(uploadedFile.path)
 		const fileHash = computeFileHash(nft.contract.csn, fileContent)
