@@ -284,6 +284,24 @@ export default async function handle(req, res) {
 				})
 			}
 
+			const existingAsset = await prisma.AssetNFT.findFirst({
+				where: {
+					assetType: asset.assetType,
+					active: true,
+					nft: {
+						id: nft.id
+					}
+				},
+				include: {
+					asset: true,
+				}
+			})
+
+			if(existingAsset) {
+				console.log(`Replace asset ${nft.anchor}/${existingAsset.assetType}: ${existingAsset.asset.assetHash} -> ${asset.assetHash}`)
+				softDeleteAssetsFromNFT(nft, existingAsset.assetType);
+			}
+
 			try {
 				const assetNFT = await prisma.AssetNFT.create({
 					data: {
