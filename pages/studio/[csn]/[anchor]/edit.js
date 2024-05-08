@@ -100,7 +100,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	const [allowChangingAssetType, setAllowChangingAssetType] = useState(true)
 	const [newAssetType, setNewAssetType] = useState('')
 	const [newAsset, setNewAsset] = useState(null)
-	const [pendingAdditionalAssets, setPendingAdditionalAssets] = useState([])
+	const [pendingAdditionalAssets, setPendingAdditionalAssets] = useState({})
 
 	const { nft, isLoading, error, mutate } = useNFT({
 		csn: contract.csn, anchor: anchor
@@ -129,7 +129,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	})
 
 	useBeforeunload(
-		pendingAdditionalAssets.length > 0 || isDirty ? (event) => event.preventDefault() : null
+		pendingAdditionalAssets || isDirty ? (event) => event.preventDefault() : null
 	);
 
 	useEffect(() => {
@@ -180,13 +180,18 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 		combinedMetadata.attributes = data.attributes
 
-		const preparedAdditionalAssets = pendingAdditionalAssets.map((asset) => {
-			return {
-				assetType: asset.assetType,
-				assetId: asset.asset.id,
-				assetHash: asset.asset.assetHash
-			}
-		})
+		let preparedAdditionalAssets = [];
+		if(pendingAdditionalAssets) {
+			preparedAdditionalAssets = Object.entries(pendingAdditionalAssets).map(( [key, asset], index) => {
+
+				console.log(asset)
+				return {
+					assetType: asset.assetType,
+					assetId: asset.asset.id,
+					assetHash: asset.asset.assetHash
+				}
+			})
+		}
 
 		const formData = new FormData()
 		formData.append('metadata', JSON.stringify(combinedMetadata))
@@ -197,14 +202,14 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 			body: formData
 		})
 
-		setPendingAdditionalAssets([])
+		setPendingAdditionalAssets({})
 		resetModals()
 
 		mutate()
 	}
 
 	const onReset = async (data) => {
-		setPendingAdditionalAssets([])
+		setPendingAdditionalAssets({})
 		mutate()
 	}
 
@@ -250,10 +255,13 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	}
 
 	const saveAdditionalAsset = (asset) => {
-		setPendingAdditionalAssets([...pendingAdditionalAssets, {
-			assetType: newAssetType,
-			asset: newAsset
-		}])
+		setPendingAdditionalAssets(pendingAdditionalAssets => ({
+			...pendingAdditionalAssets,
+			[newAssetType]: {
+				assetType: newAssetType,
+				asset: newAsset
+			}
+		}));
 
 		if(newAssetType == "image") {
 			mutate();
@@ -265,7 +273,8 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	const getImageUrl = () => {
 
 		// Priority 1: Pending assets (these are non-applied changes)
-		for(let entry of pendingAdditionalAssets) {
+		for(let assetType in pendingAdditionalAssets) {
+			const entry = pendingAdditionalAssets[assetType]
 			if(entry.assetType == 'image') {
 				let url = entry.asset.assetURL
 				if(!url) {
@@ -306,12 +315,24 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		setDisplayAddAssetModal(false)
 
 		const file = JSON.parse(files[0].serverId).asset
-		setPendingAdditionalAssets([...pendingAdditionalAssets, {
-			assetType: newAssetType,
-			asset: file
-		}])
+		setPendingAdditionalAssets(pendingAdditionalAssets => ({
+			...pendingAdditionalAssets,
+			[newAssetType]: {
+				assetType: newAssetType,
+				asset: file
+			}
+		}));
 
 		setNewAssetType('')
+	}
+
+	function isEmpty(obj) {
+		if (obj == null) { 
+			return true;
+		}
+	
+		// Then proceed to check for properties
+		return Object.keys(obj).length === 0;
 	}
 
 	const removeAdditionalAsset = async (asset) => {
@@ -334,10 +355,15 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	}
 
 	const removePendingAdditionalAsset = (asset) => {
-		setPendingAdditionalAssets(
-			pendingAdditionalAssets
-				.filter((obj) => obj.asset.assetHash !== asset.asset.assetHash)
-		)
+		setPendingAdditionalAssets(pendingAdditionalAssets => {
+			const filteredEntries = Object.entries(pendingAdditionalAssets).filter(([key, value]) => 
+				value.asset.assetHash !== asset.asset.assetHash
+			);
+		
+			// Convert the filtered entries back into an object
+			const newAssets = Object.fromEntries(filteredEntries);
+			return newAssets;
+		});
 	}
 
 	const primaryAsset = discoverPrimaryAsset(nft)
@@ -368,12 +394,12 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 													<ImageCard url={getImageUrl()} />
 													{/* Icons overlay */}
 													<div className="absolute top-0 right-0 flex space-x-2 p-2">
-														<button onClick={linkExistingImage} className="p-2 rounded-full bg-raven-900 hover:bg-gray-100">
-																<LinkIcon className="h-6 w-6 text-gray-700" />
-														</button>
-														<button onClick={addNewImage} className="p-2 rounded-full bg-raven-900 hover:bg-gray-100">
-																<PlusIcon className="h-6 w-6 text-gray-700" />
-														</button>														
+														<Button btnType="button" onClick={linkExistingImage} className="btn-ghost">
+																<LinkIcon className="h-6 w-6" />
+														</Button>
+														<Button btnType="button" onClick={addNewImage} className="btn-ghost">
+																<PlusIcon className="h-6 w-6" />
+														</Button>
 													</div>
 												</div>
 											</div>
@@ -476,18 +502,17 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												<h2 className="text-2xl font-bold my-4">
 													Assets
 												</h2>
-												<div className="flex flex-row w-half">
-													<Button btnType="button" onClick={addNewAsset} className="w-1/2 mt-2 mr-2">
-														Upload
+												<div className="w-full text-end">
+													<Button btnType="button" onClick={toggleLinkAssetModal} className="btn-ghost">
+														<LinkIcon className="h-6 w-6" />
 													</Button>
-
-													<Button btnType="button" onClick={toggleLinkAssetModal} className="w-1/2 mt-2">
-														Link
-													</Button>
+													<Button btnType="button" onClick={addNewAsset} className="btn-ghost">
+														<PlusIcon className="h-6 w-6" />
+													</Button>													
 												</div>
 												<div>
 													
-													{(additionalAssets.length > 0 || pendingAdditionalAssets.length > 0) && (
+													{(additionalAssets.length > 0 || !isEmpty(pendingAdditionalAssets)) && (
 														<Table zebra={true}>
 															<Table.Head>
 																<span />
@@ -521,7 +546,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 																	</Table.Row>
 																))}
 
-																{pendingAdditionalAssets.map((asset, index) => (
+																{Object.entries(pendingAdditionalAssets).map(([key, asset], index) => (
 																	<Table.Row key={index}>
 																		<span>
 																			<div className="badge badge-secondary">
