@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useBeforeunload } from 'react-beforeunload'
-import { ArrowTopRightOnSquareIcon, TrashIcon, XMarkIcon, PencilIcon } from '@heroicons/react/20/solid'
+import { ArrowTopRightOnSquareIcon, TrashIcon, PlusIcon, LinkIcon } from '@heroicons/react/20/solid'
 
 import { AppLayout, StudioHeader, Loading, ErrorPage, Button, SelectableCardList } from '@/components/ui'
 import { FileUploader } from '@/components/studio'
@@ -80,16 +80,8 @@ const ImageCard = ({ asset, url, ...props }) => {
 				className="h-auto max-w-full rounded-lg"
 				width={500}
 				height={500}
+				alt="NFT-Image"
 				src={asset ? asset : url} />
-
-			{url && (
-				<label htmlFor="image"
-					className="w-[3rem] h-[3rem] flex items-center justify-center absolute z-10 invisible group-hover:visible right-5
-					top-5 border cursor-pointer btn btn-circle hover:shadow-white border-white
-					hover:shadow-sm">
-						<PencilIcon className="w-6 h-6"/>
-				</label>
-			)}
 		</div>
 	)
 }
@@ -103,9 +95,9 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		)
 	}
 
-	const [selectedImage, setSelectedImage] = useState(null)
 	const [displayLinkAssetModal, setDisplayLinkAssetModal] = useState(false)
 	const [displayAddAssetModal, setDisplayAddAssetModal] = useState(false)
+	const [allowChangingAssetType, setAllowChangingAssetType] = useState(true)
 	const [newAssetType, setNewAssetType] = useState('')
 	const [newAsset, setNewAsset] = useState(null)
 	const [pendingAdditionalAssets, setPendingAdditionalAssets] = useState([])
@@ -165,7 +157,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 	const nftCaption = nft ? nft.slid == 0 ? 'Default NFT' : nft.slid : anchor
 
 	const additionalAssets = nft?.assets
-		.filter((obj) => { return obj.active && obj.assetType !== 'image' })
+		.filter((obj) => { return obj.active })
 
 	const onSubmit = async (data) => {
 		const newMetadata = (data.metadataProps || []).reduce((obj, prop) => {
@@ -198,7 +190,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 
 		const formData = new FormData()
 		formData.append('metadata', JSON.stringify(combinedMetadata))
-		formData.append('image', selectedImage)
 		formData.append('additionalAssets', JSON.stringify(preparedAdditionalAssets))
 
 		await fetch(`/api/internal/nft/${contract.csn}/${anchor}/edit`, {
@@ -207,19 +198,34 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		})
 
 		setPendingAdditionalAssets([])
-		setSelectedImage(null)
-		setNewAsset(null)
-		setNewAssetType('')
+		resetModals()
 
 		mutate()
 	}
 
+	const onReset = async (data) => {
+		setPendingAdditionalAssets([])
+		mutate()
+	}
+
 	const toggleLinkAssetModal = () => {
-		setNewAssetType('')
+		if(displayLinkAssetModal) {
+			resetModals();
+		}
 		setDisplayLinkAssetModal(!displayLinkAssetModal)
 	}
 
+	const resetModals = () => {
+		setNewAssetType('')
+		setNewAsset(null)
+		setAllowChangingAssetType(true)
+	}
+
+
 	const toggleAddAssetModal = () => {
+		if(displayAddAssetModal) {
+			resetModals();
+		}
 		setDisplayAddAssetModal(!displayAddAssetModal)
 	}
 
@@ -239,16 +245,6 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 		removeTrait(index)
 	}
 
-	const handleFileChange = (e) => {
-		const file = e.target.files[0]
-
-		setSelectedImage(file)
-	}
-
-	const handleRemoveImage = () => {
-		setSelectedImage(null)
-	}
-
 	const onSelectAsset = (asset) => {
 		setNewAsset(asset)
 	}
@@ -259,13 +255,51 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 			asset: newAsset
 		}])
 
+		if(newAssetType == "image") {
+			mutate();
+		}
 		setDisplayLinkAssetModal(false)
-		setNewAssetType('')
-		setNewAsset(null)
+		resetModals()		
+	}
+
+	const getImageUrl = () => {
+
+		// Priority 1: Pending assets (these are non-applied changes)
+		for(let entry of pendingAdditionalAssets) {
+			if(entry.assetType == 'image') {
+				let url = entry.asset.assetURL
+				if(!url) {
+					// The image is already uploaded at the time, even if there is no URL generated yet
+					// due to lacking DB-Entry
+					url = `/api/v1/assets/${contract.csn}/${entry.asset.assetHash}`
+				}
+				return url;
+			}
+		}
+
+		// Priority 2: The primary asset-URL as queried from the NFT
+		if(assetURL) {
+			return assetURL;
+		}
+		
+		// Priority 3: Fallback / empty
+		return '/nft-fallback-cover.webp'
 	}
 
 	const addNewAsset = () => {
 		toggleAddAssetModal()
+	}
+
+	const addNewImage = () => {
+		setNewAssetType("image")
+		setAllowChangingAssetType(false)
+		addNewAsset()
+	}
+
+	const linkExistingImage = () => {
+		setNewAssetType("image")
+		setAllowChangingAssetType(false)
+		setDisplayLinkAssetModal(true)
 	}
 
 	const onFinishUpload = (files) => {
@@ -326,41 +360,23 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 								<StudioHeader title={`Editing ${nftCaption}`}
 											contract={contract} nft={nft}
 											staticCaption={nftCaption} />
-
 								<div className="flex m-8">
 									<div className="grid w-full px-8">
-										<form onSubmit={handleSubmit(onSubmit)}>
-											<div className="flex flex-col items-center justify-center items-center">
-												<input id="image" className="hidden" type="file" onChange={handleFileChange} />
-												{selectedImage && (
-													<div className="mt-2 relative group">
-														<ImageCard
-															asset={URL.createObjectURL(selectedImage)}
-														/>
-
-														<Button btnType='button'
-															variant="btn-circle"
-															onClick={handleRemoveImage}
-															className="absolute z-10 invisible group-hover:visible right-5
-																top-5 border cursor-pointer hover:shadow-white border-white
-																rounded-full hover:shadow-sm"
-															aria-label="Remove image">
-															<XMarkIcon
-																className="w-8 h-8"/>
-														</Button>
+										<form onSubmit={handleSubmit(onSubmit)} onReset={onReset}>
+											<div className="mt-2 flex flex-col items-center justify-center items-center">
+												<div className="relative">
+													<ImageCard url={getImageUrl()} />
+													{/* Icons overlay */}
+													<div className="absolute top-0 right-0 flex space-x-2 p-2">
+														<button onClick={linkExistingImage} className="p-2 rounded-full bg-raven-900 hover:bg-gray-100">
+																<LinkIcon className="h-6 w-6 text-gray-700" />
+														</button>
+														<button onClick={addNewImage} className="p-2 rounded-full bg-raven-900 hover:bg-gray-100">
+																<PlusIcon className="h-6 w-6 text-gray-700" />
+														</button>														
 													</div>
-												)}
-
-												{!selectedImage && (
-													<div className="mt-2">
-														<ImageCard
-															url={assetURL || '/nft-fallback-cover.webp'}
-														/>
-													</div>
-												)}
-
+												</div>
 											</div>
-
 											<div className="form-control my-4 md:w-3/12">
 												<label className="m-1">Name</label>
 												<input
@@ -456,12 +472,21 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												</Button>
 											</div>
 
-											<div className="form-control my-4">
+											<div className="form-control my-4 w-full">
 												<h2 className="text-2xl font-bold my-4">
-													Additional Assets
+													Assets
 												</h2>
+												<div className="flex flex-row w-half">
+													<Button btnType="button" onClick={addNewAsset} className="w-1/2 mt-2 mr-2">
+														Upload
+													</Button>
 
+													<Button btnType="button" onClick={toggleLinkAssetModal} className="w-1/2 mt-2">
+														Link
+													</Button>
+												</div>
 												<div>
+													
 													{(additionalAssets.length > 0 || pendingAdditionalAssets.length > 0) && (
 														<Table zebra={true}>
 															<Table.Head>
@@ -526,35 +551,24 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 															</Table.Body>
 														</Table>
 													)}
-
 													{additionalAssets.length === 0 && (
 														<div className="text-center my-4">
 															This NFT does not have any additional assets
 														</div>
 													)}
 												</div>
-
-												<div className="flex flex-row w-full">
-													<Button btnType="button" onClick={addNewAsset} className="w-1/2 mt-2 mr-2">
-														Add a new asset
-													</Button>
-
-													<Button btnType="button" onClick={toggleLinkAssetModal} className="w-1/2 mt-2">
-														Link to Existing Asset
-													</Button>
-												</div>
-
 												<div className="flex mt-4">
 													{displayLinkAssetModal && (
 														<Modal.Legacy className="w-8/12 max-w-5xl" open={displayLinkAssetModal} onClickBackdrop={toggleLinkAssetModal}>
 															<Modal.Header className="font-bold text-center">
-																Select a new Asset
+																Link asset <i><u>{newAssetType}</u></i>
 															</Modal.Header>
 															<Modal.Body>
 																<div className="mb-4 text-center">
 																	<input type="text" value={newAssetType}
 																		onChange={(e) => setNewAssetType(e.target.value)}
 																		placeholder="Asset Type"
+																		hidden={!allowChangingAssetType}
 																		required
 																		className="input input-bordered w-full max-w-xs" />
 																</div>
@@ -573,11 +587,10 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 															</Modal.Actions>
 														</Modal.Legacy>
 													)}
-
 													{(!displayLinkAssetModal && displayAddAssetModal) && (
 														<Modal.Legacy className="w-8/12 max-w-5xl" open={displayAddAssetModal} onClickBackdrop={toggleAddAssetModal}>
 															<Modal.Header className="font-bold text-center">
-																Upload a new Asset
+																Upload asset <i><u>{newAssetType}</u></i>
 															</Modal.Header>
 															<Modal.Body>
 																<div className="mb-4 text-center">
@@ -585,6 +598,7 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 																		<input type="text" value={newAssetType}
 																			onChange={(e) => setNewAssetType(e.target.value)}
 																			placeholder="Asset Type"
+																			hidden={!allowChangingAssetType}
 																			required
 																			className="input input-bordered w-full max-w-xs" />
 																	</div>
@@ -603,14 +617,12 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 													)}
 												</div>
 											</div>
-
-
 											<div className="flex flex-row justify-between">
-												<Button type="reset" className="">
+												<Button btnType="reset" className="">
 													Cancel
 												</Button>
 
-												<Button type="submit" className="">
+												<Button btnType="submit" className="">
 													Save
 												</Button>
 											</div>
