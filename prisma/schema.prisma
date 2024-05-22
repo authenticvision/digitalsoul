@@ -32,6 +32,20 @@ model Wallet {
   @@map(name: "wallets")
 }
 
+model Design {
+  id       String   @id @default(cuid())
+  contract Contract @relation(fields: [contractId], references: [id])
+  theme      Json
+  logo     Asset? @relation(fields: [logoAssetId], references: [id])
+
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+  contractId String   @map(name: "contract_id") @unique
+  logoAssetId String?   @map(name: "logo_asset_id")
+
+   @@map(name: "designs")
+}
+
 model Contract {
   id      String @id @default(cuid())
   name    String
@@ -43,6 +57,7 @@ model Contract {
 
   /// Contract-Settings and configurations defining the behavior of endpoints and pages
   settings Json
+  design Design?
 
   nfts   NFT[]
   assets Asset[]
@@ -88,6 +103,7 @@ model Asset {
   updatedAt  DateTime   @default(now()) @map(name: "updated_at")
   contractId String     @map(name: "contract_id")
   nfts       AssetNFT[]
+  designs  Design[]
 
   @@map(name: "assets")
 }
