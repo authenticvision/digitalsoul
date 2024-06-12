@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { AppLayout, Loading, ErrorPage } from '@/components/ui'
 import { NFTCard } from '@/components/studio'
-import { EditableContractSettings } from '@/components/studio'
+import { ContractSettings } from '@/components/studio'
 import { auth } from 'auth'
 import prisma from '@/lib/prisma'
 
@@ -36,6 +36,16 @@ export async function getServerSideProps(context) {
 			csn: true,
 			address: true,
 			settings: true,
+			design: {
+				select: {
+					logo: {
+						select: {
+							assetHash: true
+						}
+					},
+					theme: true,
+				}
+			},
 		}
 	})
 
@@ -71,6 +81,9 @@ export async function getServerSideProps(context) {
 		}
 	}
 }
+
+const cardCn = "card card-compact rounded-lg border w-full shadow-xl p-5 mb-7"
+
 
 const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 	if (props.forbidden) {
@@ -111,42 +124,52 @@ const ContractConfig = ({ defaultNFT, wallet, contract, ...props }) => {
 								</div>
 							</div>
 
+
 							<div className="flex justify-between w-9/12 ml-8 mt-8 mb-8">
 								<div className="flex flex-col w-full">
-									<div className="form-control w-full">
-										<label className="label">
-											<span className="label-text">Contract Name</span>
-										</label>
-										<input type="text" value={contract.name}
-											readOnly
-											className="input input-bordered w-full text-raven-500" />
+									<div className={cardCn}>
+										<h1 className="mt-5">Contract Details</h1>
+
+										<div className="form-control w-full">
+											<label className="label">
+												<span className="label-text">Contract Name</span>
+											</label>
+											<input type="text" value={contract.name}
+												readOnly
+												className="input w-full" />
+										</div>
+
+										<div className="form-control w-full ">
+											<label className="label">
+												<span className="label-text">Contract CSN</span>
+											</label>
+											<input type="text" value={contract.csn}
+												readOnly
+												className="input w-full" />
+										</div>
+
+										<div className="form-control w-full ">
+											<label className="label">
+												<span className="label-text">Contract Address</span>
+											</label>
+											<input type="text" value={contract.address}
+												readOnly
+												className="input w-full" />
+										</div>
+
+										
 									</div>
+									<div className={cardCn}>
+										<h1 className="mt-5">Collection and Appearance</h1>
 
-									<div className="form-control w-full ">
-										<label className="label">
-											<span className="label-text">Contract CSN</span>
-										</label>
-										<input type="text" value={contract.csn}
-											readOnly
-											className="input input-bordered w-full text-raven-500" />
+										<ContractSettings contract={contract} wallet={wallet} />
 									</div>
-
-									<div className="form-control w-full ">
-										<label className="label">
-											<span className="label-text">Contract Address</span>
-										</label>
-										<input type="text" value={contract.address}
-											readOnly
-											className="input input-bordered w-full text-raven-500" />
-									</div>
-
-									<hr className="mt-8 mb-4 border-raven-900"/>
-
-									<EditableContractSettings contract={contract} wallet={wallet} />
 								</div>
 
 								<div className="flex ml-8">
-									<NFTCard nft={defaultNFT} />
+									<div>
+										<NFTCard nft={defaultNFT} />
+									</div>
 								</div>
 							</div>
 

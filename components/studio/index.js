@@ -8,12 +8,18 @@ import NFTImageUploader from './NFTImageUploader'
 import NFTCaption from './NFTCaption'
 import TraitsBox from './TraitsBox'
 import MetadataBox from './MetadataBox'
-import EditableContractSettings from './EditableContractSettings'
 import AdditionalAssetsBox from './AdditionalAssetsBox'
 import FileUploader from './FileUploader'
 import AssetsList from './AssetsList'
+import ContractSettings from './ContractSettings'
+import EditableImage from './EditableImage'
+import AssetAddModal from './AssetAddModal'
+import AssetLinkModal from './AssetLinkModal'
+import Toast from './Toast'
 
 export {
+	AssetAddModal,
+	AssetLinkModal,
 	Header,
 	NFTTable,
 	NFTCards,
@@ -25,7 +31,9 @@ export {
 	NFTImageUploader,
 	NFTCaption,
 	AssetsList,
-	EditableContractSettings,
+	ContractSettings,
 	FileUploader,
-	AdditionalAssetsBox
+	AdditionalAssetsBox,
+	EditableImage,
+	Toast
 }

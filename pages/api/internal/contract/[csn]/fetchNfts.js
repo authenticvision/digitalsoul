@@ -9,7 +9,7 @@ const allowedMethods = ['GET']
 
 // TODO MOVE TO UTILS
 export const fetchAnchors = async(api, csn) => {
-	return await api.getAnchors(csn)
+	return await api.getAnchors(csn.toUpperCase())
 }
 
 export const storeNFTS = async (anchors, contract) => {
@@ -67,7 +67,10 @@ export default async function handle(req, res) {
     const { data: anchors } = await fetchAnchors(api, csn)
     const contract = await prisma.contract.findFirst({
         where: {
-            csn: csn
+            csn: {
+              equals: csn,
+              mode: "insensitive"
+            }
         }
     })
 

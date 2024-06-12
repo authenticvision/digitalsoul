@@ -16,6 +16,7 @@
     "test": "export $(xargs < .env.test) && NODE_ENV=test npx prisma db push && NODE_ENV=test jest"
   },
   "dependencies": {
+    "@authenticvision/attestation": "^0.0.5",
     "@ethersproject/keccak256": "^5.7.0",
     "@heroicons/react": "^2.0.18",
     "@prisma/client": "^5.2.0",
