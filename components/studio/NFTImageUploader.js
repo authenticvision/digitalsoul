@@ -42,7 +42,7 @@ const NFTImageUploader = ({ nft, onFinish, ...props }) => {
 					onprocessfiles={afterProcess}
 					server={`/api/internal/assets/${nft.contract.csn}/${nft.anchor}/image`}
 					name="assets"
-					labelIdle='Drag & Drop your images (jpg, png, gif) or <span class="filepond--label-action">Browse</span>'
+					labelIdle='Drag & Drop your images (jpg, png, gif) or <span className="filepond--label-action">Browse</span>'
 				/>
 			</div>
 

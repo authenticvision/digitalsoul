@@ -105,6 +105,12 @@ You should also copy the PostgreSQL database config file as well:
 
 Open both configuration files on your favorite editor and fill them in.
 
+#### Development-Attestations
+_Note_ that if you want to use https://api.metaanchor.io to generate development-attestations via the `attestation/dev/generate` endpoint, uncomment the `ATTESTATION_DEV_KEY` in `.env.local`. 
+
+⚠️ Make sure to never deploy `ATTESTATION_DEV_KEY` to production, as this is a severe security vulnerability.
+
+
 #### Build the containers
 
 Now we need to get the containers ready to go, using docker. For production:

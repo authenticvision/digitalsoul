@@ -50,7 +50,7 @@ const FileUploader = ({
 				onprocessfiles={afterProcessFiles}
 				server={endpoint}
 				name="assets"
-				labelIdle='Drag & Drop your NFT files or <span class="filepond--label-action">Browse</span>'
+				labelIdle='Drag & Drop your NFT files or <span className="filepond--label-action">Browse</span>'
 			/>
 		</div>
 	)

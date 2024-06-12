@@ -1,9 +1,91 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import prisma from '@/lib/prisma'
+import { jsonify } from '@/lib/utils';
 import { checkAllowedMethods } from '@/lib/apiHelpers';
 
 const allowedMethods = ['PUT']
+
+
+const updateContractSettings = async (contract, newSettings) => {
+	const updatedSettings = await prisma.Contract.update({
+		where: {
+			id: contract.id
+		},
+		data: {
+			settings: newSettings,
+			updatedAt: new Date()
+		}
+	})
+}
+
+const updateTheme = async (contract, newTheme) => {
+	const updatedSettings = await prisma.Contract.update({
+		where: {
+			id: contract.id
+		},
+		data: {
+			design: {
+				update: {
+					theme: newTheme,
+					updatedAt: new Date(),
+				}
+			}
+		}
+	})
+}
+
+const createDesignIfNotExists = async (contract, session) => {
+	if(contract.design) {
+		return contract;
+	}
+
+	console.log(`Create design entry for ${contract.csn}..`)
+	await prisma.design.create({
+		data: {
+			theme: {},
+			contract: { connect: { id: contract.id } }
+		}
+	});
+
+	return loadContract(contract.csn, session);
+}
+
+
+const updateLogo = async (contract, newLogo) => {
+	const updatedSettings = await prisma.Contract.update({
+		where: {
+			id: contract.id
+		},
+		data: {
+			design: {
+				update: {
+					logoAssetId: newLogo.id,
+					updatedAt: new Date(),
+				}
+			}
+		}
+	})
+}
+
+const loadContract = async (csn, session) => {
+	const contract = await prisma.Contract.findFirst({
+		where: {
+			csn: csn,
+      owner: session?.wallet	
+		}, 
+		include: {
+			design : {
+				include: {
+					logo: true,
+				}
+			}
+		}
+	})
+
+	return await createDesignIfNotExists(contract, session);;
+
+}
 
 export default async function handle(req, res) {
 	const session = await getServerSession(req, res, authOptions)
@@ -14,48 +96,47 @@ export default async function handle(req, res) {
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
 	const { csn } = req.query
-	const { contractSettings: rawContractSettings } = req.body
-	let contractSettings = rawContractSettings
 
-	if (typeof rawContractSettings == "string") {
-		try {
-			metadata = JSON.parse(rawContractSettings)
-		} catch (error) {
-			console.error(error)
-			return res.status(422).json({
-				message: 'JSON is either malformatted or not a JSON object'
-			})
-		}
-	}
+	const { 
+		contractSettings: contractSettings, 
+		theme: theme, 
+		logo: logo,
+	} = req.body
 
-	const contract = await prisma.Contract.findFirst({
-		where: {
-			csn: csn,
-            owner: session.wallet_id	
-		}
-	})
+	const contract = await loadContract(csn, session);
 
 	if (!contract) {
 		return res.status(404).json({ message: 'Contract does not exist' })
 	}
 
 	try {
-		const updatedSettings = await prisma.Contract.update({
-			where: {
-				id: contract.id
-			},
-			data: {
-				settings: contractSettings,
-				updatedAt: new Date()
+		if(contractSettings) {
+			const jContractSettings = jsonify(contractSettings);
+			if(!jContractSettings) {
+				return res.status(422).json({message: 'Contract Settings is no valid JSON'});
 			}
-		})
+			updateContractSettings(contract, jContractSettings);
+		}
 
-		contract.settings = contractSettings
+		if (theme) {
+			const jTheme = jsonify(theme);
+
+			if(!jTheme) {
+				return res.status(422).json({message: 'Theme is no valid JSON'});
+			}
+			updateTheme(contract, jTheme);
+		}
+
+		if (logo) {
+			updateLogo(contract, jsonify(logo));
+		}
+
 	} catch (err) {
 		console.error(err)
 		return res.status(500).json({
-			message: 'There were some error when updating the contract settings',
+			message: 'There were some errors when updating the contract',
 		})
 	}
-	return res.json({ ...contract })
+
+	return res.status(200).json({ ... await loadContract(csn, session) })
 }

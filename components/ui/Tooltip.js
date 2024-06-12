@@ -11,7 +11,7 @@ const Tooltip = ({ children, text }) => {
     >
       {children}
       {showTooltip && (
-        <div className="bg-shark-700" style={{
+        <div className="bg-secondary" style={{
           position: 'absolute',
           bottom: '100%',
           left: '50%',
