@@ -15,14 +15,14 @@ import { ArrowUpRightIcon } from '@heroicons/react/24/outline'
 
 export async function getServerSideProps(context) {
 	const { csn, anchor } = context.query;
-  const {av_beneficiary, av_sip} = context.query;
+  const {av_beneficiary, av_attestation} = context.query;
   let themeConfig = {}
 
   function makeErrorProps(errorMsg) {
     return {props: {serverError: errorMsg, themeConfig:themeConfig}}
   }
 
-  const attestation = av_sip ? await decodeAttestation(av_sip) : null;
+  const attestation = av_attestation ? await decodeAttestation(av_attestation) : null;
 
   const nftStr = `${csn}/${anchor}`;
   let metadata = null;
@@ -120,7 +120,6 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
   const nftTransferredModal = useRef(null)
   const changeWalletModal = useRef(null)
 
-
   const [error, setError] = useState(serverError)
   const [beneficiary, setBeneficiary] = useState(avBeneficiary);
   const [secondsToExpire, setSecondsToExpire] = useState(null)
@@ -145,7 +144,7 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
     }
   }, [beneficiary, attestationToken, doClaimWhenComplete])
 
-  const verifySipToken = async () => {
+  const verifyAttestation = async () => {
     if(!(attestationToken && beneficiary)) {
       console.log(`Not verifying, either attestation token or beneficiary missing. Beneficiary: ${beneficiary}, attestation: ${attestationToken}`)
       return;
@@ -157,7 +156,7 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        avSip:attestationToken,
+        avAttestation:attestationToken,
         walletAddress: beneficiary
       })
     })
@@ -233,7 +232,7 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          avSip:attestationToken,
+          avAttestation:attestationToken,
           beneficiary: beneficiary
         })
       })

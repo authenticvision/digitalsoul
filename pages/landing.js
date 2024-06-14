@@ -163,7 +163,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, beneficia
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				avSip:avSip,
+				avAttestation:avSip,
 				walletAddress: beneficiary
 			})
 		})
@@ -179,7 +179,7 @@ const LandingNFT = ({ nft, noData, avSip, errorMsg, wallet, assetData, beneficia
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				avSip:avSip,
+				avAttestation:avSip,
 				beneficiary: beneficiary
 			})
 		})
