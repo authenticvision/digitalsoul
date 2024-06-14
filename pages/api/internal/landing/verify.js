@@ -9,13 +9,13 @@ export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
-	const { avSip, walletAddress } = req.body
+	const { avAttestation, walletAddress } = req.body
 
 	// In case the wallet is null, pass an empty string to the API, as this is
 	// better understood than null
 	const walletID = walletAddress || "";
 
-	if (!avSip) {
+	if (!avAttestation) {
 		return res.status(400).json({ message: 'Missing required parameters' })
 	}
 
@@ -35,7 +35,7 @@ export default async function handle(req, res) {
 
 	try {
 		const { data: response, status } = await api.verifyOwner(
-			avSip, 
+			avAttestation, 
 			walletID
 		)
 
@@ -45,7 +45,7 @@ export default async function handle(req, res) {
 		// TODO: Add this to a unified error service
 		console.error(e)
 		let errorMsg = `There was an error when trying to communicate with
-		the /asset-by-sip endpoint`
+		the /asset-by-attestation endpoint`
 
 		return res.status(500).json({ error: errorMsg })
 	}

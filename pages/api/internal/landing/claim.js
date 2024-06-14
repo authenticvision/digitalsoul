@@ -8,9 +8,9 @@ export default async function handle(req, res) {
 	// TODO: Move this somewhere else, probably as a utility function
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
 
-	const { avSip, beneficiary } = req.body
+	const { avAttestation, beneficiary } = req.body
 
-	if (!avSip || !beneficiary) {
+	if (!avAttestation || !beneficiary) {
 		return res.status(400).json({ message: 'Missing required parameters' })
 	}
 
@@ -30,7 +30,7 @@ export default async function handle(req, res) {
 
 	try {
 		const { data: response, status } = await api.claimNFT(
-			avSip, beneficiary
+			avAttestation, beneficiary
 		)
 
 		if (status == 200) {
