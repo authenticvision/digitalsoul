@@ -6,9 +6,9 @@ import { useBeforeunload } from 'react-beforeunload'
 import { ArrowTopRightOnSquareIcon, TrashIcon, PlusIcon, LinkIcon } from '@heroicons/react/20/solid'
 
 import { AppLayout, StudioHeader, Loading, ErrorPage, Button } from '@/components/ui'
-import { EditableImage, AssetAddModal, AssetLinkModal, Toast } from '@/components/studio'
+import { EditableImage, AssetAddModal, AssetLinkModal, Toast, MobilePreview } from '@/components/studio'
 import { Table } from 'react-daisyui'
-import { discoverPrimaryAsset, generateAssetURL } from '@/lib/utils'
+import { discoverPrimaryAsset, generateAssetURL, generateCollectionURL } from '@/lib/utils'
 
 import { auth } from 'auth'
 
@@ -62,18 +62,20 @@ export async function getServerSideProps(context) {
 	}
 
 	const contract = JSON.parse(JSON.stringify(nft.contract))
+	const collectionUrl = generateCollectionURL(nft);
 
 	return {
 		props: {
 			anchor,
 			wallet,
-			contract
+			contract,
+			collectionUrl
 		}
 	}
 }
 
 
-const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
+const NFTEdit = ({ contract, wallet, anchor, collectionUrl, ...props }) => {
 	const router = useRouter()
 
 	if (props.forbidden) {
@@ -539,7 +541,9 @@ const NFTEdit = ({ contract, wallet, anchor, ...props }) => {
 												<Button btnType="reset" className="">
 													Cancel
 												</Button>
-
+												<MobilePreview url={collectionUrl}>
+													<Button btnType="button">See public Asset</Button>
+												</MobilePreview>
 												<Button btnType="submit" className="">
 													Save
 												</Button>
