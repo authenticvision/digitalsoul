@@ -69,15 +69,15 @@ const EditableImage = ({
   }
 	
 	return (
-    <div className="mt-2 flex flex-col items-center justify-center items-center">
+    <div className="mt-2 flex flex-col items-center justify-center">
       <div className="relative">
         <ImageCard url={imgUrl} />
         {/* Icons overlay */}
         <div className="absolute top-0 right-0 flex space-x-2 p-2">
-          <Button btnType="button" onClick={handleLinkImage} className="btn-ghost">
+          <Button btnType="button" onClick={handleLinkImage} className="btn-circle glass">
               <LinkIcon className="h-6 w-6" />
           </Button>
-          <Button btnType="button" onClick={handleAddImage} className="btn-ghost">
+          <Button btnType="button" onClick={handleAddImage} className="btn-circle glass">
               <PlusIcon className="h-6 w-6" />
           </Button>
         </div>

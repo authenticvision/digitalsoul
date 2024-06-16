@@ -16,6 +16,7 @@ import EditableImage from './EditableImage'
 import AssetAddModal from './AssetAddModal'
 import AssetLinkModal from './AssetLinkModal'
 import Toast from './Toast'
+import MobilePreview from './MobilePreview'
 
 export {
 	AssetAddModal,
@@ -27,6 +28,7 @@ export {
 	NFTCard,
 	TraitsBox,
 	MetadataBox,
+	MobilePreview,
 	NFTImageEdit,
 	NFTImageUploader,
 	NFTCaption,

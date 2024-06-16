@@ -48,3 +48,30 @@ li {
 .filepond--panel-root {
 	@apply bg-base-100 !important;
 }
+
+/* Stylized iPhone for preview */
+.iphone-frame {
+  width: 375px;
+  height: 812px;
+  border-radius: 40px;
+  border: 16px solid #333333;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: white;
+}
+
+.iphone-notch {
+  width: 210px;
+  height: 30px;
+  background: black;
+  position: absolute;
+  top: -16px;
+  left: calc(50% - 105px);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.iphone-frame iframe {
+  border-radius: inherit;
+}
+
