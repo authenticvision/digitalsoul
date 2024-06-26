@@ -137,6 +137,8 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
   const [doChangeWallet, setDoChangeWallet] = useState(false);
   const [doClaimWhenComplete, setDoClaimWhenComplete] = useState(false);
 
+  const logoSrc = landingOptions?.logo ? landingOptions.logo : "/logo-white.svg";
+
   useEffect( () => {
     if(doClaimWhenComplete) {
       setDoClaimWhenComplete(false); // reset!
@@ -374,7 +376,7 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
             <div>
               <AuthorizationBar wallet={stateWallet} handleWalletChange={handleWalletChange} />
               <div className="flex justify-center align-center w-full">
-                  <img src={landingOptions?.logo} className="fill priority" width={200} alt="Collection Logo" />
+                <img src={logoSrc} fill className="priority" width={200} alt="Collection Logo" />
 						  </div>
               <div className="mt-10">
                 <NftVisualization metaData={metadata} isOwned={ownershipDetails?.wallet_is_owner || false} />
