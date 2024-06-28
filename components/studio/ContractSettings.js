@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Tooltip, Button } from '../ui';
 import Toast from '@/components/studio/Toast'; // Ensure correct import path
 import Link from 'next/link'
-import { jsonify, generateAssetURL } from '@/lib/utils';
+import { jsonify, generateAssetURL, jsonFromDaisyTheme } from '@/lib/utils';
 import { EditableImage } from '@/components/studio'
 
 
@@ -98,6 +98,25 @@ const ContractSettings = ({ wallet, contract, ...props }) => {
 		return '/nft-fallback-cover.webp'
 	}
 
+  const handleThemePaste = (e) => {
+    // Prevent the default paste action
+    e.preventDefault();
+
+    // Get the pasted content from the clipboard
+    const clipboardContent = e.clipboardData.getData('text');
+
+    // Pass the clipboard content through myFunction
+    const modifiedContent = jsonFromDaisyTheme(clipboardContent);
+
+    if(modifiedContent) {
+      console.log("Parsed JSON (evtl. converted from DaisyUI-Theme generator)")
+      setTheme(JSON.stringify(modifiedContent, undefined, 2));
+    } else {
+      // if it was not parseable, set it anyway to avoid user-confusion
+      setTheme(e.clipboardData.getData('text'));
+    }
+  };
+
   const logoChanged = (assetType, asset) => {
     setNewLogo(asset)
   }
@@ -180,8 +199,8 @@ const ContractSettings = ({ wallet, contract, ...props }) => {
               <tr>
                 <td>
                   <label className="label">
-                    <span className="label-text">Theme colors (<Link className="link" target="blank" href="https://daisyui.com/theme-generator/">Refer DaisyUI Theme generator</Link>)</span>
-                    <Tooltip text={`The collection pages use DaisyUI components. Use the default theme colors to style your collection page.`}>
+                    <span className="label-text">Theme colors (<Link className="link" target="blank" href="https://daisyui.com/theme-generator/">Theme generator</Link>)</span>
+                    <Tooltip text={`The collection pages use DaisyUI components. Use their theme color names to style your collection page.`}>
                       <p>(?)</p>
                     </Tooltip>
                   </label>
@@ -190,6 +209,7 @@ const ContractSettings = ({ wallet, contract, ...props }) => {
                 <textarea
                   className="textarea textarea-bordered flex w-full h-48"
                   onChange={(e) => setTheme(e.target.value)}
+                  onPaste={handleThemePaste}
                   value={theme}
                 />
                 </td>
