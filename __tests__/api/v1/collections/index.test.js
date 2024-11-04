@@ -7,6 +7,9 @@ import prisma from '@/lib/prisma'
 import api from '@/pages/api/v1/collections/[csn]/[anchor]'
 import { createMocks } from 'node-mocks-http'
 
+
+// TODO add tests for collection-endpoint, i.e. /api/v1/collections/[csn], see #84
+
 describe('/api/v1/collections/[csn]/[anchor]', () => {
 	it('responds with a 405 if using wrong method', async () => {
 		const { req, res } = createMocks({

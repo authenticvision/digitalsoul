@@ -7,13 +7,27 @@ import { checkAllowedMethods } from '@/lib/apiHelpers';
 const allowedMethods = ['PUT']
 
 
+// Updates contract settings in a way s.t. it preserves values under keys, which are not present in newSettings
 const updateContractSettings = async (contract, newSettings) => {
+	const oldSettings = contract.settings;
+	const mergedSettings = Object.assign({}, oldSettings, newSettings);
+	
+	// Find keys that were kept unchanged
+	const unchangedKeys = Object.keys(oldSettings).filter(
+		key => !(key in newSettings)
+	);
+
+	if(unchangedKeys.length > 0) {
+		console.log(`Settings-Update (csn=${contract.csn}): Preserve settings under keys ${unchangedKeys}`)
+	}
+
+
 	const updatedSettings = await prisma.Contract.update({
 		where: {
 			id: contract.id
 		},
 		data: {
-			settings: newSettings,
+			settings: mergedSettings,
 			updatedAt: new Date()
 		}
 	})
