@@ -8,10 +8,12 @@ import { decodeAttestation } from '@/lib/serverUtils'
 import prisma from '@/lib/prisma'
 import MetaAnchor from '@/lib/api.metaanchor.io'
 import receivingNFTAnimation from "@/lib/receivingNFT.json";
-import Lottie from "lottie-react";
+
 import { generateDaisyColors } from '@/lib/themeColors'
 import { ArrowUpRightIcon } from '@heroicons/react/24/outline'
 
+import dynamic from "next/dynamic";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export async function getServerSideProps(context) {
 	const { csn, anchor } = context.query;
@@ -29,6 +31,8 @@ export async function getServerSideProps(context) {
   let assetData = null; // on-chain data
   let landingOptions = null;
   const beneficiary = av_beneficiary?.toString() || null;
+
+  
 
   // TODO Resolve wallet.
   const wallet = {
@@ -333,6 +337,10 @@ const CollectionItemView = ({ wallet, metadata, avBeneficiary, themeConfig, atte
       const assetOwnershipInfo = await verifyAttestation();
       setOwnershipDetails(assetOwnershipInfo);
       if(ownershipDetails?.wallet) {
+        if(ownershipDetails?.wallet?.id == "undefined") {
+          // Monkey-Patching for strange MetaAnchor-API behavior
+          ownershipDetails.wallet.id = null;
+        }
         setStateWallet(ownershipDetails?.wallet);
       }
       if(isOwnerBefore && !assetOwnershipInfo?.wallet_is_owner) {

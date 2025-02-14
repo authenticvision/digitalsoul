@@ -35,7 +35,7 @@
     "filepond-plugin-image-preview": "^4.6.11",
     "formidable": "^3.5.1",
     "formidable-serverless": "^1.1.1",
-    "lottie-react": "^2.4.0",
+    "lottie-react": "^2.4.1",
     "mime": "^3.0.0",
     "nanoid": "^5.0.3",
     "next": "13.4.18",

@@ -14,8 +14,7 @@ export async function getServerSideProps(context) {
   const {av_beneficiary, av_attestation} = context.query;
   const attestation = av_attestation ? await decodeAttestation(av_attestation) : null;
   const avAttestationToken = av_attestation || null;
-  const avBeneficiary = av_beneficiary || null;
-
+  let avBeneficiary = av_beneficiary || null;
 
   function makeErrorProps(errorMsg) {
     return {props: {error: errorMsg}}
@@ -68,7 +67,11 @@ export async function getServerSideProps(context) {
     return makeErrorProps(`No DigitalSoul for label ${slid} found in collection "${csn}"`);
   }
 
-  const forwardURL = `${generateCollectionURL(dbNft)}?av_attestation=${avAttestationToken}&av_beneficiary=${av_beneficiary}`
+  let forwardURL = `${generateCollectionURL(dbNft)}?av_attestation=${avAttestationToken}`
+  if(av_beneficiary) {
+    forwardURL = `${forwardURL}&av_beneficiary=${av_beneficiary}`
+
+  }
 
 	return {
 		props: {

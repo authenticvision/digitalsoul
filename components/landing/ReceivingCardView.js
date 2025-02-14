@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react'
-import Lottie from "lottie-react";
+//import Lottie from "lottie-react";
+import dynamic from "next/dynamic";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import { WalletAddress } from '@/components/landing'
 import receivingNFTAnimation from "@/lib/receivingNFT.json";
 

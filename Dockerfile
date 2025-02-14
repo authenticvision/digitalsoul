@@ -1,4 +1,4 @@
-FROM node:18-alpine AS dependencies
+FROM node:22-alpine AS dependencies
 
 WORKDIR /srv/app
 COPY package.json yarn.lock ./
@@ -7,8 +7,9 @@ RUN yarn install --frozen-lockfile
 USER node
 
 ########################################################
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
+RUN apk add openssl
 ARG NODE_ENV
 ENV NODE_ENV ${NODE_ENV}
 WORKDIR /srv/app
@@ -30,7 +31,7 @@ RUN ln -s /srv/data/next-cache ./.next/cache
 
 
 ################################################################
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
 USER 1000
 WORKDIR /srv/app
