@@ -140,7 +140,7 @@ Great, now the digitalsoul instance is running under `http://localhost:3000`.
 
 *Tip: If you ever need to change the DB, you can (1) spin up a shell inside the
 digitalsoul container: `docker-compose exec digitalsoul sh` (2) do a Prisma's push
-command, optionally forcing a reset of the data: `yarn run db:push` or `yarn run
+command, optionally forcing a reset of the data: `npm run db:push` or `npm run
 db:reset`*
 
 ### Running tests
