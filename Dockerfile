@@ -1,8 +1,8 @@
 FROM node:22-alpine AS dependencies
 
 WORKDIR /srv/app
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm install --frozen-lockfile
 
 USER node
 
@@ -18,7 +18,7 @@ COPY . .
 COPY --from=dependencies /srv/app/node_modules ./node_modules
 
 RUN npx prisma generate
-RUN yarn build
+RUN npm run build
 
 # NextJS seems to have no intentions on supporting a
 # different cache dir. They do seem to approve symlinking though
