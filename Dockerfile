@@ -33,6 +33,17 @@ RUN ln -s /srv/data/next-cache ./.next/cache
 ################################################################
 FROM node:22-alpine AS runner
 
+# in each stage where you want the values:
+ARG GIT_COMMIT=unknown
+ARG GIT_REF=unknown
+
+# bake them as environment variables available at runtime
+ENV GIT_COMMIT=${GIT_COMMIT}
+ENV GIT_REF=${GIT_REF}
+
+LABEL org.opencontainers.image.revision=${GIT_COMMIT} \
+      org.opencontainers.image.ref.name=${GIT_REF}
+
 USER 1000
 WORKDIR /srv/app
 ENV NODE_ENV production
@@ -52,3 +63,5 @@ EXPOSE 3000
 # Filesystem write access to run a command. In production
 # environments this may be problematic
 CMD [ "node_modules/.bin/next", "start", "-H", "0.0.0.0" ]
+
+

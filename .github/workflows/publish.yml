@@ -1,0 +1,67 @@
+name: Build & Publish to GHCR
+
+on:
+  push:
+    branches:
+      - '**'   # all branches
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: authenticvision/digitalsoul
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tag
+        id: tag
+        shell: bash
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+
+          # sanitize branch name to a valid, lowercase docker tag (max 128 chars)
+          # replace / and _ with -, remove invalid chars, lowercase, trim to 128
+          SAFE_BRANCH="$(echo "$BRANCH" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[\/_]+/-/g; s/[^a-z0-9.-]+/-/g; s/^-+//; s/-+$//' \
+          )"
+          SAFE_BRANCH="${SAFE_BRANCH:0:128}"
+
+          if [ "$BRANCH" = "master" ]; then
+            echo "tag=${IMAGE}:latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${IMAGE}:${SAFE_BRANCH}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.tag.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            GIT_REF=${{ github.ref_name }}
+
