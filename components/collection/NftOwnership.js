@@ -22,7 +22,7 @@ const NftOwnership = ({ beneficiary, currentOwner, isOwned, onClaim,  attestatio
           )}
         {(!isOwned && !attestationValid) && (
           <div>
-            Scan (again) to claim with <a className="link" href="https://app.authenticvision.com/app/meta-anchor/">MetaAnchor-App</a>
+            Scan (again) to claim via <a className="link" href="https://scan.metaanchor.io/">MetaAnchor-App</a>
           </div>
         )}
       </div>
