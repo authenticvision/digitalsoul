@@ -1,8 +1,6 @@
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
-
 import path from 'path'
 import { checkAllowedMethods } from "@/lib/apiHelpers"
+import { resolveWallet } from "@/lib/auth/resolveWallet";
 import prisma from '@/lib/prisma'
 
 import formidable from 'formidable-serverless'
@@ -107,8 +105,8 @@ const createAsset = async ({ wallet, nft, assetCtx, contractId }) => {
 }
 
 export default async function handle(req, res) {
-	const session = await getServerSession(req, res, authOptions)
-	if (!session) {
+	const { wallet } = await resolveWallet(req, res);
+	if (!wallet) {		
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
@@ -116,7 +114,6 @@ export default async function handle(req, res) {
 
 
 	const { csn, anchor, assetType } = req.query
-	const wallet = session.wallet
 
 	const nft = await prisma.NFT.findFirst({
 		where: {
@@ -149,58 +146,83 @@ export default async function handle(req, res) {
 	form.uploadDir = tmpDir
 
 	form.parse(req, async (err, fields, files) => {
-		const uploadedFile = files.assets
-
-		const fileContent = readFileSync(uploadedFile.path)
-		const fileHash = computeFileHash(nft.contract.csn, fileContent)
-
-		const existingAsset = await prisma.asset.findFirst({
-			where: {
-				assetHash: fileHash
+		 try {
+			if (err) {
+			console.error("formidable parse error:", err);
+			return res.status(400).json({ error: "invalid_multipart_form" });
 			}
-		})
 
-		if (existingAsset) {
-			await connectWithExistingAsset(wallet, existingAsset, assetType, nft)
-			rmSync(uploadedFile.path)
-			return res.json({
-				existingAsset
+			const uploadedFile = files?.assets; // or accept both: files.assets || files.file
+			if (!uploadedFile) {
+			return res.status(400).json({ error: "missing_file_field", expected: "assets" });
+			}
+
+			const filePath = uploadedFile.filepath || uploadedFile.path; // formidable v2 uses filepath
+			if (!filePath) {
+			return res.status(400).json({ error: "uploaded_file_has_no_path" });
+			}
+
+			const fileContent = readFileSync(filePath);
+
+			const fileHash = computeFileHash(nft.contract.csn, fileContent)
+
+			const existingAsset = await prisma.asset.findFirst({
+				where: {
+					assetHash: fileHash
+				}
 			})
-		} else {
-			try {
-				// Split files per Smart contract.
-				// This is a logical separation and also reduces the risk of Filesystem-overload
-				// due to too many files in the same directory
-				const targetDir = path.join(STORAGE_DIR, nft.contract.csn)
-				const storageFilePath = path.join(nft.contract.csn, fileHash)
-				const targetFile = path.join(targetDir, fileHash)
 
-				// Create contract-directory in case it does not exist
-				mkdirSync(targetDir, {recursive:true})
-				renameSync(uploadedFile.path, targetFile)
-
-				const assetNFT = await createAsset({
-					wallet,
-					nft,
-					assetCtx: {
-						fileHash,
-						storageFilePath,
-						originalFileName: uploadedFile.name,
-						assetType
-					},
-					contractId: nft.contract.id,
-				})
-
-				return res.json({
-					asset: assetNFT.asset
-				})
-			} catch (error) {
-				console.error(error)
+			if (existingAsset) {
+				await connectWithExistingAsset(wallet, existingAsset, assetType, nft)
 				rmSync(uploadedFile.path)
-				return res.status(500).json({
-					error: 'There was an error when storing the asset'
+				return res.json({
+					existingAsset
 				})
+			} else {
+				try {
+					// Split files per Smart contract.
+					// This is a logical separation and also reduces the risk of Filesystem-overload
+					// due to too many files in the same directory
+					const targetDir = path.join(STORAGE_DIR, nft.contract.csn)
+					const storageFilePath = path.join(nft.contract.csn, fileHash)
+					const targetFile = path.join(targetDir, fileHash)
+
+					// Create contract-directory in case it does not exist
+					mkdirSync(targetDir, {recursive:true})
+					renameSync(uploadedFile.path, targetFile)
+
+					const assetNFT = await createAsset({
+						wallet,
+						nft,
+						assetCtx: {
+							fileHash,
+							storageFilePath,
+							originalFileName: uploadedFile.name,
+							assetType
+						},
+						contractId: nft.contract.id,
+					})
+
+					return res.json({
+						asset: assetNFT.asset
+					})
+				} catch (error) {
+					console.error(error)
+					rmSync(uploadedFile.path)
+					return res.status(500).json({
+						error: 'There was an error when storing the asset'
+					})
+				}
 			}
+	
+		} catch (error) {
+			console.error(error);
+			// best-effort cleanup if file exists
+			try {
+			const filePath = (files?.assets?.filepath || files?.assets?.path);
+			if (filePath) rmSync(filePath);
+			} catch {}
+			return res.status(500).json({ error: "upload_failed" });
 		}
 	})
 }

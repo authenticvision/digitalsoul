@@ -1,18 +1,16 @@
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { checkAllowedMethods } from '@/lib/apiHelpers';
 import prisma from '@/lib/prisma'
+import { resolveWallet } from '@/lib/auth/resolveWallet';
 
 const allowedMethods = ['GET']
 
 export default async function handle(req, res) {
-	const session = await getServerSession(req, res, authOptions)
-	if (!session) {
+	const { wallet } = await resolveWallet(req, res);
+	if (!wallet) {		
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
 	if (!await checkAllowedMethods(req, res, allowedMethods)) return;
-
 
 	const { contractId } = req.query
 

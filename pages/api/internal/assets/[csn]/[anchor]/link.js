@@ -1,13 +1,11 @@
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
-
+import { resolveWallet } from "@/lib/auth/resolveWallet";
 import prisma from '@/lib/prisma'
 
 const allowedMethods = ['POST']
 
 export default async function handle(req, res) {
-	const session = await getServerSession(req, res, authOptions)
-	if (!session) {
+	const { wallet } = await resolveWallet(req, res);
+	if (!wallet) {		
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
@@ -23,7 +21,6 @@ export default async function handle(req, res) {
 		return res.status(400).json({ message: 'Missing required parameters' })
 	}
 
-	const wallet = session.wallet
 
 	const contract = await prisma.contract.findFirst({
 		where: {

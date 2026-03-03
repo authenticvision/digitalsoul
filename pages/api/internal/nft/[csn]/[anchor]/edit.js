@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
 import { checkAllowedMethods } from '@/lib/apiHelpers';
@@ -9,6 +7,7 @@ import formidable from 'formidable';
 import path from 'path'
 import { renameSync, mkdirSync, rmSync, createReadStream } from 'fs';
 import { computeKeccak256Hash, computeCsnFileHash } from '@/lib/utils'
+import { resolveWallet } from "@/lib/auth/resolveWallet";
 
 const allowedMethods = ['PUT']
 const metadataSchema = z.object({
@@ -65,8 +64,8 @@ const softDeleteAssetsFromNFT = async (nft, assetType) => {
 }
 
 export default async function handle(req, res) {
-	const session = await getServerSession(req, res, authOptions)
-	if (!session) {
+	const { wallet } = await resolveWallet(req, res);
+	if (!wallet) {		
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
@@ -78,7 +77,7 @@ export default async function handle(req, res) {
 		where: {
 			anchor: anchor,
 			contract: {
-				ownerId: session.wallet.id,
+				ownerId: wallet.id,
 				csn: {
 					equals: csn,
 					mode: "insensitive"
@@ -92,7 +91,7 @@ export default async function handle(req, res) {
 
 	const contract = await prisma.Contract.findFirst({
 		where: {
-			ownerId: session.wallet.id,
+			ownerId: wallet.id,
 			csn: {
 				equals: csn,
 				mode: "insensitive"
@@ -161,7 +160,7 @@ export default async function handle(req, res) {
 					},
 					assignedBy: {
 						connect: {
-							id: session.wallet.id
+							id: wallet.id
 						}
 					},
 					nft: {
@@ -212,7 +211,7 @@ export default async function handle(req, res) {
 						},
 						assignedBy: {
 							connect: {
-								id: session.wallet.id
+								id: wallet.id
 							}
 						},
 						nft: {
@@ -314,7 +313,7 @@ export default async function handle(req, res) {
 						},
 						assignedBy: {
 							connect: {
-								id: session.wallet.id
+								id: wallet.id
 							}
 						},
 						nft: {

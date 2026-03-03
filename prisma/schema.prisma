@@ -24,6 +24,7 @@ model Wallet {
   id         String     @id @default(cuid())
   address    String     @unique
   email      String?    @unique
+  apiKeyHash String?    @unique @map(name: "api_key_hash")
   createdAt  DateTime   @default(now()) @map(name: "created_at")
   updatedAt  DateTime   @default(now()) @map(name: "updated_at")
   contracts  Contract[]

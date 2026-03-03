@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
-
+import { resolveWallet } from '@/lib/auth/resolveWallet';
 import path from 'path'
 import mime from 'mime'
 import { tmpdir } from "os"
@@ -36,8 +34,8 @@ export const config = {
 const STORAGE_DIR = process.env.STORAGE_DIR
 
 export default async function handle(req, res) {
-	const session = await getServerSession(req, res, authOptions)
-	if (!session) {
+	const { wallet } = await resolveWallet(req, res);
+	if (!wallet) {		
 		return res.status(401).json({ message: 'Unauthorized' })
 	}
 
@@ -47,7 +45,6 @@ export default async function handle(req, res) {
 	}
 
 	const { csn } = req.query
-	const { wallet } = session
 
 	// TODO: Add validation from owner
 	const contract = await prisma.contract.findFirst({
